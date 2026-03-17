@@ -29,6 +29,10 @@ public class MaterialCardUI : MonoBehaviour
     [Tooltip("Special — core only. Hidden automatically for wood.")]
     public TMP_Text field3Text;
 
+    [Header("Buy / Sold Out")]
+    public Button   buyButton;
+    public TMP_Text soldOutLabel;
+
     // ── Public API ─────────────────────────────────────────────────
 
     public void SetData(MaterialData data)
@@ -54,6 +58,14 @@ public class MaterialCardUI : MonoBehaviour
         }
 
         ShowPlaceholder();
+        if (buyButton    != null) buyButton.gameObject.SetActive(true);
+        if (soldOutLabel != null) soldOutLabel.gameObject.SetActive(false);
+    }
+
+    public void SetSoldOut()
+    {
+        if (buyButton    != null) buyButton.gameObject.SetActive(false);
+        if (soldOutLabel != null) soldOutLabel.gameObject.SetActive(true);
     }
 
     public void ShowPlaceholder()

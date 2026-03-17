@@ -25,6 +25,9 @@ public class MaterialGenerator : MonoBehaviour
 
     [Header("UI — Controls")]
     public Button   generateButton;
+    public Button   proceedButton;     // enabled when ≥1 core AND ≥1 wood purchased
+    public Button   backButton;        // returns to CustomerGeneratorTest
+    public TMP_Text goldText;          // shows "Gold: XXXg"
     public TMP_Text statusText;
 
     [Header("UI — Customer Dossier")]
@@ -51,6 +54,8 @@ public class MaterialGenerator : MonoBehaviour
     private bool _busy;
     private readonly List<MaterialCardUI> _coreCards = new();
     private readonly List<MaterialCardUI> _woodCards = new();
+    private Color _goldDefaultColor = Color.white;
+    private Coroutine _goldFlashCoroutine;
 
     // ── Customer generation prompts ────────────────────────────────
     // (Identical to CustomerGenerator.cs — kept here so this script is self-contained.)
@@ -231,6 +236,21 @@ Use exactly this structure:
     {
         SetStatus("Waiting...");
         ClearDossier();
+
+        if (goldText != null)
+        {
+            _goldDefaultColor = goldText.color;
+            UpdateGoldDisplay();
+        }
+        if (proceedButton != null)
+        {
+            proceedButton.interactable = false;
+            proceedButton.onClick.AddListener(
+                () => GameManager.Instance?.LoadScene(GameManager.SCENE_CRAFTING));
+        }
+        if (backButton != null)
+            backButton.onClick.AddListener(
+                () => GameManager.Instance?.LoadScene(GameManager.SCENE_CUSTOMER));
     }
 
     // ── Public API ─────────────────────────────────────────────────
@@ -266,8 +286,10 @@ Use exactly this structure:
         yield return StartCoroutine(RunCustomerGeneration(r => customer = r));
         if (customer == null) { Finish(); yield break; }
 
-        // Step 2 — Display dossier
+        // Step 2 — Display dossier and save to GameManager
         DisplayCustomer(customer);
+        if (GameManager.Instance != null)
+            GameManager.Instance.currentCustomer = customer;
 
         // Steps 3–6 — Materials + images
         yield return StartCoroutine(MaterialsPipeline(customer, ownBusy: false));
@@ -290,7 +312,10 @@ Use exactly this structure:
         yield return StartCoroutine(RunMaterialGeneration(customer, r => materials = r));
         if (materials == null) { Finish(); yield break; }
 
-        // Step 4 — Instantiate cards with text data immediately
+        // Step 4 — Push to GameManager and instantiate cards
+        if (GameManager.Instance != null)
+            GameManager.Instance.availableMaterials = materials;
+
         var cores = materials.FindAll(m => m.materialType == "core");
         var woods = materials.FindAll(m => m.materialType == "wood");
         InstantiateCards(cores, coreCardContainer, _coreCards);
@@ -676,8 +701,17 @@ Apply the four design rules. Return ONLY the JSON object.";
             var go   = Instantiate(materialCardPrefab, container);
             var card = go.GetComponent<MaterialCardUI>();
             if (card == null) { Debug.LogError("[MaterialGenerator] MaterialCard prefab missing MaterialCardUI"); continue; }
-            card.SetData(materials[i]);
+
+            var mat = materials[i]; // capture for lambda
+            card.SetData(mat);
             cardList.Add(card);
+
+            // Wire the Buy button
+            if (card.buyButton != null)
+            {
+                card.buyButton.onClick.RemoveAllListeners();
+                card.buyButton.onClick.AddListener(() => OnBuyCard(card, mat));
+            }
 
             // Divide the container into thirds horizontally
             var rt = go.GetComponent<RectTransform>();
@@ -688,10 +722,63 @@ Apply the four design rules. Return ONLY the JSON object.";
                 rt.anchorMin        = new Vector2(lo, 0f);
                 rt.anchorMax        = new Vector2(hi, 1f);
                 rt.anchoredPosition = Vector2.zero;
-                rt.sizeDelta        = new Vector2(-10f, 0f); // 5px gap on each side
+                rt.sizeDelta        = new Vector2(-10f, 0f);
                 rt.pivot            = new Vector2(0.5f, 0.5f);
             }
         }
+    }
+
+    private void OnBuyCard(MaterialCardUI card, MaterialData mat)
+    {
+        if (GameManager.Instance == null) return;
+
+        if (!GameManager.Instance.CanAfford(mat.price))
+        {
+            FlashGoldRed();
+            return;
+        }
+
+        GameManager.Instance.SpendGold(mat.price);
+        GameManager.Instance.AddToInventory(mat);
+        card.SetSoldOut();
+        UpdateGoldDisplay();
+        CheckProceedButton();
+    }
+
+    private void UpdateGoldDisplay()
+    {
+        if (goldText == null) return;
+        int gold = GameManager.Instance != null ? GameManager.Instance.playerGold : 0;
+        goldText.text = $"Gold: {gold}g";
+    }
+
+    private void CheckProceedButton()
+    {
+        if (proceedButton == null || GameManager.Instance == null) return;
+        var inv = GameManager.Instance.inventory;
+        bool hasCore = inv.Exists(m => m.materialType == "core");
+        bool hasWood = inv.Exists(m => m.materialType == "wood");
+        proceedButton.interactable = hasCore && hasWood;
+    }
+
+    private void FlashGoldRed()
+    {
+        if (goldText == null) return;
+        if (_goldFlashCoroutine != null) StopCoroutine(_goldFlashCoroutine);
+        _goldFlashCoroutine = StartCoroutine(DoFlashGoldRed());
+    }
+
+    private IEnumerator DoFlashGoldRed()
+    {
+        goldText.color = Color.red;
+        float t = 0f;
+        while (t < 0.6f)
+        {
+            t += Time.deltaTime;
+            goldText.color = Color.Lerp(Color.red, _goldDefaultColor, t / 0.6f);
+            yield return null;
+        }
+        goldText.color = _goldDefaultColor;
     }
 
     private void ClearCards()
