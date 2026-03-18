@@ -20,6 +20,9 @@ public class CustomerGenerator : MonoBehaviour
     [Tooltip("The Generate button — disabled during a request.")]
     public Button generateButton;
 
+    [Tooltip("Proceed to Market button — enabled after a customer is generated.")]
+    public Button proceedButton;
+
     [Tooltip("Status label shown below the button.")]
     public TMP_Text statusText;
 
@@ -162,6 +165,12 @@ Return ONLY the JSON object.";
     {
         SetStatus("Waiting...");
         ClearDossier();
+        if (proceedButton != null)
+        {
+            proceedButton.interactable = false;
+            proceedButton.onClick.AddListener(() =>
+                GameManager.Instance?.LoadScene(GameManager.SCENE_MARKET));
+        }
     }
 
     // ── Public API — wired to the button ──────────────────────────
@@ -282,7 +291,24 @@ Return ONLY the JSON object.";
             }
 
             PopulateDossier(customer);
-            SetStatus("Done.");
+
+            // Push to GameManager so other scenes can read the customer
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.currentCustomer = new CustomerOrder
+                {
+                    customerName  = customer["customerName"]?.ToString()  ?? "",
+                    schoolOfMagic = customer["schoolOfMagic"]?.ToString() ?? "",
+                    profession    = customer["profession"]?.ToString()     ?? "",
+                    personality   = customer["personality"]?.ToString()   ?? "",
+                    request       = customer["request"]?.ToString()       ?? "",
+                    trueGoal      = customer["trueGoal"]?.ToString()      ?? "",
+                    constraint    = customer["constraint"]?.ToString()    ?? "",
+                };
+            }
+
+            if (proceedButton != null) proceedButton.interactable = true;
+            SetStatus("Customer ready. Proceed to the market.");
         }
 
         _busy = false;
