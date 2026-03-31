@@ -1,0 +1,42 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_FILE_PATH\"; case \"$FILE\" in *.unity|*.prefab|*.asset|*.meta) echo \"BLOCKED: Do not modify Unity binary/meta files: $FILE\" >&2; exit 2;; esac; exit 0'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "[Console]::Beep(1200, 300); [Console]::Beep(1500, 200)",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "[Console]::Beep(800, 400); [Console]::Beep(800, 400)",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

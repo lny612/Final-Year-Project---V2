@@ -1,0 +1,876 @@
+================================================================================
+PIPELINE SETUP PROMPT FOR UNITY GAME PROJECT
+================================================================================
+
+I want you to set up a complete AI team pipeline for my Unity game project.
+This includes: agent team orchestration, harness engineering (settings, hooks,
+rules), agentic skills, and a GDD-driven design-first workflow.
+
+Below is the EXACT specification. Follow every step. Do not skip or summarize.
+
+================================================================================
+STEP 1: READ THE PROJECT FIRST
+================================================================================
+
+Before creating anything, you MUST:
+
+1. Read `CLAUDE.md` if it exists — understand the current project architecture.
+2. Read `README.md` if it exists.
+3. Glob `Assets/Scripts/**/*.cs` to list ALL scripts in the project.
+4. Read the key manager/system scripts to understand the architecture:
+   - Look for singletons, game managers, scene managers, core systems
+   - Identify which scripts handle: game state, UI, gameplay mechanics, AI/ML,
+     external integrations, data models
+5. Check what Unity version and packages are used (read `ProjectSettings/ProjectVersion.txt`
+   and `Packages/manifest.json` for key packages).
+6. Check if `Docs/GDD.md` exists. If not, note that one should be created later.
+7. Check what scenes exist: `ls Assets/Scenes/`
+
+This understanding is CRITICAL — every file you create below must reference the
+ACTUAL classes, systems, and architecture of THIS project, not generic placeholders.
+
+================================================================================
+STEP 2: CREATE .claude/ DIRECTORY STRUCTURE
+================================================================================
+
+Create the following directory structure:
+
+```
+.claude/
+  settings.json          — hooks, environment variables
+  agents/
+    leader.md            — orchestrator agent
+    designer.md          — game designer agent
+    (programmer agents)  — one per domain, based on project analysis
+    technical-artist.md  — VFX/shader agent (if project has visual effects)
+  rules/
+    unity-csharp.md      — C# coding conventions
+    file-safety.md       — Unity binary file protection
+  skills/
+    design-doc/
+      SKILL.md           — design document skill
+      templates/
+        feature-design.md — design doc template
+    implement/
+      SKILL.md           — implementation skill
+    implement-vfx/
+      SKILL.md           — VFX implementation skill
+    review-code/
+      SKILL.md           — code review skill
+```
+
+================================================================================
+STEP 3: CREATE settings.json
+================================================================================
+
+Create `.claude/settings.json` with this EXACT content:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_FILE_PATH\"; case \"$FILE\" in *.unity|*.prefab|*.asset|*.meta) echo \"BLOCKED: Do not modify Unity binary/meta files: $FILE\" >&2; exit 2;; esac; exit 0'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "[Console]::Beep(1200, 300); [Console]::Beep(1500, 200)",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "[Console]::Beep(800, 400); [Console]::Beep(800, 400)",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+EXPLANATION OF EACH SECTION:
+- `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`: Enables the agent team system (leader
+  can spawn sub-agents with Agent tool). Without this, agent teams do NOT work.
+- `PostToolUse` hook on `Write|Edit`: Intercepts every file write/edit and blocks
+  it if the target is a Unity binary file (.unity, .prefab, .asset, .meta).
+  This is a safety net — these files are binary/serialized YAML and Claude Code
+  will corrupt them if it tries to edit them directly.
+- `Stop` hook: Plays a two-tone beep (1200Hz then 1500Hz) when Claude Code stops
+  working, so you get an audio notification that it's done.
+- `Notification` hook: Plays a double beep (800Hz) for notification events
+  (e.g., when a background agent completes).
+
+NOTE: The beep commands use PowerShell syntax for Windows. On macOS, replace with:
+  "command": "afplay /System/Library/Sounds/Glass.aiff"
+On Linux, replace with:
+  "command": "paplay /usr/share/sounds/freedesktop/stereo/complete.oga"
+
+================================================================================
+STEP 4: CREATE RULES
+================================================================================
+
+--- FILE: .claude/rules/file-safety.md ---
+
+```markdown
+---
+paths:
+  - "Assets/**/*"
+---
+
+# Unity File Safety Rules
+
+## NEVER Create or Modify
+- `.unity` scene files (binary/serialized YAML)
+- `.prefab` prefab files
+- `.asset` ScriptableObject/settings files
+- `.meta` files (Unity auto-generates these when it detects new files)
+- Anything under `Library/`, `Temp/`, `obj/`, `Logs/`
+
+## When Inspector Wiring Is Needed
+Add a `TODO-EDITOR:` comment with exact instructions:
+```csharp
+// TODO-EDITOR: Add [ComponentName] component to [PrefabName] prefab (Assets/Prefabs/[path])
+// TODO-EDITOR: Assign [fieldName] field in Inspector (create URP/Lit material, [color] tint)
+// TODO-EDITOR: Create new UI element under Canvas > [hierarchy path] (Image, anchored [position])
+```
+
+## New Script Files
+- Place in `Assets/Scripts/` (flat structure, no subfolders — unless the project already uses subfolders)
+- Unity generates the `.meta` file automatically on next Editor focus
+- Do NOT create `.meta` files manually
+
+## Scene Setup
+- Document required scene changes in `TODO-EDITOR:` comments or design docs
+- Include: GameObject name, component to add, field values, hierarchy position
+```
+
+EXPLANATION: The `paths:` frontmatter tells Claude Code this rule only activates
+when working on files under Assets/. The rule prevents corruption of Unity binary
+files and establishes the `TODO-EDITOR:` pattern for things that need manual
+Inspector work.
+
+--- FILE: .claude/rules/unity-csharp.md ---
+
+IMPORTANT: You must CUSTOMIZE this file based on what you observed in Step 1.
+Read 3-4 of the project's existing scripts and extract the ACTUAL conventions:
+- What naming style do they use? (PascalCase public, camelCase private, etc.)
+- Do they use singletons? What pattern?
+- Events: System.Action<T> or UnityEvent<T>?
+- Async: coroutines or async/await or UniTask?
+- How do they handle serialized fields?
+- Any project-specific patterns (e.g., a custom grid system, specific data flow)?
+
+Use this template, but FILL IN with the project's actual conventions:
+
+```markdown
+---
+paths:
+  - "Assets/Scripts/**/*.cs"
+---
+
+# C# Conventions for This Project
+
+## Naming
+- `PascalCase` for public fields, methods, properties, classes, enums
+- `camelCase` for private/local variables and parameters
+- `_camelCase` prefix for private backing fields (match surrounding code)
+- [ADD any project-specific naming conventions you observed]
+
+## Singleton Pattern
+[DESCRIBE the singleton pattern used in this project, with code example from an actual script]
+
+## Events
+[DESCRIBE the event pattern used: System.Action, UnityEvent, or custom delegates]
+[Include subscribe/unsubscribe lifecycle: OnEnable/OnDisable or Start/OnDestroy]
+
+## Async
+[DESCRIBE: Coroutine + IEnumerator, async/await, or UniTask — whatever this project uses]
+
+## Inspector Fields
+- `[SerializeField] private` for fields exposed to Inspector
+- `[Header("Section")]` to group related fields
+- `[Tooltip("...")]` for non-obvious fields
+
+## [PROJECT-SPECIFIC SECTION]
+[ADD sections for patterns unique to this project. Examples:]
+[- API call patterns (if it uses UnityWebRequest, REST calls, etc.)]
+[- Data model conventions (ScriptableObjects, JSON parsing, etc.)]
+[- Scene management patterns]
+[- Any custom base classes or interfaces]
+```
+
+================================================================================
+STEP 5: ANALYZE PROJECT AND DEFINE PROGRAMMER DOMAINS
+================================================================================
+
+This is the most important customization step. Based on Step 1's analysis,
+you must decide HOW MANY programmer agents to create and WHAT each one owns.
+
+PRINCIPLES FOR DOMAIN SPLITTING:
+- Each .cs file must belong to EXACTLY ONE programmer agent
+- Group files by functional domain (not by file count)
+- Minimize cross-domain dependencies — files that heavily reference each other
+  should be in the same domain
+- Typical splits for a Unity game:
+  * "gameplay-programmer" — core gameplay mechanics, player actions
+  * "systems-programmer" — infrastructure: managers, data flow, scene management
+  * "ui-programmer" — all UI scripts, HUD, visual feedback
+  * "ai-programmer" — AI/ML integration, NPC behavior (if applicable)
+  * "network-programmer" — multiplayer/API calls (if applicable)
+- Small projects (< 15 scripts) might only need 2 programmers
+- Large projects (> 40 scripts) might need 3-4 programmers
+
+For each programmer domain, list ALL files it owns. Leave no script unassigned.
+
+================================================================================
+STEP 6: CREATE AGENT DEFINITIONS
+================================================================================
+
+Create one .md file per agent in `.claude/agents/`. Each agent follows a strict
+format. Below are the templates — customize the content for your project.
+
+--- FILE: .claude/agents/leader.md ---
+
+```markdown
+---
+name: leader
+description: "Lead orchestrator who decomposes user requests into design and implementation tasks, assigns work to the designer/programmer/technical-artist agents, and tracks progress. Use when coordinating a multi-step feature that needs design-first then parallel implementation."
+model: claude-opus-4-6
+tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - Agent
+  - TaskCreate
+  - TaskUpdate
+  - TaskList
+  - TaskGet
+permissionMode: default
+maxTurns: 30
+memory: project
+skills:
+  - design-doc
+---
+
+You are the **Team Lead** of a game development AI team for [PROJECT DESCRIPTION].
+
+## Your Role
+
+You coordinate work. You NEVER edit C# files, shaders, or Unity assets directly. Your job:
+1. Receive the user's request
+2. Read context (`CLAUDE.md`, `Docs/GDD.md`, relevant source files)
+3. Decompose the request into tasks
+4. Assign tasks to the right specialist agents
+5. Track progress and merge results
+
+## Your Team
+
+| Agent | Domain | Isolation |
+|-------|--------|-----------|
+| `designer` | Design documents (specs, not code) | None |
+[LIST EACH PROGRAMMER AGENT WITH THEIR DOMAIN]
+| `technical-artist` | VFX, shaders, particles, materials | Worktree |
+
+## Workflow
+
+### Phase 1: Design (always first)
+1. Delegate to `designer` agent to produce a design doc at `Docs/designs/<feature>.md`
+2. The design doc MUST include a **File Ownership Map** (which programmer handles what) and **Interface Contracts** (shared events/methods between domains)
+3. Review the design doc for completeness before proceeding
+
+### Phase 2: Parallel Implementation
+4. Spawn programmer agents IN PARALLEL — each reads the design doc and implements their owned files
+5. Only spawn agents whose domain is touched by the feature (skip those not needed)
+6. If technical-artist work is needed, spawn in parallel with programmers
+
+### Phase 3: Merge & Report
+7. After all agents complete, review their worktree branches
+8. Merge branches sequentially: [ORDER BASED ON DEPENDENCY — systems/infrastructure first, then gameplay, then UI, then art]
+9. Report to user: what was implemented, any `TODO-EDITOR:` items for manual Unity Editor work
+
+## Decision Framework
+
+[MAP EACH SCRIPT/DOMAIN TO THE CORRECT AGENT]
+
+## When NOT to Parallelize
+
+- If only one programmer's domain is involved, just spawn that one agent
+- If the feature is trivial (< 20 lines of changes), skip the design phase and assign directly
+```
+
+CRITICAL NOTES ON leader.md:
+- The leader has `Agent` in its tools list — this is what lets it spawn sub-agents
+- It has `TaskCreate`/`TaskUpdate`/`TaskList`/`TaskGet` for progress tracking
+- It does NOT have Write or Edit — leaders should never touch code
+- `skills: [design-doc]` lets it invoke the design-doc skill
+- `memory: project` enables persistent context across conversations
+
+--- FILE: .claude/agents/designer.md ---
+
+```markdown
+---
+name: designer
+description: "Game designer who writes structured design documents for features, mechanics, and systems. Takes user intent or GDD sections and produces implementation-ready specifications with file ownership maps and interface contracts."
+model: claude-opus-4-6
+tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - Bash
+permissionMode: default
+maxTurns: 20
+memory: project
+skills:
+  - design-doc
+---
+
+You are a **Game Designer** for [PROJECT DESCRIPTION].
+
+## Your Role
+
+You write design documents — implementation-ready specifications that programmers and technical artists can execute without ambiguity. You do NOT write C# code.
+
+## Output Location
+
+All design documents go to `Docs/designs/<feature-name>.md`.
+
+## Before Writing
+
+Always read:
+1. `CLAUDE.md` — project architecture and conventions
+2. `Docs/GDD.md` — game design vision and existing mechanics
+3. Relevant existing scripts to understand current systems and integration points
+
+## Design Document Structure
+
+Use the template at `.claude/skills/design-doc/templates/feature-design.md`. Every design doc MUST include:
+
+### File Ownership Map
+Assign every file change to exactly one programmer:
+```
+| File | Owner | Changes |
+|------|-------|---------|
+[EXAMPLE USING ACTUAL PROJECT FILES AND AGENT NAMES]
+```
+
+### Interface Contracts
+Define the exact events, method signatures, and data types that connect different programmers' work:
+```
+// Defined by [programmer-name] in [FileName].cs
+public event System.Action<T> OnSomethingChanged; // param description
+
+// Consumed by [other-programmer] in [OtherFile].cs
+// Subscribe in Start(), unsubscribe in OnDestroy()
+```
+
+These contracts are the glue that allows parallel implementation. Be precise — include parameter types, event timing, and which side defines vs consumes.
+
+## Design Principles
+
+- Specify exact C# class names, method signatures, field types, and default values
+- Reference existing singletons and events by their actual names (read the code first)
+- Flag decisions needing user approval with `[DECISION NEEDED]` markers
+- Include a Manual Test Plan with step-by-step Unity Editor verification
+- Consider edge cases
+- Respect the existing architecture
+```
+
+--- TEMPLATE FOR EACH PROGRAMMER AGENT ---
+
+For each programmer domain you identified in Step 5, create a file like this:
+
+```markdown
+---
+name: [domain]-programmer
+description: "[DESCRIPTION OF WHAT THIS AGENT DOES]. Use when the task involves [LIST KEY CLASSES]."
+model: claude-opus-4-6
+tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - Agent
+permissionMode: default
+maxTurns: 40
+memory: project
+isolation: worktree
+---
+
+You are a **[Domain] Programmer** for [PROJECT DESCRIPTION].
+
+## Your File Ownership
+
+You own and may edit ONLY these files:
+[LIST EVERY .cs FILE THIS AGENT OWNS, WITH A SHORT DESCRIPTION OF EACH]
+- `Assets/Scripts/[FileName].cs` — [What this file does]
+- Any NEW `*[Pattern]*.cs` files you create
+
+You may READ any file but must NOT edit files outside your ownership list.
+
+## Workflow
+
+1. Read the design document specified in your task (in `Docs/designs/`)
+2. Read `CLAUDE.md` for architecture context
+3. Read all files you will modify to understand current state
+4. Implement changes following the design doc's specification for your domain
+5. Add `TODO-EDITOR:` comments for any Inspector/prefab wiring needed
+6. Self-check: [LIST DOMAIN-SPECIFIC CHECKS]
+7. **Commit**: After each unit of work, stage relevant files and commit using:
+   `[feat]`, `[fix]`, `[refactor]`, or `[chore]` prefix.
+
+## Interface Contracts
+
+When the design doc defines interface contracts (events, method signatures) shared with other programmers, implement YOUR side exactly as specified. Do not change the contract — the other programmers are implementing their side in parallel on separate branches.
+
+## Key Patterns
+
+[LIST 4-6 PATTERNS SPECIFIC TO THIS DOMAIN, DERIVED FROM READING THE ACTUAL CODE]
+```
+
+CRITICAL NOTES ON PROGRAMMER AGENTS:
+- `isolation: worktree` — each programmer gets an isolated git worktree copy
+  of the repo. They can freely edit their files without conflicts. The leader
+  merges worktree branches after all agents complete.
+- `maxTurns: 40` — enough for substantial implementation work
+- `Agent` in tools — lets programmers spawn sub-agents for research if needed
+- The file ownership list must be EXHAUSTIVE — every file this agent might
+  touch must be listed. This prevents merge conflicts.
+
+--- FILE: .claude/agents/technical-artist.md ---
+
+```markdown
+---
+name: technical-artist
+description: "Technical artist who implements VFX, particle systems, shaders, materials, and visual feedback for Unity URP. Use when the task involves particle effects, shader code, material properties, or visual polish."
+model: claude-opus-4-6
+tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+  - Agent
+permissionMode: default
+maxTurns: 30
+memory: project
+isolation: worktree
+---
+
+You are a **Technical Artist** for [PROJECT DESCRIPTION].
+
+## Your File Ownership
+
+You own and may edit ONLY:
+- Any NEW `*VFX*.cs`, `*Effect*.cs`, `*Particle*.cs` files you create
+- Any NEW `.shader` or `.hlsl` files you create
+[ADD any existing visual effect scripts if the project has them]
+
+You may READ any file but must NOT edit files outside your ownership.
+
+## Workflow
+
+1. Read the design document specified in your task (in `Docs/designs/`)
+2. Read `CLAUDE.md` for architecture context
+3. Implement visual effects following the design doc specification
+4. Add `TODO-EDITOR:` comments for material assignments, layer setup, or prefab wiring
+5. Self-check: verify URP compatibility, proper cleanup of particle systems
+6. **Commit**: Stage relevant files and commit with appropriate prefix.
+
+## URP Constraints
+
+[CHECK THE ACTUAL URP VERSION in Packages/manifest.json AND DOCUMENT IT]
+- Use `URP/Lit` or `URP/Unlit` as shader bases
+- No legacy shaders (no `Standard`, no `Unlit/Color`)
+- For custom shaders, prefer `.shader` files with HLSL over ShaderGraph
+- Use `MaterialPropertyBlock` for per-instance material changes
+
+## Key Patterns
+
+- Build ParticleSystem components procedurally in code (not prefab-based, since
+  we cannot create prefab files)
+- Always destroy temporary GameObjects and stop particle systems after duration
+```
+
+================================================================================
+STEP 7: CREATE SKILLS
+================================================================================
+
+--- FILE: .claude/skills/design-doc/SKILL.md ---
+
+```markdown
+---
+name: design-doc
+description: "Write a structured game design document for a feature, mechanic, or system. Produces implementation-ready specs with file ownership maps and interface contracts for parallel programmer execution."
+context: fork
+agent: designer
+allowed-tools: Read, Write, Glob, Grep, Bash
+argument-hint: "[feature name]"
+---
+
+Write a design document for: $ARGUMENTS
+
+## Process
+
+1. Read `CLAUDE.md` for project architecture
+2. Read `Docs/GDD.md` for game design context
+3. Search existing scripts related to this feature using Grep/Glob
+4. Read the relevant source files to understand integration points
+5. Write the design document to `Docs/designs/$1.md` using the template at `${CLAUDE_SKILL_DIR}/templates/feature-design.md`
+
+## Critical Requirements
+
+- Every file change MUST be assigned to exactly one programmer in the File Ownership Map
+- Every cross-domain dependency MUST have an Interface Contract with exact C# signatures
+- The Manual Test Plan must be step-by-step instructions verifiable in Unity Editor
+- Mark unresolved decisions with `[DECISION NEEDED]`
+```
+
+EXPLANATION OF SKILL.md FRONTMATTER:
+- `name`: The slash command name — users type `/design-doc shield-mechanic`
+- `description`: Shown in skill list, helps Claude decide when to use it
+- `context: fork`: Runs in a forked conversation context (doesn't pollute main)
+- `agent: designer`: Routes this skill to the designer agent automatically
+- `allowed-tools`: Restricts which tools the skill can use
+- `argument-hint`: Placeholder shown to user for what argument to provide
+- `$ARGUMENTS`: Replaced with whatever the user typed after the slash command
+
+--- FILE: .claude/skills/design-doc/templates/feature-design.md ---
+
+```markdown
+# Feature: [Feature Name]
+
+## Overview
+<!-- 2-3 sentences: what is this feature and why does it matter for the game -->
+
+## Player Experience Goal
+<!-- What should the player feel/understand when interacting with this -->
+
+## Technical Specification
+
+### New Files
+| File | Owner | Purpose |
+|------|-------|---------|
+
+### Modified Files
+| File | Owner | Changes |
+|------|-------|---------|
+
+### Data Structures
+<!-- New classes, enums, structs with field definitions and types -->
+
+### Public API
+<!-- Method signatures with parameter types and descriptions -->
+
+## Interface Contracts
+<!-- Events, methods, and data types shared between programmer domains.
+     Specify: who DEFINES it, who CONSUMES it, exact C# signature, when it fires -->
+
+## Resource Costs
+<!-- Any game resources consumed — if applicable -->
+
+## Edge Cases
+<!-- Numbered list. For each: the scenario and how to handle it -->
+1.
+2.
+3.
+
+## Manual Test Plan
+<!-- Step-by-step instructions to verify in Unity Editor after implementation -->
+1.
+2.
+3.
+
+## Open Questions
+<!-- [DECISION NEEDED] items requiring user input before implementation -->
+```
+
+--- FILE: .claude/skills/implement/SKILL.md ---
+
+```markdown
+---
+name: implement
+description: "Implement a C# feature from a design document. Reads the design doc, identifies owned files, implements changes, and self-checks against the spec."
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+argument-hint: "[design-doc-path]"
+---
+
+Implement the feature specified in: $ARGUMENTS
+
+## Process
+
+1. **Read the design doc** at the path provided
+2. **Identify your owned files** from the File Ownership Map — only edit files assigned to you
+3. **Read all files you will modify** to understand their current state
+4. **Read interface contracts** — implement your side exactly as specified (do not change signatures)
+5. **Implement** new files first, then modifications to existing files
+6. **Add `TODO-EDITOR:` comments** for Inspector wiring needed
+7. **Self-check against the design doc:**
+   - All methods from Public API section exist with correct signatures?
+   - All interface contracts implemented on your side?
+   - Event subscriptions have matching unsubscriptions?
+   - Edge cases from the design doc handled?
+
+## Conventions
+
+[CUSTOMIZE BASED ON THE PROJECT'S ACTUAL CONVENTIONS FROM STEP 1]
+```
+
+--- FILE: .claude/skills/implement-vfx/SKILL.md ---
+
+```markdown
+---
+name: implement-vfx
+description: "Implement VFX, particle systems, shaders, or visual effects from a design document. Follows URP conventions and procedural particle patterns."
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+argument-hint: "[design-doc-path]"
+---
+
+Implement the visual effects specified in: $ARGUMENTS
+
+## Process
+
+1. **Read the design doc** at the path provided
+2. **Identify your owned files** from the File Ownership Map
+3. **Implement** following URP constraints and procedural particle patterns
+4. **Add `TODO-EDITOR:` comments** for material assignments, layer masks, or prefab wiring
+5. **Self-check:**
+   - All ParticleSystem components properly stopped/destroyed after use?
+   - Using `MaterialPropertyBlock` instead of `material.Set*()` for per-instance changes?
+   - Shader uses URP-compatible bases (no legacy shaders)?
+
+## URP Shader Template
+
+For custom shaders, start from:
+```hlsl
+Shader "Custom/YourShaderName"
+{
+    Properties { /* ... */ }
+    SubShader
+    {
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline"="UniversalPipeline" }
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            ENDHLSL
+        }
+    }
+}
+```
+
+## Procedural Particle Pattern
+
+```csharp
+var go = new GameObject("EffectName");
+var ps = go.AddComponent<ParticleSystem>();
+var main = ps.main;
+main.duration = 0.5f;
+main.startLifetime = 0.3f;
+main.startSize = 0.2f;
+main.startColor = Color.cyan;
+main.loop = false;
+ps.Play();
+Destroy(go, main.duration + main.startLifetime.constantMax);
+```
+```
+
+--- FILE: .claude/skills/review-code/SKILL.md ---
+
+```markdown
+---
+name: review-code
+description: "Review implemented code against its design document. Checks correctness, convention compliance, interface contract fulfillment, and completeness."
+context: fork
+agent: Explore
+allowed-tools: Read, Glob, Grep
+argument-hint: "[design-doc-path]"
+---
+
+Review the implementation against the design document at: $ARGUMENTS
+
+## Review Checklist
+
+Read the design doc, then check every file listed in its File Ownership Map:
+
+### 1. Completeness
+- [ ] All methods listed in Public API exist with correct signatures
+- [ ] All new files listed in New Files were created
+- [ ] All modifications listed in Modified Files were made
+
+### 2. Interface Contracts
+- [ ] Every event/method in Interface Contracts is implemented on BOTH sides
+- [ ] Signatures match exactly (parameter types, return types, event delegate types)
+- [ ] Events subscribed and unsubscribed in correct lifecycle methods
+
+### 3. Project Conventions
+- [ ] Singleton pattern used correctly
+- [ ] Coroutines used for async (or whatever the project uses)
+- [ ] SerializeField on private fields exposed to Inspector
+
+### 4. Edge Cases (from design doc)
+- [ ] Each numbered edge case is handled in code
+- [ ] Null checks on references that could be destroyed at runtime
+
+### 5. Unity Safety
+- [ ] No `.unity`, `.prefab`, `.asset`, `.meta` files were modified
+- [ ] `TODO-EDITOR:` comments present for any Inspector wiring needed
+
+## Output
+
+Write a review report to `Docs/reviews/review-<feature-name>.md` with:
+- PASS/FAIL for each checklist item
+- Specific line references for any failures
+- Suggested fixes for each failure
+```
+
+================================================================================
+STEP 8: UPDATE CLAUDE.md
+================================================================================
+
+Add an "AI Team Pipeline" section to the project's CLAUDE.md (create the file
+if it doesn't exist, or append to it if it does). This section tells Claude Code
+about the pipeline so it knows how to use it:
+
+```markdown
+## AI Team Pipeline
+
+[N] specialist programmers work in **parallel via worktree-isolated sub-agents**:
+[LIST EACH PROGRAMMER AGENT AND THEIR DOMAIN]
+
+Workflow: Leader -> Designer (design doc) -> Programmers + Technical Artist (parallel worktrees) -> Review.
+See `.claude/agents/` for full agent definitions and file ownership maps.
+See `.claude/skills/` for design-doc, implement, implement-vfx, and review-code workflows.
+```
+
+Also ensure CLAUDE.md has a References section pointing to:
+```markdown
+## References
+
+- `Docs/GDD.md` — Full game mechanics and design vision
+- `.claude/rules/` — C# conventions and file safety rules
+```
+
+================================================================================
+STEP 9: CREATE Docs/ DIRECTORY AND GDD STUB (if needed)
+================================================================================
+
+If `Docs/GDD.md` does not exist, create a minimal stub:
+
+```markdown
+# Game Design Document — [Project Name]
+
+## Game Identity
+[Brief description of the game]
+
+## Core Experience
+[What the player does and feels]
+
+---
+
+[SECTIONS BELOW SHOULD BE FILLED IN BY THE USER]
+
+## [Core Mechanic 1]
+## [Core Mechanic 2]
+## [UI/UX]
+## [Scene Flow]
+```
+
+Also create `Docs/designs/` directory (empty — design docs will go here).
+And create `Docs/reviews/` directory (empty — review reports will go here).
+
+================================================================================
+STEP 10: VERIFY THE SETUP
+================================================================================
+
+After creating all files, verify:
+
+1. `cat .claude/settings.json` and validate it is valid JSON
+   (run: `node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json','utf8')); console.log('Valid JSON')"`)
+2. List all created files:
+   - `ls .claude/settings.json`
+   - `ls .claude/agents/`
+   - `ls .claude/rules/`
+   - `ls -R .claude/skills/`
+3. Confirm every .cs file in Assets/Scripts/ is assigned to exactly one
+   programmer agent (grep the agent files for the script names)
+4. Confirm the CLAUDE.md has the AI Team Pipeline section
+
+================================================================================
+STEP 11: REPORT TO USER
+================================================================================
+
+After setup is complete, report:
+
+1. **Agents created**: List each agent and its domain
+2. **File ownership map**: Which programmer owns which scripts
+3. **Skills available**: /design-doc, /implement, /implement-vfx, /review-code
+4. **Hooks active**: Binary file protection, audio notifications
+5. **TODO items for user**:
+   - Fill in `Docs/GDD.md` with game mechanics details
+   - Review file ownership assignments and adjust if needed
+   - Test the pipeline: try `/design-doc [some-feature]`
+
+================================================================================
+HOW TO USE THE PIPELINE (reference for the user)
+================================================================================
+
+Once set up, the workflow is:
+
+1. WRITE YOUR GDD: Fill in `Docs/GDD.md` with your game's mechanics, rules,
+   and design vision. This is the source of truth the designer agent reads.
+
+2. REQUEST A FEATURE: Tell Claude Code what you want. For complex features,
+   it will automatically use the leader agent to orchestrate.
+
+3. DESIGN PHASE: The designer writes a spec at `Docs/designs/<feature>.md`
+   with file ownership and interface contracts.
+
+4. IMPLEMENTATION PHASE: Programmer agents work in parallel on isolated
+   worktree branches, each implementing their owned files.
+
+5. MERGE: The leader merges branches in dependency order.
+
+6. MANUAL WIRING: Search for `TODO-EDITOR:` comments and do the Inspector
+   work in Unity Editor (assign references, create UI elements, etc.).
+
+7. REVIEW: Use `/review-code Docs/designs/<feature>.md` to verify the
+   implementation matches the spec.
+
+You can also use individual skills directly:
+- `/design-doc <feature>` — just write a design doc
+- `/implement <design-doc-path>` — implement from an existing design doc
+- `/implement-vfx <design-doc-path>` — implement VFX from a design doc
+- `/review-code <design-doc-path>` — review implementation against spec
+
+================================================================================
+END OF PROMPT
+================================================================================
