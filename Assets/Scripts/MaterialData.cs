@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 /// <summary>
 /// Runtime-only data class for a generated wand material.
@@ -19,4 +20,7 @@ public class MaterialData
     // Core-only
     public string elementalAffinity;
     public string special;
+
+    // Runtime image — survives scene transitions via GameManager inventory
+    [NonSerialized] public Texture2D generatedImage;
 }

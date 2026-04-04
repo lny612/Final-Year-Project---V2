@@ -344,7 +344,11 @@ Use exactly this structure:
             StartCoroutine(RunImageGeneration(mat.imagePrompt, tex =>
             {
                 completed++;
-                if (tex != null) cardUI.SetImage(tex);
+                if (tex != null)
+                {
+                    mat.generatedImage = tex;
+                    cardUI.SetImage(tex);
+                }
                 SetStatus($"Generated image {completed} of {total}...");
             }));
         }
@@ -599,16 +603,26 @@ Apply the four design rules. Return ONLY the JSON object.";
         var clipNode = workflow[clipNodeId];
         if (clipNode == null)
         {
-            Debug.LogError($"[MaterialGenerator] CLIP node \"{clipNodeId}\" not found in workflow.");
-            onDone(null); yield break;
+            clipNode = FindNodeByClass(workflow, "CLIPTextEncode");
+            if (clipNode == null)
+            {
+                Debug.LogError($"[MaterialGenerator] CLIPTextEncode node not found in workflow.");
+                onDone(null); yield break;
+            }
+            Debug.LogWarning($"[MaterialGenerator] clipNodeId \"{clipNodeId}\" not found, resolved CLIPTextEncode by class_type.");
         }
         clipNode["inputs"]["text"] = prompt;
 
         var ksNode = workflow[kSamplerNodeId];
         if (ksNode == null)
         {
-            Debug.LogError($"[MaterialGenerator] KSampler node \"{kSamplerNodeId}\" not found in workflow.");
-            onDone(null); yield break;
+            ksNode = FindNodeByClass(workflow, "KSampler");
+            if (ksNode == null)
+            {
+                Debug.LogError($"[MaterialGenerator] KSampler node not found in workflow.");
+                onDone(null); yield break;
+            }
+            Debug.LogWarning($"[MaterialGenerator] kSamplerNodeId \"{kSamplerNodeId}\" not found, resolved KSampler by class_type.");
         }
         ksNode["inputs"]["seed"] = (long)UnityEngine.Random.Range(0, int.MaxValue);
 
@@ -835,6 +849,14 @@ Apply the four design rules. Return ONLY the JSON object.";
     }
 
     // ── Shared helpers ────────────────────────────────────────────
+
+    private static JToken FindNodeByClass(JObject workflow, string classType)
+    {
+        foreach (var prop in workflow.Properties())
+            if (prop.Value is JObject node && (string)node["class_type"] == classType)
+                return node;
+        return null;
+    }
 
     private IEnumerator LoadApiKey(Action<string> onDone)
     {

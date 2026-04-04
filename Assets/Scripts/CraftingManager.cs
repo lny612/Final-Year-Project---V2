@@ -248,9 +248,9 @@ public class CraftingManager : MonoBehaviour
     private void RefreshSlotUI(int slot, MaterialData mat)
     {
         string label = $"<b>{mat.name}</b>\n{mat.price}g";
-        if (slot == 1 && slot1Name != null) slot1Name.text = label;
-        if (slot == 2 && slot2Name != null) slot2Name.text = label;
-        if (slot == 3 && slot3Name != null) slot3Name.text = label;
+        if (slot == 1) { if (slot1Name  != null) slot1Name.text    = label; if (slot1Image != null) slot1Image.texture = mat.generatedImage; }
+        if (slot == 2) { if (slot2Name  != null) slot2Name.text    = label; if (slot2Image != null) slot2Image.texture = mat.generatedImage; }
+        if (slot == 3) { if (slot3Name  != null) slot3Name.text    = label; if (slot3Image != null) slot3Image.texture = mat.generatedImage; }
     }
 
     private void ClearSlotUI(int slot)
@@ -531,16 +531,26 @@ Use exactly this structure:
         var clipNode = workflow[clipNodeId];
         if (clipNode == null)
         {
-            Debug.LogError($"[CraftingManager] CLIP node \"{clipNodeId}\" not found.");
-            onDone(null); yield break;
+            clipNode = FindNodeByClass(workflow, "CLIPTextEncode");
+            if (clipNode == null)
+            {
+                Debug.LogError($"[CraftingManager] CLIPTextEncode node not found.");
+                onDone(null); yield break;
+            }
+            Debug.LogWarning($"[CraftingManager] clipNodeId \"{clipNodeId}\" not found, resolved CLIPTextEncode by class_type.");
         }
         clipNode["inputs"]["text"] = prompt;
 
         var ksNode = workflow[kSamplerNodeId];
         if (ksNode == null)
         {
-            Debug.LogError($"[CraftingManager] KSampler node \"{kSamplerNodeId}\" not found.");
-            onDone(null); yield break;
+            ksNode = FindNodeByClass(workflow, "KSampler");
+            if (ksNode == null)
+            {
+                Debug.LogError($"[CraftingManager] KSampler node not found.");
+                onDone(null); yield break;
+            }
+            Debug.LogWarning($"[CraftingManager] kSamplerNodeId \"{kSamplerNodeId}\" not found, resolved KSampler by class_type.");
         }
         ksNode["inputs"]["seed"] = (long)UnityEngine.Random.Range(0, int.MaxValue);
 
@@ -609,6 +619,14 @@ Use exactly this structure:
     }
 
     // ── Shared helpers ────────────────────────────────────────────
+
+    private static JToken FindNodeByClass(JObject workflow, string classType)
+    {
+        foreach (var prop in workflow.Properties())
+            if (prop.Value is JObject node && (string)node["class_type"] == classType)
+                return node;
+        return null;
+    }
 
     private IEnumerator LoadApiKey(Action<string> onDone)
     {

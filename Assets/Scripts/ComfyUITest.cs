@@ -158,11 +158,13 @@ public class ComfyUITest : MonoBehaviour
         var clipNode = workflow[clipNodeId];
         if (clipNode == null)
         {
-            ReportError(
-                $"CLIP node \"{clipNodeId}\" not found in the workflow JSON.\n" +
-                "Check the Clip Node Id field in the Inspector\n" +
-                "(open the JSON, search for CLIPTextEncode, copy the key above it).");
-            yield break;
+            clipNode = FindNodeByClass(workflow, "CLIPTextEncode");
+            if (clipNode == null)
+            {
+                ReportError("CLIPTextEncode node not found in the workflow JSON.");
+                yield break;
+            }
+            Debug.LogWarning($"[ComfyUITest] clipNodeId \"{clipNodeId}\" not found, resolved CLIPTextEncode by class_type.");
         }
         clipNode["inputs"]["text"] = userPrompt;
 
@@ -170,11 +172,13 @@ public class ComfyUITest : MonoBehaviour
         var ksamplerNode = workflow[kSamplerNodeId];
         if (ksamplerNode == null)
         {
-            ReportError(
-                $"KSampler node \"{kSamplerNodeId}\" not found in the workflow JSON.\n" +
-                "Check the K Sampler Node Id field in the Inspector\n" +
-                "(open the JSON, search for KSampler, copy the key above it).");
-            yield break;
+            ksamplerNode = FindNodeByClass(workflow, "KSampler");
+            if (ksamplerNode == null)
+            {
+                ReportError("KSampler node not found in the workflow JSON.");
+                yield break;
+            }
+            Debug.LogWarning($"[ComfyUITest] kSamplerNodeId \"{kSamplerNodeId}\" not found, resolved KSampler by class_type.");
         }
         // Use the full range so every generation is unique.
         ksamplerNode["inputs"]["seed"] = (long)UnityEngine.Random.Range(0, int.MaxValue);
@@ -327,6 +331,14 @@ public class ComfyUITest : MonoBehaviour
     }
 
     // ── Helpers ───────────────────────────────────────────────────
+
+    private static JToken FindNodeByClass(JObject workflow, string classType)
+    {
+        foreach (var prop in workflow.Properties())
+            if (prop.Value is JObject node && (string)node["class_type"] == classType)
+                return node;
+        return null;
+    }
 
     private void SetStatus(string message)
     {
