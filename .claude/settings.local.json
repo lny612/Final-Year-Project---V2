@@ -1,7 +1,31 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''.claude/settings.json'',''utf8''\\)\\); console.log\\(''Valid JSON''\\)\")"
+      "Bash(node -e \"JSON.parse\\(require\\(''fs''\\).readFileSync\\(''.claude/settings.json'',''utf8''\\)\\); console.log\\(''Valid JSON''\\)\")",
+      "Bash(xargs ls:*)",
+      "Bash(python3 -m json.tool)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.nextdiffusion.ai)",
+      "WebFetch(domain:apatero.com)",
+      "WebFetch(domain:myaiforce.com)",
+      "WebFetch(domain:www.hardware-corner.net)",
+      "WebFetch(domain:zimageturbo.org)",
+      "WebFetch(domain:blog.comfy.org)",
+      "WebFetch(domain:zimage.run)",
+      "Bash(\"/c/Users/iris6/AppData/Local/Programs/ComfyUI/resources/uv/win/uv.exe\" python:*)",
+      "Bash(\"/c/Users/iris6/AppData/Local/Programs/ComfyUI/resources/uv/win/uv.exe\" --help)",
+      "Read(//c/.venv//**)",
+      "Bash(\"/c/.venv/Scripts/python.exe\" --version)",
+      "Bash(ls:*)",
+      "Bash(/c/.venv/Scripts/python.exe:*)",
+      "Bash(\"/c/.venv/Scripts/pip3.exe\" uninstall:*)",
+      "Bash(\"/c/.venv/Scripts/pip3.exe\" install:*)",
+      "Bash(curl:*)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(r['tag_name'], r['name']\\) for r in data]\")",
+      "Bash(python -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(r['tag_name'], r['name']\\) for r in data]\")",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

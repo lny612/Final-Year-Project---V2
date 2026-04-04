@@ -20,8 +20,8 @@ public class CraftingManager : MonoBehaviour
     [Header("API Settings")]
     public string openAIUrl  = "https://api.openai.com/v1/chat/completions";
     public string comfyUIUrl = "http://127.0.0.1:8000";
-    public string clipNodeId     = "57:27";
-    public string kSamplerNodeId = "57:3";
+    public string clipNodeId     = "5";
+    public string kSamplerNodeId = "4";
 
     [Header("UI — Left Panel (Inventory)")]
     public Transform coreInventoryContainer;
@@ -53,6 +53,14 @@ public class CraftingManager : MonoBehaviour
     [Header("UI — Status")]
     public TMP_Text statusText;
 
+    [Header("Minigame")]
+    [Tooltip("Assign the TracingMinigameUI component on the MinigamePanel.")]
+    public TracingMinigameUI tracingMinigame;
+    // TODO-EDITOR: Create a full-screen UI Panel "MinigamePanel" under Canvas
+    //   (anchored stretch-fill, initially inactive). Add TracingMinigameUI component.
+    //   Add child TMP_Text "RoundText" (top-center) and "InstructionText" (bottom-center).
+    //   Wire all fields. Then assign this field on CraftingManager.
+
     // ── Private state ──────────────────────────────────────────────
 
     private MaterialData _slot1;   // Core 1
@@ -68,6 +76,8 @@ public class CraftingManager : MonoBehaviour
     private readonly List<GameObject> _woodRows = new();
 
     private bool _busy;
+    private bool _minigameDone;
+    private bool _pipelineDone;
 
     // ── Unity lifecycle ────────────────────────────────────────────
 
@@ -273,8 +283,28 @@ public class CraftingManager : MonoBehaviour
         GameManager.Instance?.RemoveFromInventory(_slot3);
 
         _busy = true;
+        _minigameDone = false;
+        _pipelineDone = false;
         confirmButton.interactable = false;
+
+        // Start wand generation immediately (runs during minigame)
         StartCoroutine(CraftingPipeline());
+
+        // Start minigame in parallel — grade only affects evaluation rewards
+        if (tracingMinigame != null)
+        {
+            tracingMinigame.Begin(grade =>
+            {
+                if (GameManager.Instance != null)
+                    GameManager.Instance.craftingQualityGrade = grade;
+                _minigameDone = true;
+                TryShowResult();
+            });
+        }
+        else
+        {
+            _minigameDone = true; // no minigame wired — skip (testing)
+        }
     }
 
     private IEnumerator CraftingPipeline()
@@ -286,6 +316,7 @@ public class CraftingManager : MonoBehaviour
         if (string.IsNullOrEmpty(apiKey))
         {
             SetStatus("Error: no API key found in StreamingAssets/config.json");
+            _pipelineDone = true;
             _busy = false;
             confirmButton.interactable = true;
             yield break;
@@ -307,6 +338,7 @@ public class CraftingManager : MonoBehaviour
         if (content == null)
         {
             SetStatus("Error: wand generation API call failed. Check API key and connection.");
+            _pipelineDone = true;
             _busy = false;
             confirmButton.interactable = true;
             yield break;
@@ -329,6 +361,7 @@ public class CraftingManager : MonoBehaviour
         {
             Debug.LogError("[CraftingManager] Wand parse: " + ex.Message);
             SetStatus("Error: unexpected wand response format from OpenAI.");
+            _pipelineDone = true;
             _busy = false;
             confirmButton.interactable = true;
             yield break;
@@ -359,7 +392,20 @@ public class CraftingManager : MonoBehaviour
             Debug.LogError("[CraftingManager] Wand image generation failed; showing placeholder.");
         }
 
-        SetStatus("Wand forged. Proceed to evaluation when ready.");
+        _pipelineDone = true;
+        TryShowResult();
+    }
+
+    /// <summary>
+    /// Called by both the minigame callback and CraftingPipeline.
+    /// Shows the result panel only when both are done.
+    /// </summary>
+    private void TryShowResult()
+    {
+        if (!_minigameDone || !_pipelineDone) return;
+
+        char grade = GameManager.Instance?.craftingQualityGrade ?? 'A';
+        SetStatus($"Wand forged (Quality: {grade}). Proceed to evaluation when ready.");
 
         if (resultPanel   != null) resultPanel.SetActive(true);
         if (proceedButton != null)
@@ -519,7 +565,7 @@ Use exactly this structure:
 
         if (string.IsNullOrEmpty(promptId)) { onDone(null); yield break; }
 
-        const float pollInterval = 1.5f;
+        const float pollInterval = 1.0f;
         const float timeout      = 60f;
         float elapsed = 0f;
         string filename = null, subfolder = "", type = "output";

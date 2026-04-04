@@ -157,10 +157,12 @@ public class EvaluationManager : MonoBehaviour
             yield break;
         }
 
-        // Rewards
-        int goldEarned       = Mathf.RoundToInt(150 * (matchScore / 100f));
+        // Rewards (quality grade from tracing minigame scales rewards)
+        float qualityMult    = GetQualityMultiplier(
+            GameManager.Instance?.craftingQualityGrade ?? 'A');
+        int goldEarned       = Mathf.RoundToInt(150 * (matchScore / 100f) * qualityMult);
         int reputationChange = matchScore >= 40
-                               ? Mathf.RoundToInt(20 * (matchScore / 100f))
+                               ? Mathf.RoundToInt(20 * (matchScore / 100f) * qualityMult)
                                : -10;
 
         GameManager.Instance?.AddGold(goldEarned);
@@ -205,7 +207,9 @@ public class EvaluationManager : MonoBehaviour
 
         float delay = 0.3f;
 
-        yield return FadeInText(verdictText,          verdict,                                delay);
+        char grade = GameManager.Instance?.craftingQualityGrade ?? 'A';
+        yield return FadeInText(verdictText,
+            $"<b>Crafting Quality: {grade}</b>  —  {verdict}",                               delay);
         yield return FadeInText(whatWorkedText,        $"<b>What worked:</b>  {worked}",      delay);
         if (score < 85 && !string.IsNullOrEmpty(missed))
             yield return FadeInText(whatMissedText,   $"<b>What missed:</b>  {missed}",       delay);
@@ -233,6 +237,20 @@ public class EvaluationManager : MonoBehaviour
             yield return null;
         }
         t.alpha = 1f;
+    }
+
+    // ── Quality grade ─────────────────────────────────────────────
+
+    private static float GetQualityMultiplier(char grade)
+    {
+        return grade switch
+        {
+            'A' => 1.0f,
+            'B' => 0.85f,
+            'C' => 0.7f,
+            'D' => 0.55f,
+            _   => 0.4f   // F or unknown
+        };
     }
 
     // ── Next Customer ─────────────────────────────────────────────

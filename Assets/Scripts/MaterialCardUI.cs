@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -76,11 +77,35 @@ public class MaterialCardUI : MonoBehaviour
 
     public void SetImage(Texture2D tex)
     {
-        if (placeholder   != null) placeholder.gameObject.SetActive(false);
         if (materialImage != null)
         {
-            materialImage.gameObject.SetActive(true);
             materialImage.texture = tex;
+            materialImage.gameObject.SetActive(true);
+            // Start transparent, fade in over placeholder
+            var c = materialImage.color;
+            c.a = 0f;
+            materialImage.color = c;
+            StartCoroutine(CrossfadeImage());
         }
+    }
+
+    private IEnumerator CrossfadeImage()
+    {
+        const float duration = 0.3f;
+        float elapsed = 0f;
+        Color c = materialImage.color;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            c.a = Mathf.Clamp01(elapsed / duration);
+            materialImage.color = c;
+            yield return null;
+        }
+
+        c.a = 1f;
+        materialImage.color = c;
+        // Hide placeholder once real image is fully visible
+        if (placeholder != null) placeholder.gameObject.SetActive(false);
     }
 }

@@ -55,12 +55,12 @@ public class ComfyUITest : MonoBehaviour
     [Tooltip("The JSON key of the CLIPTextEncode node in the workflow. " +
              "Open image_z_image_turbo.json and search for \"CLIPTextEncode\" " +
              "to find this key (e.g. \"57:27\").")]
-    public string clipNodeId     = "57:27";
+    public string clipNodeId     = "5";
 
     [Tooltip("The JSON key of the KSampler node in the workflow. " +
              "Open image_z_image_turbo.json and search for \"KSampler\" " +
-             "to find this key (e.g. \"57:3\").")]
-    public string kSamplerNodeId = "57:3";
+             "to find this key (e.g. \"4\").")]
+    public string kSamplerNodeId = "4";
 
     [Header("UI References")]
     [Tooltip("The TMP_InputField where the user types their prompt.")]

@@ -18,10 +18,10 @@ public class MaterialGenerator : MonoBehaviour
     public string comfyUIUrl     = "http://127.0.0.1:8000";
 
     [Tooltip("CLIPTextEncode node ID in image_z_image_turbo.json.")]
-    public string clipNodeId     = "57:27";
+    public string clipNodeId     = "5";
 
     [Tooltip("KSampler node ID in image_z_image_turbo.json.")]
-    public string kSamplerNodeId = "57:3";
+    public string kSamplerNodeId = "4";
 
     [Header("UI — Controls")]
     public Button   generateButton;
@@ -251,6 +251,14 @@ Use exactly this structure:
         if (backButton != null)
             backButton.onClick.AddListener(
                 () => GameManager.Instance?.LoadScene(GameManager.SCENE_CUSTOMER));
+
+        // Auto-start if arriving from CustomerGenerator with a customer already set
+        if (GameManager.Instance?.currentCustomer != null
+            && GameManager.Instance.availableMaterials.Count == 0)
+        {
+            DisplayCustomer(GameManager.Instance.currentCustomer);
+            StartCoroutine(MaterialsPipeline(GameManager.Instance.currentCustomer, ownBusy: true));
+        }
     }
 
     // ── Public API ─────────────────────────────────────────────────
@@ -321,20 +329,29 @@ Use exactly this structure:
         InstantiateCards(cores, coreCardContainer, _coreCards);
         InstantiateCards(woods, woodCardContainer, _woodCards);
 
-        // Step 5 — Generate images sequentially
+        // Step 5 — Queue all image generation requests in parallel
         var queue = new List<(MaterialCardUI ui, MaterialData data)>();
         for (int i = 0; i < _coreCards.Count && i < cores.Count; i++) queue.Add((_coreCards[i], cores[i]));
         for (int i = 0; i < _woodCards.Count && i < woods.Count; i++) queue.Add((_woodCards[i], woods[i]));
 
-        for (int i = 0; i < queue.Count; i++)
+        int completed = 0;
+        int total = queue.Count;
+        SetStatus($"Generating {total} images...");
+
+        for (int i = 0; i < total; i++)
         {
-            SetStatus($"Generating image {i + 1} of {queue.Count}...");
             var (cardUI, mat) = queue[i];
-            Texture2D tex = null;
-            yield return StartCoroutine(RunImageGeneration(mat.imagePrompt, r => tex = r));
-            if (tex != null) cardUI.SetImage(tex);
-            // On failure: placeholder stays, pipeline continues.
+            StartCoroutine(RunImageGeneration(mat.imagePrompt, tex =>
+            {
+                completed++;
+                if (tex != null) cardUI.SetImage(tex);
+                SetStatus($"Generated image {completed} of {total}...");
+            }));
         }
+
+        // Wait for all images to finish (or timeout individually)
+        while (completed < total)
+            yield return null;
 
         SetStatus("Done.");
         Finish();
@@ -624,7 +641,7 @@ Apply the four design rules. Return ONLY the JSON object.";
         }
 
         // Poll history
-        const float pollInterval = 1.5f;
+        const float pollInterval = 1.0f;
         const float timeout      = 60f;
         float elapsed = 0f;
         string filename = null, subfolder = "", type = "output";

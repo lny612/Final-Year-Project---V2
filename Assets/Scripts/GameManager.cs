@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public int                playerGold         = 500;
     [HideInInspector] public int                playerReputation   = 0;
     [HideInInspector] public WandResult         currentWandResult;
+    [HideInInspector] public char               craftingQualityGrade = 'A';
 
     // ── Unity lifecycle ────────────────────────────────────────────
 
@@ -63,7 +64,8 @@ public class GameManager : MonoBehaviour
     {
         currentCustomer    = null;
         availableMaterials = new List<MaterialData>();
-        currentWandResult  = null;
+        currentWandResult      = null;
+        craftingQualityGrade   = 'A';
         // inventory, playerGold, playerReputation are preserved
         LoadScene(SCENE_CUSTOMER);
     }
