@@ -468,7 +468,7 @@ public class TracingMinigameUI : MonoBehaviour
     {
         var keys = new KeyCode[count];
         for (int i = 0; i < count; i++)
-            keys[i] = GATE_KEY_POOL[Random.Range(0, GATE_KEY_POOL.Length)];
+            keys[i] = GATE_KEY_POOL[UnityEngine.Random.Range(0, GATE_KEY_POOL.Length)];
         return keys;
     }
 }
