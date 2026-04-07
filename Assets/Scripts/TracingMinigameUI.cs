@@ -6,8 +6,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Main tracing minigame controller. Orchestrates 3 rounds of rune-tracing,
-/// builds path visuals, spawns cursor + mist, tracks retries, computes grade.
+/// Main tracing minigame controller. Orchestrates 3 rounds of path-tracing.
+/// The player traces a trail with the mouse (fills blue) while a red fill advances
+/// on a timer from the starting point. Keyboard-key gates at waypoints must be
+/// pressed to proceed. Win = blue reaches end before red. Each win = +1 success.
+/// Grade: 3 wins → A, 2 → B, 1 → C, 0 → F.
 /// Lives on a full-screen overlay panel inside the CraftingScene canvas.
 /// </summary>
 [DisallowMultipleComponent]
@@ -26,49 +29,63 @@ public class TracingMinigameUI : MonoBehaviour
     public TMP_Text instructionText;
 
     [Header("Tuning")]
-    [Tooltip("Mist speed in normalized path-units per second.")]
+    [Tooltip("Red fill speed in normalized path-units per second.")]
     public float mistSpeed = 0.12f;
-
-    [Tooltip("Seconds the player must hold at each waypoint.")]
-    public float waypointHoldTime = 0.4f;
 
     [Tooltip("Max distance (pixels) the mouse can be from the path.")]
     public float pathTolerance = 40f;
 
-    [Tooltip("Total retries across all rounds before forced F grade.")]
-    public int maxTotalRetries = 9;
-
     [Header("Colors")]
-    public Color pathColor     = new Color(0.31f, 0.93f, 0.97f, 1f);    // #4FECF7
-    public Color pathGlowColor = new Color(0.31f, 0.93f, 0.97f, 0.25f);
-    public Color mistColor     = new Color(0.9f, 0.15f, 0.15f, 0.7f);
-    public Color cursorColor   = new Color(1f, 1f, 1f, 0.95f);
-    public Color waypointColor = new Color(0.31f, 0.93f, 0.97f, 0.5f);
+    public Color pathColor        = new Color(0.31f, 0.93f, 0.97f, 1f);    // cyan outline
+    public Color pathGlowColor    = new Color(0.31f, 0.93f, 0.97f, 0.25f);
+    public Color tracedColor      = new Color(0.2f, 0.5f, 1f, 0.85f);      // blue fill
+    public Color mistColor        = new Color(0.9f, 0.15f, 0.15f, 0.7f);   // red fill
+    public Color cursorColor      = new Color(1f, 1f, 1f, 0.95f);
+    public Color gateColor        = new Color(1f, 0.85f, 0.3f, 0.8f);      // amber gate marker
+    public Color gateClearedColor = new Color(0.3f, 1f, 0.3f, 0.6f);       // green cleared
 
     // ── Private state ─────────────────────────────────────────────
 
     private Action<char>     _onComplete;
-    private int              _totalRetries;
+    private int              _totalSuccesses;
     private RectTransform    _panelRect;
     private Camera           _uiCamera;
     private readonly List<GameObject> _pathVisuals = new();
 
+    // Fill segments for red/blue trail visualization
+    private struct FillSegInfo
+    {
+        public Image image;
+        public float t; // normalized T at midpoint of this segment
+    }
+    private readonly List<FillSegInfo> _fillSegs = new();
+
+    // Gate marker visuals
+    private readonly List<Image>    _gateMarkers = new();
+    private readonly List<TMP_Text> _gateLabels  = new();
+
     // Dynamically created components per round
     private TracingCursor _cursor;
     private TracingMist   _mist;
-    private Image         _channelFill;
+
+    // Key pool for gate randomization
+    private static readonly KeyCode[] GATE_KEY_POOL =
+    {
+        KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T,
+        KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.F,
+    };
 
     // ── Public entry point ────────────────────────────────────────
 
     /// <summary>
     /// Start the minigame. Calls <paramref name="onComplete"/> with the
-    /// quality grade char ('A'–'F') when all rounds finish.
+    /// quality grade char ('A', 'B', 'C', or 'F') when all rounds finish.
     /// </summary>
     public void Begin(Action<char> onComplete)
     {
-        _onComplete   = onComplete;
-        _totalRetries = 0;
-        _panelRect    = minigamePanel.GetComponent<RectTransform>();
+        _onComplete     = onComplete;
+        _totalSuccesses = 0;
+        _panelRect      = minigamePanel.GetComponent<RectTransform>();
 
         // Find the UI camera (null for Screen Space – Overlay canvases)
         var canvas = minigamePanel.GetComponentInParent<Canvas>();
@@ -97,27 +114,25 @@ public class TracingMinigameUI : MonoBehaviour
             // Show round transition
             yield return ShowTransition(round + 1);
 
-            // Run this round (may loop on retries)
+            // Run this round (single attempt — win or lose)
             yield return RunSingleRound(scaledPath, cumulDist, waypointTs[round], round + 1);
-
-            // Check forced F
-            if (_totalRetries >= maxTotalRetries) break;
 
             // Clean up visuals before next round
             ClearRoundVisuals();
         }
 
         // Compute grade and finish
-        char grade = ComputeGrade(_totalRetries);
+        char grade = ComputeGrade(_totalSuccesses);
 
         if (roundText != null)
             roundText.text = $"Crafting Quality: {grade}";
         if (instructionText != null)
-            instructionText.text = grade == 'A'
-                ? "Flawless ritual."
-                : grade == 'F'
-                    ? "The ritual faltered..."
-                    : "Ritual complete.";
+            instructionText.text = grade switch
+            {
+                'A' => "Flawless ritual!",
+                'F' => "The ritual faltered...",
+                _   => "Ritual complete."
+            };
 
         yield return new WaitForSeconds(1.5f);
 
@@ -131,7 +146,7 @@ public class TracingMinigameUI : MonoBehaviour
         if (roundText != null)
             roundText.text = $"Round {roundNumber} of 3";
         if (instructionText != null)
-            instructionText.text = "Trace the rune before the mist catches you.\nHold at waypoints to channel.";
+            instructionText.text = "Trace the path! Press the shown key at each gate.";
 
         yield return new WaitForSeconds(1.2f);
     }
@@ -139,69 +154,85 @@ public class TracingMinigameUI : MonoBehaviour
     private IEnumerator RunSingleRound(Vector2[] path, float[] cumulDist,
         float[] waypointTs, int roundNumber)
     {
-        // Build visuals
-        BuildPathVisuals(path);
-        BuildWaypointVisuals(path, cumulDist, waypointTs);
-        CreateCursorAndMist(path, cumulDist, waypointTs);
+        // Generate random gate keys and build all visuals
+        KeyCode[] keys = GenerateGateKeys(waypointTs.Length);
 
+        BuildPathVisuals(path);
+        BuildFillSegments(path, cumulDist);
+        BuildGateVisuals(path, cumulDist, waypointTs, keys);
+        CreateCursorAndMist(path, cumulDist, waypointTs, keys);
+
+        // Brief countdown
+        if (instructionText != null)
+            instructionText.text = "Get ready...";
+        yield return new WaitForSeconds(0.8f);
+
+        if (instructionText != null)
+            instructionText.text = "Trace!";
+
+        _cursor.SetActive(true);
+        _mist.SetActive(true);
+
+        int lastClearedGate = -1;
+
+        // Run until win or lose — no retries
+        bool won = false;
         while (true)
         {
-            // Reset for this attempt
-            _cursor.Reset();
-            _mist.Reset();
+            // Update red/blue fill visualization
+            UpdateFillColors(_cursor.CursorT, _mist.MistT);
 
-            // Brief countdown
-            if (instructionText != null)
-                instructionText.text = "Get ready...";
-            yield return new WaitForSeconds(0.8f);
-
-            if (instructionText != null)
-                instructionText.text = "Trace!";
-
-            _cursor.SetActive(true);
-            _mist.SetActive(true);
-
-            // Run until success or failure
-            bool caught = false;
-            while (!_cursor.ReachedEnd)
+            // Update gate visuals as cursor clears them
+            int nextGate = _cursor.CurrentGateIndex;
+            while (lastClearedGate < nextGate - 1)
             {
-                if (_mist.CaughtPlayer(_cursor.CursorT))
-                {
-                    caught = true;
-                    break;
-                }
-                yield return null;
+                lastClearedGate++;
+                if (lastClearedGate < _gateMarkers.Count)
+                    _gateMarkers[lastClearedGate].color = gateClearedColor;
             }
 
-            _cursor.SetActive(false);
-            _mist.SetActive(false);
-
-            if (!caught)
+            // Pulse the active gate when waiting for key press
+            if (_cursor.IsWaitingForKey && _cursor.CurrentGateIndex < _gateMarkers.Count)
             {
-                // Round succeeded
-                if (instructionText != null)
-                    instructionText.text = "Rune sealed!";
-                yield return new WaitForSeconds(0.6f);
+                float pulse = 0.6f + 0.4f * Mathf.Sin(Time.time * 6f);
+                var gc = gateColor;
+                gc.a = pulse;
+                _gateMarkers[_cursor.CurrentGateIndex].color = gc;
+            }
+
+            // Win: blue reached the end
+            if (_cursor.ReachedEnd)
+            {
+                won = true;
                 break;
             }
 
-            // Failed — retry
-            _totalRetries++;
-
-            if (_totalRetries >= maxTotalRetries)
-            {
-                if (instructionText != null)
-                    instructionText.text = "The ritual collapses...";
-                yield return new WaitForSeconds(1f);
+            // Lose: red filled the entire trail
+            if (_mist.ReachedEnd)
                 break;
-            }
 
-            // Flash red feedback
-            yield return FlashFeedback();
-
-            if (roundText != null)
-                roundText.text = $"Round {roundNumber} of 3  (retry)";
+            yield return null;
         }
+
+        // Final fill update
+        UpdateFillColors(_cursor.CursorT, _mist.MistT);
+
+        _cursor.SetActive(false);
+        _mist.SetActive(false);
+
+        if (won)
+        {
+            _totalSuccesses++;
+            if (instructionText != null)
+                instructionText.text = "Rune sealed!";
+        }
+        else
+        {
+            if (instructionText != null)
+                instructionText.text = "The mist consumed the path...";
+        }
+
+        yield return new WaitForSeconds(1f);
     }
 
     // ── Path visual construction ──────────────────────────────────
@@ -242,50 +273,98 @@ public class TracingMinigameUI : MonoBehaviour
         }
     }
 
-    private void BuildWaypointVisuals(Vector2[] path, float[] cumulDist, float[] waypointTs)
+    /// <summary>
+    /// Build overlay segments that render red/blue fill on top of the base path.
+    /// Each fill segment maps to a path segment and stores its normalized T position.
+    /// </summary>
+    private void BuildFillSegments(Vector2[] path, float[] cumulDist)
     {
-        foreach (float wt in waypointTs)
-        {
-            Vector2 pos = RunePathData.SampleAt(path, cumulDist, wt);
+        float totalLen = RunePathData.PathLength(cumulDist);
+        if (totalLen < 0.001f) return;
 
-            var go = new GameObject("Waypoint", typeof(RectTransform), typeof(Image));
+        for (int i = 0; i < path.Length - 1; i++)
+        {
+            Vector2 a = path[i];
+            Vector2 b = path[i + 1];
+            Vector2 diff = b - a;
+            float len = diff.magnitude;
+            if (len < 0.5f) continue;
+
+            var go = new GameObject("FillSeg", typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(minigamePanel.transform, false);
+            _pathVisuals.Add(go);
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 0.5f);
+            rt.anchoredPosition = a;
+            rt.sizeDelta = new Vector2(len, 10f); // slightly wider than base for visibility
+
+            float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+            rt.localRotation = Quaternion.Euler(0, 0, angle);
+
+            var img = go.GetComponent<Image>();
+            img.color = Color.clear; // start invisible
+            img.raycastTarget = false;
+
+            float midDist = (cumulDist[i] + cumulDist[i + 1]) * 0.5f;
+            _fillSegs.Add(new FillSegInfo { image = img, t = midDist / totalLen });
+        }
+    }
+
+    /// <summary>
+    /// Build gate markers with TMP key labels at each waypoint position.
+    /// </summary>
+    private void BuildGateVisuals(Vector2[] path, float[] cumulDist,
+        float[] waypointTs, KeyCode[] keys)
+    {
+        for (int i = 0; i < waypointTs.Length; i++)
+        {
+            Vector2 pos = RunePathData.SampleAt(path, cumulDist, waypointTs[i]);
+
+            // Gate marker circle
+            var go = new GameObject("Gate", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(minigamePanel.transform, false);
             _pathVisuals.Add(go);
 
             var rt = go.GetComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(24f, 24f);
+            rt.sizeDelta = new Vector2(36f, 36f);
 
             var img = go.GetComponent<Image>();
-            img.color = waypointColor;
+            img.color = gateColor;
             img.raycastTarget = false;
+            _gateMarkers.Add(img);
+
+            // Key label (child of gate marker)
+            var labelGo = new GameObject("KeyLabel", typeof(RectTransform));
+            labelGo.transform.SetParent(go.transform, false);
+            _pathVisuals.Add(labelGo);
+
+            var labelRt = labelGo.GetComponent<RectTransform>();
+            labelRt.anchorMin = Vector2.zero;
+            labelRt.anchorMax = Vector2.one;
+            labelRt.offsetMin = Vector2.zero;
+            labelRt.offsetMax = Vector2.zero;
+
+            var label = labelGo.AddComponent<TextMeshProUGUI>();
+            label.text = keys[i].ToString();
+            label.fontSize = 18f;
+            label.alignment = TextAlignmentOptions.Center;
+            label.color = Color.white;
+            label.raycastTarget = false;
+            _gateLabels.Add(label);
         }
     }
 
     // ── Dynamic cursor + mist creation ────────────────────────────
 
-    private void CreateCursorAndMist(Vector2[] path, float[] cumulDist, float[] waypointTs)
+    private void CreateCursorAndMist(Vector2[] path, float[] cumulDist,
+        float[] waypointTs, KeyCode[] keys)
     {
-        // Channel fill indicator
-        var fillGo = new GameObject("ChannelFill", typeof(RectTransform), typeof(Image));
-        fillGo.transform.SetParent(minigamePanel.transform, false);
-        _pathVisuals.Add(fillGo);
-
-        var fillRt = fillGo.GetComponent<RectTransform>();
-        fillRt.anchorMin = fillRt.anchorMax = fillRt.pivot = new Vector2(0.5f, 0.5f);
-        fillRt.sizeDelta = new Vector2(36f, 36f);
-
-        _channelFill = fillGo.GetComponent<Image>();
-        _channelFill.color = waypointColor;
-        _channelFill.type = Image.Type.Filled;
-        _channelFill.fillMethod = Image.FillMethod.Radial360;
-        _channelFill.fillAmount = 0f;
-        _channelFill.raycastTarget = false;
-        fillGo.SetActive(false);
-
-        // Cursor
-        var cursorGo = new GameObject("Cursor", typeof(RectTransform), typeof(Image), typeof(TracingCursor));
+        // Cursor (visible dot on the path)
+        var cursorGo = new GameObject("Cursor", typeof(RectTransform), typeof(Image),
+            typeof(TracingCursor));
         cursorGo.transform.SetParent(minigamePanel.transform, false);
         _pathVisuals.Add(cursorGo);
 
@@ -298,24 +377,35 @@ public class TracingMinigameUI : MonoBehaviour
         cursorImg.raycastTarget = false;
 
         _cursor = cursorGo.GetComponent<TracingCursor>();
-        _cursor.Initialize(path, cumulDist, pathTolerance, waypointHoldTime,
-            waypointTs, _panelRect, _uiCamera, _channelFill);
+        _cursor.Initialize(path, cumulDist, pathTolerance, waypointTs, keys,
+            _panelRect, _uiCamera);
 
-        // Mist
-        var mistGo = new GameObject("Mist", typeof(RectTransform), typeof(Image), typeof(TracingMist));
+        // Mist (timer only — red fill is rendered via fill segments, no visible dot)
+        var mistGo = new GameObject("Mist", typeof(RectTransform), typeof(TracingMist));
         mistGo.transform.SetParent(minigamePanel.transform, false);
         _pathVisuals.Add(mistGo);
 
-        var mistRt = mistGo.GetComponent<RectTransform>();
-        mistRt.anchorMin = mistRt.anchorMax = mistRt.pivot = new Vector2(0.5f, 0.5f);
-        mistRt.sizeDelta = new Vector2(60f, 60f);
-
-        var mistImg = mistGo.GetComponent<Image>();
-        mistImg.color = mistColor;
-        mistImg.raycastTarget = false;
-
         _mist = mistGo.GetComponent<TracingMist>();
-        _mist.Initialize(path, cumulDist, mistSpeed);
+        _mist.Initialize(mistSpeed);
+    }
+
+    // ── Fill visualization ────────────────────────────────────────
+
+    /// <summary>
+    /// Update each fill segment's color based on cursor (blue) and mist (red) progress.
+    /// Blue takes priority — traced path stays blue even if red has also reached it.
+    /// </summary>
+    private void UpdateFillColors(float cursorT, float mistT)
+    {
+        foreach (var seg in _fillSegs)
+        {
+            if (seg.t <= cursorT)
+                seg.image.color = tracedColor;   // player traced — blue
+            else if (seg.t <= mistT)
+                seg.image.color = mistColor;     // mist reached — red
+            else
+                seg.image.color = Color.clear;   // neither reached yet
+        }
     }
 
     // ── Cleanup ───────────────────────────────────────────────────
@@ -327,9 +417,11 @@ public class TracingMinigameUI : MonoBehaviour
             if (go != null) Destroy(go);
         }
         _pathVisuals.Clear();
+        _fillSegs.Clear();
+        _gateMarkers.Clear();
+        _gateLabels.Clear();
         _cursor = null;
         _mist   = null;
-        _channelFill = null;
     }
 
     // ── Helpers ───────────────────────────────────────────────────
@@ -357,36 +449,26 @@ public class TracingMinigameUI : MonoBehaviour
         return scaled;
     }
 
-    private static char ComputeGrade(int totalRetries)
+    /// <summary>
+    /// Map cumulative round successes to a quality grade.
+    /// 3 wins = A (1.0x), 2 = B (0.85x), 1 = C (0.7x), 0 = F (0.4x).
+    /// </summary>
+    private static char ComputeGrade(int successes)
     {
-        return totalRetries switch
+        return successes switch
         {
-            0 => 'A',
-            1 => 'B',
-            2 => 'C',
-            3 => 'D',
+            3 => 'A',
+            2 => 'B',
+            1 => 'C',
             _ => 'F'
         };
     }
 
-    private IEnumerator FlashFeedback()
+    private static KeyCode[] GenerateGateKeys(int count)
     {
-        // Brief red flash using a temporary overlay
-        var flashGo = new GameObject("Flash", typeof(RectTransform), typeof(Image));
-        flashGo.transform.SetParent(minigamePanel.transform, false);
-
-        var rt = flashGo.GetComponent<RectTransform>();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-
-        var img = flashGo.GetComponent<Image>();
-        img.color = new Color(1f, 0f, 0f, 0.3f);
-        img.raycastTarget = false;
-
-        yield return new WaitForSeconds(0.25f);
-        Destroy(flashGo);
-        yield return new WaitForSeconds(0.15f);
+        var keys = new KeyCode[count];
+        for (int i = 0; i < count; i++)
+            keys[i] = GATE_KEY_POOL[Random.Range(0, GATE_KEY_POOL.Length)];
+        return keys;
     }
 }

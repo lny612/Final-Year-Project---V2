@@ -1,72 +1,64 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
-/// Player cursor that follows the mouse along the rune path.
-/// Handles forward-only movement, path tolerance, and waypoint channeling.
+/// Player cursor that follows the mouse along the trail path.
+/// Forward-only movement with keyboard-key gates at waypoints.
+/// The cursor cannot advance past an uncleared gate — the player must press
+/// the displayed key to proceed. Blue fill progress is driven by CursorT.
 /// </summary>
 [DisallowMultipleComponent]
 public class TracingCursor : MonoBehaviour
 {
     // ── Runtime state (set via Initialize) ─────────────────────────
 
-    private Vector2[]    _path;
-    private float[]      _cumulDist;
-    private float        _toleranceSq;
-    private float        _waypointHoldTime;
-    private float[]      _waypointTs;
+    private Vector2[]     _path;
+    private float[]       _cumulDist;
+    private float         _toleranceSq;
+    private float[]       _waypointTs;
+    private KeyCode[]     _waypointKeys;
     private RectTransform _panelRect;
-    private Camera       _uiCamera;
-    private bool         _active;
+    private Camera        _uiCamera;
+    private bool          _active;
 
-    // Channeling
-    private int   _currentWaypointIdx = -1;   // index into _waypointTs, -1 = none
-    private float _channelProgress;            // 0 → _waypointHoldTime
+    // Gate tracking
+    private int   _nextGateIndex;   // index into _waypointTs of next uncleared gate
+    private float _nextGateT;       // T of next gate, or 1.0 if all cleared
 
-    // Visual feedback
-    private Image _channelFill;                // radial fill image for waypoint hold
+    /// <summary>Normalized progress of the cursor (0 = start, 1 = end).</summary>
+    public float CursorT         { get; private set; }
+    public bool  ReachedEnd      { get; private set; }
+    public bool  IsWaitingForKey { get; private set; }
 
-    public float CursorT       { get; private set; }
-    public bool  ReachedEnd    { get; private set; }
-    public bool  IsChanneling  { get; private set; }
+    /// <summary>Index of the next uncleared gate (equals waypoint count when all cleared).</summary>
+    public int   CurrentGateIndex => _nextGateIndex;
 
     // ── Public API ────────────────────────────────────────────────
 
     public void Initialize(Vector2[] path, float[] cumulDist,
-        float tolerance, float waypointHoldTime, float[] waypointTs,
-        RectTransform panelRect, Camera uiCamera, Image channelFillImage)
+        float tolerance, float[] waypointTs, KeyCode[] waypointKeys,
+        RectTransform panelRect, Camera uiCamera)
     {
-        _path             = path;
-        _cumulDist        = cumulDist;
-        _toleranceSq      = tolerance * tolerance;
-        _waypointHoldTime = waypointHoldTime;
-        _waypointTs       = waypointTs;
-        _panelRect        = panelRect;
-        _uiCamera         = uiCamera;
-        _channelFill      = channelFillImage;
+        _path         = path;
+        _cumulDist    = cumulDist;
+        _toleranceSq  = tolerance * tolerance;
+        _waypointTs   = waypointTs;
+        _waypointKeys = waypointKeys;
+        _panelRect    = panelRect;
+        _uiCamera     = uiCamera;
         Reset();
     }
 
-    public void SetActive(bool active)
-    {
-        _active = active;
-    }
+    public void SetActive(bool active) => _active = active;
 
     public void Reset()
     {
-        CursorT             = 0f;
-        ReachedEnd          = false;
-        IsChanneling        = false;
-        _currentWaypointIdx = -1;
-        _channelProgress    = 0f;
-        _active             = false;
-
-        if (_channelFill != null)
-        {
-            _channelFill.fillAmount = 0f;
-            _channelFill.gameObject.SetActive(false);
-        }
-
+        CursorT         = 0f;
+        ReachedEnd      = false;
+        IsWaitingForKey = false;
+        _nextGateIndex  = 0;
+        _nextGateT      = (_waypointTs != null && _waypointTs.Length > 0)
+                          ? _waypointTs[0] : 1f;
+        _active         = false;
         UpdatePosition();
     }
 
@@ -82,83 +74,43 @@ public class TracingCursor : MonoBehaviour
                 _panelRect, Input.mousePosition, _uiCamera, out localMouse))
             return;
 
-        // ── Channeling state ──────────────────────────────────────
-        if (IsChanneling)
+        // ── Waiting at a gate — check for correct key press ──────
+        if (IsWaitingForKey)
         {
-            if (Input.GetMouseButton(0))
+            if (_waypointKeys != null &&
+                _nextGateIndex < _waypointKeys.Length &&
+                Input.GetKeyDown(_waypointKeys[_nextGateIndex]))
             {
-                _channelProgress += Time.deltaTime;
-                if (_channelFill != null)
-                    _channelFill.fillAmount = _channelProgress / _waypointHoldTime;
-
-                if (_channelProgress >= _waypointHoldTime)
-                {
-                    // Waypoint cleared
-                    IsChanneling = false;
-                    _currentWaypointIdx = -1;
-                    _channelProgress = 0f;
-                    if (_channelFill != null)
-                    {
-                        _channelFill.fillAmount = 0f;
-                        _channelFill.gameObject.SetActive(false);
-                    }
-                }
+                // Gate cleared — advance to next gate
+                IsWaitingForKey = false;
+                _nextGateIndex++;
+                _nextGateT = (_waypointTs != null && _nextGateIndex < _waypointTs.Length)
+                             ? _waypointTs[_nextGateIndex] : 1f;
             }
-            else
-            {
-                // Released early — reset channel progress
-                _channelProgress = 0f;
-                if (_channelFill != null)
-                    _channelFill.fillAmount = 0f;
-            }
-
-            // Don't advance cursor while channeling
-            return;
+            return; // Don't advance cursor while waiting for key
         }
 
-        // ── Normal movement ───────────────────────────────────────
+        // ── Normal movement ──────────────────────────────────────
         float newT = RunePathData.ClosestTAhead(
             _path, _cumulDist, localMouse, CursorT, _toleranceSq);
 
-        if (newT < 0f)
-        {
-            // Mouse too far from path — don't advance
-            return;
-        }
+        if (newT < 0f) return; // Mouse too far from path
 
-        // Forward-only
-        newT = Mathf.Max(CursorT, newT);
+        newT = Mathf.Max(CursorT, newT); // Forward-only
+
+        // Cap at next uncleared gate (can't skip gates)
+        if (_waypointTs != null && _nextGateIndex < _waypointTs.Length)
+            newT = Mathf.Min(newT, _nextGateT);
+
         CursorT = newT;
 
-        // Check if entering a waypoint zone
-        if (_waypointTs != null)
+        // Snap to gate and enter waiting state when close enough
+        if (_waypointTs != null &&
+            _nextGateIndex < _waypointTs.Length &&
+            CursorT >= _nextGateT - 0.015f)
         {
-            for (int i = 0; i < _waypointTs.Length; i++)
-            {
-                float wpT = _waypointTs[i];
-                // Only trigger waypoints ahead of current position, within a small zone
-                if (CursorT >= wpT - 0.02f && CursorT <= wpT + 0.02f)
-                {
-                    // Check if we already passed this waypoint
-                    if (i <= _currentWaypointIdx) continue;
-
-                    // Enter channeling
-                    IsChanneling = true;
-                    _currentWaypointIdx = i;
-                    _channelProgress = 0f;
-                    CursorT = wpT; // snap to waypoint
-
-                    if (_channelFill != null)
-                    {
-                        _channelFill.gameObject.SetActive(true);
-                        _channelFill.fillAmount = 0f;
-                        // Position fill indicator at waypoint
-                        Vector2 wpPos = RunePathData.SampleAt(_path, _cumulDist, wpT);
-                        ((RectTransform)_channelFill.transform).anchoredPosition = wpPos;
-                    }
-                    break;
-                }
-            }
+            CursorT = _nextGateT;
+            IsWaitingForKey = true;
         }
 
         // Check completion

@@ -223,27 +223,31 @@ Ashwood        | 75g  | Resilient, enduring, performs under sustained pressure
 
 Inspired by Hogwarts Legacy's spell-learning mechanic. Performed 3 times in succession (binding the core, shaping the wood, sealing the enchantment).
 
-**Mechanic:**
-- A glowing rune path appears on screen
-- A red mist chases from behind at a fixed speed
-- Player guides cursor along the path to reach the end before the mist catches them
-- Waypoints along the path require click/hold to continue
-- If mist catches player: attempt fails, restarts that round
+**Setup:**
+- A glowing rune trail appears with a start point and end point
+- Gate markers sit on the trail, each displaying a randomized keyboard key
+- A red fill begins advancing from the start as soon as the round begins, creating a "chased" feeling — if red fills the entire trail before the player finishes, the round is lost
+
+**How to play:**
+- The player traces the trail with the mouse. If the cursor stays within the tolerance zone (+N pixels from the path), the correctly traced portion fills blue
+- When the cursor reaches a gate marker, the player must press the shown keyboard key to proceed — the gate blocks further progress until the correct key is pressed
+- Drawing past a gate without pressing its key is not allowed — the blue fill does not advance beyond an uncleared gate
+- **Win:** Blue fill reaches the end before red fill reaches the end
+- **Lose:** Red fill reaches the end of the trail first
 
 **Three rounds:**
-Each round may use a different rune shape. Difficulty (path complexity and mist speed) stays consistent. Brief thematic transition between rounds.
+Each round uses a different rune shape. Difficulty (path complexity and fill speed) stays consistent. Brief thematic transition between rounds. No retries — each round is a single win-or-lose attempt.
 
 **Quality grading:**
 
-| Grade | Condition |
-|---|---|
-| A | All 3 rounds completed on first attempt |
-| B | One round required a retry |
-| C | Two rounds required retries |
-| D | Three rounds required retries |
-| F | Player failed to complete within a maximum attempt limit |
+| Grade | Condition | Reward multiplier |
+|---|---|---|
+| A | All 3 rounds won | 1.0× |
+| B | 2 rounds won | 0.85× |
+| C | 1 round won | 0.7× |
+| F | 0 rounds won | 0.4× |
 
-Grade A should feel earned: achievable but not trivial.
+Each win adds +1 to the cumulative success count. Grade A should feel earned: achievable but not trivial.
 
 ---
 
@@ -288,13 +292,12 @@ OpenAI API compares wand against customer dossier and returns:
 
 ### Quality Grade Modifier (scales reward, not matchScore)
 
-| Grade | Reward multiplier |
-|---|---|
-| A | 1.0× (full reward) |
-| B | 0.85× |
-| C | 0.7× |
-| D | 0.55× |
-| F | 0.4× |
+| Grade | Condition | Reward multiplier |
+|---|---|---|
+| A | 3/3 rounds won | 1.0× (full reward) |
+| B | 2/3 rounds won | 0.85× |
+| C | 1/3 rounds won | 0.7× |
+| F | 0/3 rounds won | 0.4× |
 
 ### Reward Calculation
 

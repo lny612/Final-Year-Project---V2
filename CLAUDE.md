@@ -16,17 +16,21 @@ CustomerGeneratorTest → MaterialGeneratorTest → CraftingScene → Evaluation
 
 1. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint
 2. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood
-3. **CraftingScene** — Player assigns materials to slots, GPT-4o generates wand description, ComfyUI generates wand image
+3. **CraftingScene** — Player assigns materials to 3 slots (2 core + 1 wood), GPT-4o generates wand description, ComfyUI generates wand image; tracing minigame runs concurrently with API calls
 4. **EvaluationScene** — GPT-4o scores the wand match (0–100), awards gold + reputation, then loops back
 
-Additional scenes: `ComfyUITest` (standalone image generation test), `SampleScene` (unused).
+Additional scenes: `ComfyUITest` (standalone image generation test), `MinigameTest` (standalone tracing minigame test via `MinigameTestRunner`), `SampleScene` (unused).
+
+### Round Reset (`GameManager.StartNextRound`)
+
+Each round clears `currentCustomer`, `availableMaterials`, `currentWandResult`, and `craftingQualityGrade` (reset to `'A'`). **Persisted across rounds:** `inventory`, `playerGold` (starts at 500), `playerReputation`.
 
 ### Key Patterns
 
 - **GameManager** is a `DontDestroyOnLoad` singleton holding all cross-scene state (customer, materials, inventory, gold, reputation, wand result, craftingQualityGrade). Access via `GameManager.Instance`.
 - Each scene has its own manager script (CustomerGenerator, MaterialGenerator, CraftingManager, EvaluationManager) that owns its UI references and API call coroutines
 - All OpenAI calls use `UnityWebRequest` POST to chat completions, expecting JSON-only responses parsed with `Newtonsoft.Json.Linq`
-- ComfyUI integration: POST workflow JSON to `/prompt` → poll `/history/{id}` every 1.5s (60s timeout) → GET `/view` to download image as Texture2D
+- ComfyUI integration: POST workflow JSON to `/prompt` → poll `/history/{id}` every 1.5s (60s timeout) → GET `/view` to download image as Texture2D. All three image-gen scripts have a `FindNodeByClass` fallback that resolves nodes by `class_type` if the configured node ID doesn't match the workflow (guards against stale Inspector overrides).
 - **Duplicated helpers** — `LoadApiKey`, `PostOpenAI`, and `StripCodeFences` are copy-pasted in MaterialGenerator, CraftingManager, and EvaluationManager. CustomerGenerator has the same logic inlined differently. When modifying API call helpers, update all four scene manager files.
 - **Duplicated prompts** — `MaterialGenerator.cs` contains a full copy of the customer generation prompts from `CustomerGenerator.cs` (noted in a code comment: "kept here so this script is self-contained"). If you change customer generation prompts, update both files.
 
@@ -40,12 +44,14 @@ Additional scenes: `ComfyUITest` (standalone image generation test), `SampleScen
 
 The crafting ritual spans 4 tightly coupled scripts:
 
-- `TracingMinigameUI` — orchestrator: runs 3 rounds, builds all path/waypoint/cursor visuals procedurally as UI GameObjects, computes final grade (A–F based on total retries)
-- `TracingCursor` — player input: follows mouse along path with forward-only movement, handles waypoint hold-to-channel mechanic
-- `TracingMist` — chasing threat: advances along path at fixed speed, round fails if mist catches cursor
-- `RunePathData` — static data: normalized control points for 5 rune shapes, Catmull-Rom interpolation, cumulative distance math
+- `TracingMinigameUI` — orchestrator: runs 3 rounds, builds path/fill-segment/gate visuals procedurally as UI GameObjects, updates red/blue trail fill each frame, tracks successes, computes final grade (3 wins→A, 2→B, 1→C, 0→F)
+- `TracingCursor` — player input: follows mouse along path with forward-only movement, blocked at gate markers until player presses the displayed keyboard key (cannot draw past an uncleared gate)
+- `TracingMist` — timer: advances MistT at constant speed; when MistT reaches 1.0 the round is lost. No visual dot — the red fill is rendered by TracingMinigameUI's fill segments
+- `RunePathData` — static data: normalized control points for 6 rune shapes, Catmull-Rom interpolation, cumulative distance math
 
-All visuals are procedural UI (`Image` components on dynamically created `GameObject`s) — no prefabs, no scene references beyond the minigame panel.
+**Visual mechanic:** The trail fills red from the start (time-based, via TracingMist speed) and blue from the start (player-traced, via TracingCursor progress). Blue overrides red where the player has traced. Gate markers show randomized keyboard keys (from pool Q/W/E/R/T/A/S/D/F). Each round is a single attempt — no retries.
+
+All visuals are procedural UI (`Image` + `TextMeshProUGUI` components on dynamically created `GameObject`s) — no prefabs, no scene references beyond the minigame panel. `MinigameTestRunner` is a lightweight harness that auto-starts the minigame on scene load for isolated testing.
 
 ### Parallel Execution in CraftingScene
 
@@ -55,10 +61,12 @@ All visuals are procedural UI (`Image` components on dynamically created `GameOb
 
 Both set completion flags (`_pipelineDone`, `_minigameDone`); `TryShowResult()` waits for both before revealing the result panel. This means the player plays the minigame while the API calls run in the background.
 
+If the minigame reference is null (not yet wired in Editor), the minigame is skipped and `_minigameDone` is set immediately with grade `'A'`.
+
 ### Data Classes
 
 - `CustomerOrder` — customerName, schoolOfMagic, profession, personality, request, trueGoal, constraint
-- `MaterialData` — dual-type (core vs wood); cores have elementalAffinity/special, woods have personalityMatch
+- `MaterialData` — dual-type (core vs wood); cores have elementalAffinity/special, woods have personalityMatch; `generatedImage` (Texture2D, `[NonSerialized]`) carries the ComfyUI texture across scene transitions
 - `WandResult` — wandName, description, attributes[], imagePrompt, wandImage (Texture2D)
 
 ## Scripts Location
@@ -112,14 +120,14 @@ See `.claude/agents/` for full agent definitions and file ownership maps.
 
 ## GDD vs Current Implementation
 
-The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round rune ritual, quality grading A–F, reward multiplier) is fully coded but **needs manual Editor setup** — see `TODO-EDITOR` comment at `CraftingManager.cs:59` for MinigamePanel wiring instructions.
+The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round path-tracing with red/blue fill race and keyboard-key gates, quality grading A/B/C/F based on round wins, reward multiplier) is fully coded but **needs manual Editor setup** — see `TODO-EDITOR` comment at `CraftingManager.cs:59` for MinigamePanel wiring instructions.
 
 ### Reward Formula (in EvaluationManager)
 
 ```
 baseGold   = 150 * (matchScore / 100)
 baseRep    = matchScore >= 40 ? 20 * (matchScore / 100) : -10
-final      = base * qualityMultiplier   // A=1.0, B=0.85, C=0.7, D=0.55, F=0.4
+final      = base * qualityMultiplier   // A=1.0, B=0.85, C=0.7, F=0.4
 ```
 
 ## References

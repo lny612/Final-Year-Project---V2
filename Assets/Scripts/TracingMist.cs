@@ -1,76 +1,41 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
-/// Red mist that chases the player along the rune path at constant speed.
-/// Attach to a UI Image child inside the minigame overlay.
+/// Timer that drives the red fill advancing along the trail.
+/// MistT (0–1) represents how far the red fill has progressed from start to end.
+/// When MistT reaches 1.0, the round is lost. The actual red fill visualization
+/// is rendered by TracingMinigameUI via fill segments.
 /// </summary>
 [DisallowMultipleComponent]
 public class TracingMist : MonoBehaviour
 {
-    // ── Runtime state (set via Initialize) ─────────────────────────
+    private float _speed;
+    private bool  _active;
 
-    private Vector2[] _path;
-    private float[]   _cumulDist;
-    private float     _speed;       // normalized units per second
-    private bool      _active;
-    private Image     _image;
-
+    /// <summary>Normalized progress of the red fill (0 = start, 1 = end).</summary>
     public float MistT { get; private set; }
 
-    // ── Public API ────────────────────────────────────────────────
+    /// <summary>True when the red fill has reached the end of the trail.</summary>
+    public bool ReachedEnd => MistT >= 1f;
 
-    public void Initialize(Vector2[] path, float[] cumulDist, float speed)
+    public void Initialize(float speed)
     {
-        _path      = path;
-        _cumulDist = cumulDist;
-        _speed     = speed;
-        _image     = GetComponent<Image>();
+        _speed = speed;
         Reset();
     }
 
-    public void SetActive(bool active)
-    {
-        _active = active;
-    }
+    public void SetActive(bool active) => _active = active;
 
     public void Reset()
     {
         MistT   = 0f;
         _active = false;
-        UpdatePosition();
     }
-
-    public bool CaughtPlayer(float cursorT)
-    {
-        return MistT >= cursorT;
-    }
-
-    // ── Update ────────────────────────────────────────────────────
 
     private void Update()
     {
-        if (!_active || _path == null) return;
-
+        if (!_active) return;
         MistT += _speed * Time.deltaTime;
         MistT = Mathf.Clamp01(MistT);
-
-        UpdatePosition();
-
-        // Pulsing alpha
-        if (_image != null)
-        {
-            float alpha = 0.6f + 0.15f * Mathf.Sin(Time.time * 3f);
-            var c = _image.color;
-            c.a = alpha;
-            _image.color = c;
-        }
-    }
-
-    private void UpdatePosition()
-    {
-        if (_path == null || _cumulDist == null) return;
-        Vector2 pos = RunePathData.SampleAt(_path, _cumulDist, MistT);
-        ((RectTransform)transform).anchoredPosition = pos;
     }
 }

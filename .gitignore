@@ -73,3 +73,14 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Sensitive config (API keys)
+Assets/StreamingAssets/config.json
+Assets/StreamingAssets/config.json.meta
+
+# Environment files
+.env
+.env.*
+
+# Claude Code local settings (contains machine-specific paths)
+.claude/settings.local.json
