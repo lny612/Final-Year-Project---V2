@@ -224,8 +224,8 @@ Ashwood        | 75g  | Resilient, enduring, performs under sustained pressure
 Inspired by Hogwarts Legacy's spell-learning mechanic. Performed 3 times in succession (binding the core, shaping the wood, sealing the enchantment).
 
 **Setup:**
-- A glowing rune trail appears with a start point and end point
-- Gate markers sit on the trail, each displaying a randomized keyboard key
+- A glowing rune trail appears with a start point and end point. Each trail is drawn from an orchestral conductor's beat pattern (4/4, 3/4, 6/8, 5/4, 2/4, or a freeform expressive cue) so tracing feels like conducting the magic with your wand
+- Gate markers sit on the trail, each displaying a randomized keyboard key. 5 gates per round, placed at the baton's ictus points (strong articulation instants where the conductor reverses direction)
 - A red fill begins advancing from the start as soon as the round begins, creating a "chased" feeling — if red fills the entire trail before the player finishes, the round is lost
 
 **How to play:**
@@ -236,7 +236,7 @@ Inspired by Hogwarts Legacy's spell-learning mechanic. Performed 3 times in succ
 - **Lose:** Red fill reaches the end of the trail first
 
 **Three rounds:**
-Each round uses a different rune shape. Difficulty (path complexity and fill speed) stays consistent. Brief thematic transition between rounds. No retries — each round is a single win-or-lose attempt.
+Each round uses a different conducting pattern (3 of 6 picked uniquely per session). 5 gates land at the ictus points of each pattern, so the player presses 15 keys across a session. Fill speed stays constant at 0.12 normalized-units/sec (≈8.3s per round). Brief thematic transition between rounds. No retries — each round is a single win-or-lose attempt.
 
 **Quality grading:**
 

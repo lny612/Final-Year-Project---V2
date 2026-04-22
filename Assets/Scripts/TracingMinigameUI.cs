@@ -159,8 +159,11 @@ public class TracingMinigameUI : MonoBehaviour
 
         BuildPathVisuals(path);
         BuildFillSegments(path, cumulDist);
-        BuildGateVisuals(path, cumulDist, waypointTs, keys);
+        // Cursor is created BEFORE gate visuals so gate markers (and their
+        // key labels) render on top of the cursor. Otherwise, when the
+        // cursor parks on an active gate the white dot hides the key letter.
         CreateCursorAndMist(path, cumulDist, waypointTs, keys);
+        BuildGateVisuals(path, cumulDist, waypointTs, keys);
 
         // Brief countdown
         if (instructionText != null)
@@ -260,7 +263,8 @@ public class TracingMinigameUI : MonoBehaviour
             _pathVisuals.Add(go);
 
             var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 0.5f);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0f, 0.5f);
             rt.anchoredPosition = a;
             rt.sizeDelta = new Vector2(len, thickness);
 
@@ -295,7 +299,8 @@ public class TracingMinigameUI : MonoBehaviour
             _pathVisuals.Add(go);
 
             var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0f, 0.5f);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0f, 0.5f);
             rt.anchoredPosition = a;
             rt.sizeDelta = new Vector2(len, 10f); // slightly wider than base for visibility
 
@@ -349,9 +354,10 @@ public class TracingMinigameUI : MonoBehaviour
 
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             label.text = keys[i].ToString();
-            label.fontSize = 18f;
+            label.fontSize = 28f;
+            label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
-            label.color = Color.white;
+            label.color = Color.black;
             label.raycastTarget = false;
             _gateLabels.Add(label);
         }

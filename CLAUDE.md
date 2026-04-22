@@ -49,7 +49,7 @@ The crafting ritual spans 4 tightly coupled scripts:
 - `TracingMist` — timer: advances MistT at constant speed; when MistT reaches 1.0 the round is lost. No visual dot — the red fill is rendered by TracingMinigameUI's fill segments
 - `RunePathData` — static data: normalized control points for 6 rune shapes, Catmull-Rom interpolation, cumulative distance math
 
-**Visual mechanic:** The trail fills red from the start (time-based, via TracingMist speed) and blue from the start (player-traced, via TracingCursor progress). Blue overrides red where the player has traced. Gate markers show randomized keyboard keys (from pool Q/W/E/R/T/A/S/D/F). Each round is a single attempt — no retries.
+**Visual mechanic:** The trail fills red from the start (time-based, via TracingMist speed) and blue from the start (player-traced, via TracingCursor progress). Blue overrides red where the player has traced. Gate markers show randomized keyboard keys (from pool Q/W/E/R/T/A/S/D/F). Each round is a single attempt — no retries. Rune shapes are based on orchestral conductor beat patterns (Maestoso 4/4, Valse 3/4, Compound 6/8, Take Five 5/4, Quick March 2/4, plus a freeform Fermata Crescendo); each round has 5 gates placed at the baton's ictus points.
 
 All visuals are procedural UI (`Image` + `TextMeshProUGUI` components on dynamically created `GameObject`s) — no prefabs, no scene references beyond the minigame panel. `MinigameTestRunner` is a lightweight harness that auto-starts the minigame on scene load for isolated testing.
 
@@ -120,7 +120,7 @@ See `.claude/agents/` for full agent definitions and file ownership maps.
 
 ## GDD vs Current Implementation
 
-The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round path-tracing with red/blue fill race and keyboard-key gates, quality grading A/B/C/F based on round wins, reward multiplier) is fully coded but **needs manual Editor setup** — see `TODO-EDITOR` comment at `CraftingManager.cs:59` for MinigamePanel wiring instructions.
+The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round path-tracing with red/blue fill race, 5 keyboard-key gates per round at conductor-ictus points, quality grading A/B/C/F based on round wins, reward multiplier) is fully coded but **needs manual Editor setup** — see `TODO-EDITOR` comment at `CraftingManager.cs:59` for MinigamePanel wiring instructions.
 
 ### Reward Formula (in EvaluationManager)
 

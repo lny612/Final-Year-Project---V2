@@ -16,81 +16,152 @@ public static class RunePathData
         public float[]   WaypointTs;   // normalized T positions for hold-waypoints
     }
 
+    // Rune shapes derived from orchestral conducting beat patterns.
+    // Each shape is the baton's path for a meter; waypoint T-values land on
+    // the ictus points (the strong articulation instants where the baton
+    // reverses direction). 5 gates per round keeps the conducting feel
+    // demanding — every measure you must "strike the downbeat" with a key.
     public static readonly RuneShape[] ALL_SHAPES = new RuneShape[]
     {
-        // 0 — Algiz (protection, elk-sedge) — upward fork
+        // 0 — "Maestoso 4/4" (common time, 2 measures)
+        // Classic 4/4 conducting pattern: down → inward → outward → up, twice.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.50f, 0.10f), new(0.50f, 0.25f), new(0.50f, 0.40f),
-                new(0.42f, 0.50f), new(0.30f, 0.62f), new(0.22f, 0.72f),
-                new(0.30f, 0.62f), new(0.42f, 0.50f), new(0.50f, 0.40f),
-                new(0.58f, 0.50f), new(0.70f, 0.62f), new(0.78f, 0.72f),
-                new(0.70f, 0.62f), new(0.58f, 0.50f), new(0.50f, 0.55f),
-                new(0.50f, 0.70f), new(0.50f, 0.85f), new(0.50f, 0.92f),
+                new(0.50f, 0.88f), new(0.50f, 0.60f),
+                // Measure 1
+                new(0.50f, 0.15f),  // beat 1 — ICTUS (down)
+                new(0.40f, 0.32f),
+                new(0.22f, 0.48f),  // beat 2 — ICTUS (inward)
+                new(0.40f, 0.50f), new(0.58f, 0.50f),
+                new(0.78f, 0.48f),  // beat 3 — ICTUS (outward)
+                new(0.62f, 0.68f),
+                new(0.50f, 0.82f),  // beat 4 — top rebound
+                // Measure 2
+                new(0.50f, 0.55f), new(0.50f, 0.18f),  // m2 beat 1 — ICTUS
+                new(0.38f, 0.35f),
+                new(0.25f, 0.52f),  // m2 beat 2 — ICTUS
+                new(0.45f, 0.52f), new(0.60f, 0.52f),
+                new(0.75f, 0.50f),  // m2 beat 3 — ICTUS
+                new(0.62f, 0.72f),
+                new(0.50f, 0.92f),  // m2 beat 4 — final ictus
             },
-            WaypointTs = new float[] { 0.30f, 0.65f, 0.85f }
+            WaypointTs = new float[] { 0.12f, 0.24f, 0.40f, 0.66f, 0.88f }
         },
-        // 1 — Sowilo (sun, lightning bolt) — zigzag
+        // 1 — "Valse 3/4" (waltz triple meter, 2 measures)
+        // Triangular conducting pattern: down → out-right → up, twice.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.30f, 0.90f), new(0.35f, 0.80f), new(0.55f, 0.70f),
-                new(0.65f, 0.60f), new(0.45f, 0.52f), new(0.35f, 0.45f),
-                new(0.55f, 0.35f), new(0.65f, 0.25f), new(0.70f, 0.15f),
+                new(0.50f, 0.88f), new(0.50f, 0.55f),
+                // Measure 1
+                new(0.50f, 0.15f),  // beat 1 — ICTUS (down)
+                new(0.65f, 0.30f),
+                new(0.80f, 0.50f),  // beat 2 — ICTUS (right)
+                new(0.68f, 0.68f),
+                new(0.52f, 0.85f),  // beat 3 — top
+                // Measure 2
+                new(0.50f, 0.55f),
+                new(0.50f, 0.18f),  // m2 beat 1 — ICTUS
+                new(0.66f, 0.30f),
+                new(0.78f, 0.52f),  // m2 beat 2 — ICTUS
+                new(0.66f, 0.72f),
+                new(0.50f, 0.92f),  // m2 beat 3 — ICTUS (final)
             },
-            WaypointTs = new float[] { 0.35f, 0.70f }
+            WaypointTs = new float[] { 0.14f, 0.28f, 0.58f, 0.74f, 0.94f }
         },
-        // 2 — Thurisaz (thorn, giant) — pointed triangle
+        // 2 — "Compound 6/8" (one measure, 6 subdivided beats)
+        // Compound duple: two main ictus groups (L and R), each holding 3
+        // sub-beats. Baton traces a butterfly / two-leaf shape.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.30f, 0.15f), new(0.30f, 0.30f), new(0.30f, 0.50f),
-                new(0.30f, 0.65f), new(0.30f, 0.85f), new(0.45f, 0.72f),
-                new(0.60f, 0.55f), new(0.70f, 0.45f), new(0.60f, 0.35f),
-                new(0.45f, 0.25f), new(0.30f, 0.15f),
+                new(0.50f, 0.88f),  // prep
+                new(0.35f, 0.60f),
+                new(0.22f, 0.30f),  // beat 1 — main L down ICTUS
+                new(0.28f, 0.15f),
+                new(0.38f, 0.20f),  // beat 2 — sub ICTUS
+                new(0.44f, 0.30f),
+                new(0.50f, 0.42f),  // beat 3 — center ICTUS
+                new(0.56f, 0.30f),
+                new(0.62f, 0.20f),  // beat 4 — mirror sub
+                new(0.72f, 0.15f),
+                new(0.78f, 0.30f),  // beat 5 — main R down ICTUS
+                new(0.65f, 0.55f),
+                new(0.55f, 0.75f),
+                new(0.50f, 0.92f),  // beat 6 — top ICTUS
             },
-            WaypointTs = new float[] { 0.30f, 0.55f, 0.80f }
+            WaypointTs = new float[] { 0.15f, 0.30f, 0.46f, 0.70f, 0.93f }
         },
-        // 3 — Ansuz (wisdom, Odin) — angular F-shape
+        // 3 — "Take Five 5/4" (asymmetric quintuple, 3+2 grouping)
+        // Five uneven beats in one sweep — like Brubeck's iconic 5/4.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.35f, 0.90f), new(0.35f, 0.75f), new(0.35f, 0.60f),
-                new(0.35f, 0.45f), new(0.35f, 0.30f), new(0.35f, 0.15f),
-                new(0.45f, 0.25f), new(0.55f, 0.35f), new(0.65f, 0.40f),
-                new(0.55f, 0.45f), new(0.45f, 0.50f), new(0.35f, 0.55f),
-                new(0.45f, 0.60f), new(0.55f, 0.65f), new(0.65f, 0.70f),
+                new(0.50f, 0.88f), new(0.50f, 0.55f),
+                new(0.48f, 0.15f),  // beat 1 — down ICTUS
+                new(0.35f, 0.28f),
+                new(0.20f, 0.45f),  // beat 2 — inward ICTUS
+                new(0.35f, 0.52f),
+                new(0.52f, 0.50f),  // beat 3 — center pivot ICTUS
+                new(0.68f, 0.52f),
+                new(0.82f, 0.45f),  // beat 4 — outward ICTUS
+                new(0.70f, 0.70f),
+                new(0.52f, 0.85f),
+                new(0.48f, 0.92f),  // beat 5 — top ICTUS
             },
-            WaypointTs = new float[] { 0.25f, 0.55f, 0.82f }
+            WaypointTs = new float[] { 0.15f, 0.32f, 0.50f, 0.68f, 0.92f }
         },
-        // 4 — Dagaz (dawn, breakthrough) — hourglass / bowtie
+        // 4 — "Quick March 2/4" (3 measures, striding across the stage)
+        // Simple duple march, shifted horizontally each measure like a
+        // procession moving across the screen — brisk, steady downbeats.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.25f, 0.20f), new(0.40f, 0.20f), new(0.55f, 0.20f),
-                new(0.70f, 0.20f), new(0.55f, 0.35f), new(0.45f, 0.50f),
-                new(0.55f, 0.65f), new(0.70f, 0.80f), new(0.55f, 0.80f),
-                new(0.40f, 0.80f), new(0.25f, 0.80f), new(0.40f, 0.65f),
-                new(0.50f, 0.50f), new(0.40f, 0.35f), new(0.25f, 0.20f),
+                new(0.18f, 0.85f), new(0.18f, 0.45f),
+                new(0.20f, 0.18f),  // m1 beat 1 — down ICTUS
+                new(0.22f, 0.45f),
+                new(0.32f, 0.82f),  // m1 beat 2 — up
+                new(0.38f, 0.45f),
+                new(0.40f, 0.15f),  // m2 beat 1 — down ICTUS
+                new(0.44f, 0.45f),
+                new(0.54f, 0.85f),  // m2 beat 2 — up ICTUS
+                new(0.60f, 0.45f),
+                new(0.62f, 0.15f),  // m3 beat 1 — down ICTUS
+                new(0.66f, 0.45f),
+                new(0.76f, 0.82f),  // m3 beat 2 — up
+                new(0.82f, 0.45f),
+                new(0.82f, 0.18f),  // coda — final ICTUS
             },
-            WaypointTs = new float[] { 0.30f, 0.60f }
+            WaypointTs = new float[] { 0.14f, 0.30f, 0.48f, 0.68f, 0.93f }
         },
-        // 5 — Kenaz (torch, fire) — angled V opening right
+        // 5 — "Fermata Crescendo" (expressive freeform cue)
+        // A single sweeping gesture: pianissimo lift → subito → drop into
+        // piano → rebuild → fortissimo climax. Five expressive cue points.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.30f, 0.15f), new(0.35f, 0.25f), new(0.42f, 0.35f),
-                new(0.52f, 0.45f), new(0.65f, 0.52f), new(0.52f, 0.60f),
-                new(0.42f, 0.68f), new(0.35f, 0.78f), new(0.30f, 0.88f),
+                new(0.15f, 0.25f),  // start (piano)
+                new(0.20f, 0.45f),
+                new(0.22f, 0.70f),  // cue 1 — pianissimo lift
+                new(0.32f, 0.82f),
+                new(0.45f, 0.78f),  // cue 2 — subito
+                new(0.48f, 0.60f),
+                new(0.48f, 0.38f),  // cue 3 — drop
+                new(0.55f, 0.22f),
+                new(0.68f, 0.30f),  // cue 4 — rebuild
+                new(0.75f, 0.48f),
+                new(0.72f, 0.68f),
+                new(0.65f, 0.82f),
+                new(0.80f, 0.88f),  // cue 5 — fortissimo
             },
-            WaypointTs = new float[] { 0.35f, 0.70f }
+            WaypointTs = new float[] { 0.16f, 0.32f, 0.48f, 0.66f, 0.92f }
         },
     };
 
