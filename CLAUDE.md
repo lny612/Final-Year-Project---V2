@@ -116,7 +116,7 @@ Key non-default packages: `com.unity.nuget.newtonsoft-json` (JSON parsing), `com
 - **technical-artist** — VFX, shaders, particles, materials (new files only)
 
 Workflow: Leader -> Designer (design doc) -> Programmers + Technical Artist (parallel worktrees) -> Review.
-See `.claude/agents/` for full agent definitions and file ownership maps.
+See `.claude/agents/` for full agent definitions and file ownership maps, and `.claude/skills/` for invokable workflow steps (`design-doc`, `implement`, `implement-vfx`, `review-code`, `eod`).
 
 ## GDD vs Current Implementation
 
@@ -132,6 +132,8 @@ final      = base * qualityMultiplier   // A=1.0, B=0.85, C=0.7, F=0.4
 
 ## References
 
+- `README.md` — Mermaid architecture diagram + per-round AI call table
 - `Docs/GDD.md` — Full game mechanics and design vision
+- `Docs/DossierSortingFeature.md` — Designed (not yet implemented): active "fill-the-card" reading step for the customer dossier + pinned reference in CraftingScene
 - `.claude/rules/unity-csharp.md` — C# naming, async, JSON, UI conventions
 - `.claude/rules/file-safety.md` — What files to never touch, TODO-EDITOR format

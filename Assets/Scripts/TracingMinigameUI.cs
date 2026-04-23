@@ -165,6 +165,11 @@ public class TracingMinigameUI : MonoBehaviour
         CreateCursorAndMist(path, cumulDist, waypointTs, keys);
         BuildGateVisuals(path, cumulDist, waypointTs, keys);
 
+        // Yield one frame so the Canvas computes the cursor's world position,
+        // then warp the OS mouse so the player starts exactly on the trail.
+        yield return null;
+        _cursor.WarpOsMouseToStart();
+
         // Brief countdown
         if (instructionText != null)
             instructionText.text = "Get ready...";

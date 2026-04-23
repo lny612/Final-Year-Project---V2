@@ -126,4 +126,20 @@ public class TracingCursor : MonoBehaviour
         Vector2 pos = RunePathData.SampleAt(_path, _cumulDist, CursorT);
         ((RectTransform)transform).anchoredPosition = pos;
     }
+
+    /// <summary>
+    /// Warp the OS mouse cursor to the current in-game cursor position (path t=0 after Reset).
+    /// Called at round start so the player is never stuck hunting for the trail's beginning.
+    /// No-op when the Input System package is unavailable or no mouse is present.
+    /// </summary>
+    public void WarpOsMouseToStart()
+    {
+#if ENABLE_INPUT_SYSTEM
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse == null) return;
+        Vector3 world  = ((RectTransform)transform).position;
+        Vector2 screen = RectTransformUtility.WorldToScreenPoint(_uiCamera, world);
+        mouse.WarpCursorPosition(screen);
+#endif
+    }
 }

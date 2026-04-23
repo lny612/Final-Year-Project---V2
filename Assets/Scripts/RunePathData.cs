@@ -17,151 +17,140 @@ public static class RunePathData
     }
 
     // Rune shapes derived from orchestral conducting beat patterns.
-    // Each shape is the baton's path for a meter; waypoint T-values land on
-    // the ictus points (the strong articulation instants where the baton
-    // reverses direction). 5 gates per round keeps the conducting feel
-    // demanding — every measure you must "strike the downbeat" with a key.
+    // Each shape is a SINGLE-measure baton gesture — redesigned so the trail
+    // never doubles back on itself (no "double-circle" overlap). Gate waypoints
+    // land on the ictus points (the strong articulation instants where the
+    // baton reverses direction). 5 gates per round: combinations of the main
+    // ictuses plus prep or subdivision cues where fewer than 5 ictuses exist.
     public static readonly RuneShape[] ALL_SHAPES = new RuneShape[]
     {
-        // 0 — "Maestoso 4/4" (common time, 2 measures)
-        // Classic 4/4 conducting pattern: down → inward → outward → up, twice.
+        // 0 — "Maestoso 4/4" (common time, one measure)
+        // Classic down–left–right–up conducting cross. Diagonal prep from the
+        // upper-left so the descent isn't a vertical line that would be
+        // re-crossed later by the ascent.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.50f, 0.88f), new(0.50f, 0.60f),
-                // Measure 1
-                new(0.50f, 0.15f),  // beat 1 — ICTUS (down)
-                new(0.40f, 0.32f),
-                new(0.22f, 0.48f),  // beat 2 — ICTUS (inward)
-                new(0.40f, 0.50f), new(0.58f, 0.50f),
-                new(0.78f, 0.48f),  // beat 3 — ICTUS (outward)
-                new(0.62f, 0.68f),
-                new(0.50f, 0.82f),  // beat 4 — top rebound
-                // Measure 2
-                new(0.50f, 0.55f), new(0.50f, 0.18f),  // m2 beat 1 — ICTUS
-                new(0.38f, 0.35f),
-                new(0.25f, 0.52f),  // m2 beat 2 — ICTUS
-                new(0.45f, 0.52f), new(0.60f, 0.52f),
-                new(0.75f, 0.50f),  // m2 beat 3 — ICTUS
-                new(0.62f, 0.72f),
-                new(0.50f, 0.92f),  // m2 beat 4 — final ictus
+                new(0.30f, 0.85f),  // prep (upper-left)
+                new(0.50f, 0.15f),  // b1 ictus — bottom center
+                new(0.32f, 0.30f),
+                new(0.12f, 0.40f),  // b2 ictus — low-left
+                new(0.28f, 0.55f),
+                new(0.50f, 0.58f),  // apex (above body center)
+                new(0.72f, 0.55f),
+                new(0.88f, 0.40f),  // b3 ictus — low-right
+                new(0.80f, 0.62f),
+                new(0.70f, 0.82f),
+                new(0.55f, 0.92f),  // b4 ictus — top
             },
-            WaypointTs = new float[] { 0.12f, 0.24f, 0.40f, 0.66f, 0.88f }
+            WaypointTs = new float[] { 0.06f, 0.22f, 0.44f, 0.72f, 0.96f }
         },
-        // 1 — "Valse 3/4" (waltz triple meter, 2 measures)
-        // Triangular conducting pattern: down → out-right → up, twice.
+        // 1 — "Valse 3/4" (waltz triple meter, one measure)
+        // Triangular conducting pattern: down → low-right → top. Five gates
+        // from the three ictuses plus two "&" subdivision cues on the rebounds.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.50f, 0.88f), new(0.50f, 0.55f),
-                // Measure 1
-                new(0.50f, 0.15f),  // beat 1 — ICTUS (down)
-                new(0.65f, 0.30f),
-                new(0.80f, 0.50f),  // beat 2 — ICTUS (right)
-                new(0.68f, 0.68f),
-                new(0.52f, 0.85f),  // beat 3 — top
-                // Measure 2
-                new(0.50f, 0.55f),
-                new(0.50f, 0.18f),  // m2 beat 1 — ICTUS
-                new(0.66f, 0.30f),
-                new(0.78f, 0.52f),  // m2 beat 2 — ICTUS
-                new(0.66f, 0.72f),
-                new(0.50f, 0.92f),  // m2 beat 3 — ICTUS (final)
+                new(0.35f, 0.85f),  // prep (upper-left)
+                new(0.50f, 0.12f),  // b1 ictus — down
+                new(0.62f, 0.22f),  // & of 1 — rebound
+                new(0.78f, 0.38f),
+                new(0.88f, 0.55f),  // b2 ictus — low-right
+                new(0.78f, 0.72f),
+                new(0.62f, 0.85f),  // & of 2 — rebound
+                new(0.45f, 0.92f),  // b3 ictus — top
             },
-            WaypointTs = new float[] { 0.14f, 0.28f, 0.58f, 0.74f, 0.94f }
+            WaypointTs = new float[] { 0.18f, 0.32f, 0.58f, 0.80f, 0.96f }
         },
-        // 2 — "Compound 6/8" (one measure, 6 subdivided beats)
-        // Compound duple: two main ictus groups (L and R), each holding 3
-        // sub-beats. Baton traces a butterfly / two-leaf shape.
+        // 2 — "Compound 6/8" (one measure, two-lobe "in 2" pattern)
+        // Compound duple conducted in 2 with subdivided lobes: the baton
+        // traces a bottom-left lobe, crosses center, then a bottom-right lobe,
+        // rising to the top. Never returns to the start — no overlap.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.50f, 0.88f),  // prep
-                new(0.35f, 0.60f),
-                new(0.22f, 0.30f),  // beat 1 — main L down ICTUS
-                new(0.28f, 0.15f),
-                new(0.38f, 0.20f),  // beat 2 — sub ICTUS
-                new(0.44f, 0.30f),
-                new(0.50f, 0.42f),  // beat 3 — center ICTUS
-                new(0.56f, 0.30f),
-                new(0.62f, 0.20f),  // beat 4 — mirror sub
-                new(0.72f, 0.15f),
-                new(0.78f, 0.30f),  // beat 5 — main R down ICTUS
-                new(0.65f, 0.55f),
-                new(0.55f, 0.75f),
-                new(0.50f, 0.92f),  // beat 6 — top ICTUS
+                new(0.50f, 0.90f),  // prep (top center)
+                new(0.25f, 0.65f),
+                new(0.15f, 0.45f),  // b1 main ictus — left lobe low
+                new(0.25f, 0.28f),
+                new(0.35f, 0.18f),  // & of 1 — inner rebound
+                new(0.42f, 0.30f),
+                new(0.50f, 0.45f),  // lobe transition (center)
+                new(0.58f, 0.30f),
+                new(0.65f, 0.18f),  // & of 2 — mirror inner rebound
+                new(0.75f, 0.28f),
+                new(0.85f, 0.45f),  // b2 main ictus — right lobe low
+                new(0.75f, 0.65f),
+                new(0.60f, 0.85f),  // finish (offset from prep)
             },
-            WaypointTs = new float[] { 0.15f, 0.30f, 0.46f, 0.70f, 0.93f }
+            WaypointTs = new float[] { 0.18f, 0.32f, 0.58f, 0.72f, 0.96f }
         },
         // 3 — "Take Five 5/4" (asymmetric quintuple, 3+2 grouping)
-        // Five uneven beats in one sweep — like Brubeck's iconic 5/4.
+        // Five uneven beats in one sweep — natural 5-ictus → 5-gate mapping.
+        // Starts upper-left, sweeps through the five ictuses, exits at top.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.50f, 0.88f), new(0.50f, 0.55f),
-                new(0.48f, 0.15f),  // beat 1 — down ICTUS
-                new(0.35f, 0.28f),
-                new(0.20f, 0.45f),  // beat 2 — inward ICTUS
-                new(0.35f, 0.52f),
-                new(0.52f, 0.50f),  // beat 3 — center pivot ICTUS
-                new(0.68f, 0.52f),
-                new(0.82f, 0.45f),  // beat 4 — outward ICTUS
-                new(0.70f, 0.70f),
-                new(0.52f, 0.85f),
-                new(0.48f, 0.92f),  // beat 5 — top ICTUS
+                new(0.40f, 0.88f),  // prep (upper-left)
+                new(0.50f, 0.12f),  // b1 ictus — down
+                new(0.32f, 0.22f),
+                new(0.15f, 0.35f),  // b2 ictus — low-left
+                new(0.32f, 0.48f),
+                new(0.55f, 0.50f),  // b3 ictus — center-across
+                new(0.72f, 0.48f),
+                new(0.88f, 0.32f),  // b4 ictus — low-right (start of 2-group)
+                new(0.80f, 0.55f),
+                new(0.65f, 0.78f),
+                new(0.50f, 0.92f),  // b5 ictus — top
             },
-            WaypointTs = new float[] { 0.15f, 0.32f, 0.50f, 0.68f, 0.92f }
+            WaypointTs = new float[] { 0.14f, 0.32f, 0.52f, 0.70f, 0.96f }
         },
-        // 4 — "Quick March 2/4" (3 measures, striding across the stage)
-        // Simple duple march, shifted horizontally each measure like a
-        // procession moving across the screen — brisk, steady downbeats.
+        // 4 — "Quick March 2/4" (one measure, tall down-up oval)
+        // Brisk duple meter. Only 2 ictuses per measure, padded with two "&"
+        // subdivisions plus a release cue for five gates. The figure is a
+        // tall, narrow downstroke-and-upstroke oval that ends low-right.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.18f, 0.85f), new(0.18f, 0.45f),
-                new(0.20f, 0.18f),  // m1 beat 1 — down ICTUS
-                new(0.22f, 0.45f),
-                new(0.32f, 0.82f),  // m1 beat 2 — up
-                new(0.38f, 0.45f),
-                new(0.40f, 0.15f),  // m2 beat 1 — down ICTUS
-                new(0.44f, 0.45f),
-                new(0.54f, 0.85f),  // m2 beat 2 — up ICTUS
-                new(0.60f, 0.45f),
-                new(0.62f, 0.15f),  // m3 beat 1 — down ICTUS
-                new(0.66f, 0.45f),
-                new(0.76f, 0.82f),  // m3 beat 2 — up
-                new(0.82f, 0.45f),
-                new(0.82f, 0.18f),  // coda — final ICTUS
+                new(0.28f, 0.85f),  // prep (upper-left)
+                new(0.50f, 0.12f),  // b1 ictus — down
+                new(0.38f, 0.32f),
+                new(0.22f, 0.48f),  // & of 1
+                new(0.38f, 0.65f),
+                new(0.50f, 0.85f),  // b2 ictus — up
+                new(0.62f, 0.65f),
+                new(0.78f, 0.48f),  // & of 2
+                new(0.85f, 0.28f),
+                new(0.82f, 0.12f),  // release (final)
             },
-            WaypointTs = new float[] { 0.14f, 0.30f, 0.48f, 0.68f, 0.93f }
+            WaypointTs = new float[] { 0.12f, 0.30f, 0.52f, 0.72f, 0.96f }
         },
         // 5 — "Fermata Crescendo" (expressive freeform cue)
-        // A single sweeping gesture: pianissimo lift → subito → drop into
-        // piano → rebuild → fortissimo climax. Five expressive cue points.
+        // A monotonic rising gesture: soft hold at the opening, then a steady
+        // crescendo ascent across the panel, ending in a high release flourish.
+        // No back-tracking — the strictest single-sweep in the set.
         new RuneShape
         {
             ControlPoints = new Vector2[]
             {
-                new(0.15f, 0.25f),  // start (piano)
-                new(0.20f, 0.45f),
-                new(0.22f, 0.70f),  // cue 1 — pianissimo lift
-                new(0.32f, 0.82f),
-                new(0.45f, 0.78f),  // cue 2 — subito
-                new(0.48f, 0.60f),
-                new(0.48f, 0.38f),  // cue 3 — drop
-                new(0.55f, 0.22f),
-                new(0.68f, 0.30f),  // cue 4 — rebuild
-                new(0.75f, 0.48f),
-                new(0.72f, 0.68f),
-                new(0.65f, 0.82f),
-                new(0.80f, 0.88f),  // cue 5 — fortissimo
+                new(0.15f, 0.35f),  // start — pianissimo opening
+                new(0.22f, 0.30f),  // cue 1 — fermata hold (dip)
+                new(0.30f, 0.32f),
+                new(0.38f, 0.40f),  // cue 2 — begin crescendo lift
+                new(0.45f, 0.50f),
+                new(0.55f, 0.60f),  // cue 3 — sustain
+                new(0.65f, 0.68f),
+                new(0.75f, 0.78f),  // cue 4 — fortissimo peak
+                new(0.82f, 0.85f),
+                new(0.78f, 0.92f),
+                new(0.65f, 0.90f),  // cue 5 — release flourish
             },
-            WaypointTs = new float[] { 0.16f, 0.32f, 0.48f, 0.66f, 0.92f }
+            WaypointTs = new float[] { 0.08f, 0.28f, 0.50f, 0.72f, 0.96f }
         },
     };
 
@@ -297,6 +286,74 @@ public static class RunePathData
         }
         return cumulDist.Length - 1;
     }
+
+    // ── Self-overlap validation ───────────────────────────────────
+
+    /// <summary>
+    /// Count sample-point pairs separated by at least arcLengthGap of arc
+    /// length that fall within minSelfDistance of each other. A single
+    /// perpendicular crossing typically produces 1–3 pairs; a long parallel
+    /// run (the "double-circle" failure mode) produces many more. Thresholds
+    /// are expressed in normalized 0–1 path-space so they're resolution-free.
+    /// </summary>
+    public static int CountOverlapPairs(
+        Vector2[] path, float[] cumulDist,
+        float minSelfDistance, float arcLengthGap)
+    {
+        float total = PathLength(cumulDist);
+        if (total < 0.0001f) return 0;
+        float minSq   = minSelfDistance * minSelfDistance;
+        float gapDist = arcLengthGap * total;
+
+        int count = 0;
+        for (int i = 0; i < path.Length; i++)
+        {
+            for (int j = i + 1; j < path.Length; j++)
+            {
+                if (cumulDist[j] - cumulDist[i] < gapDist) continue;
+                if ((path[i] - path[j]).sqrMagnitude < minSq) count++;
+            }
+        }
+        return count;
+    }
+
+    /// <summary>
+    /// True if the path has more overlapping sample pairs than maxPairs.
+    /// Default thresholds tolerate a single perpendicular self-crossing but
+    /// reject any path that runs parallel to itself for a noticeable stretch.
+    /// </summary>
+    public static bool HasSelfOverlap(
+        Vector2[] path, float[] cumulDist,
+        float minSelfDistance = 0.04f,
+        float arcLengthGap    = 0.15f,
+        int   maxPairs        = 6)
+    {
+        return CountOverlapPairs(path, cumulDist, minSelfDistance, arcLengthGap) > maxPairs;
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>
+    /// Editor / dev-build only: check every rune shape for self-overlap and
+    /// log a warning when a pattern trips the validator. Runs once on class
+    /// initialization — zero cost in shipped builds.
+    /// </summary>
+    public static void ValidateAll()
+    {
+        for (int i = 0; i < ALL_SHAPES.Length; i++)
+        {
+            Vector2[] path = Interpolate(ALL_SHAPES[i].ControlPoints);
+            float[]   cum  = BuildCumulativeDistances(path);
+            int pairs = CountOverlapPairs(path, cum, 0.04f, 0.15f);
+            if (pairs > 6)
+            {
+                Debug.LogWarning(
+                    $"[RunePathData] Shape {i} has {pairs} overlapping sample pairs — path appears to double back on itself.");
+            }
+        }
+    }
+
+    static RunePathData() { ValidateAll(); }
+#endif
 
     // ── Selection ─────────────────────────────────────────────────
 
