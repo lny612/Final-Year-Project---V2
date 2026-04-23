@@ -41,8 +41,11 @@ public class TracingMinigameUI : MonoBehaviour
     public Color tracedColor      = new Color(0.2f, 0.5f, 1f, 0.85f);      // blue fill
     public Color mistColor        = new Color(0.9f, 0.15f, 0.15f, 0.7f);   // red fill
     public Color cursorColor      = new Color(1f, 1f, 1f, 0.95f);
-    public Color gateColor        = new Color(1f, 0.85f, 0.3f, 0.8f);      // amber gate marker
+    public Color gateColor        = new Color(1f, 0.85f, 0.3f, 0.85f);     // amber — Tap gate
+    public Color holdGateColor    = new Color(0.35f, 0.9f, 1f, 0.9f);      // cyan — Hold gate
+    public Color accentGateColor  = new Color(1f, 0.4f, 0.95f, 0.9f);      // magenta — Accent gate
     public Color gateClearedColor = new Color(0.3f, 1f, 0.3f, 0.6f);       // green cleared
+    public Color holdPreviewColor = new Color(0.3f, 1f, 0.3f, 0.22f);      // green halo — Hold target zone
 
     // ── Private state ─────────────────────────────────────────────
 
@@ -61,18 +64,37 @@ public class TracingMinigameUI : MonoBehaviour
     private readonly List<FillSegInfo> _fillSegs = new();
 
     // Gate marker visuals
-    private readonly List<Image>    _gateMarkers = new();
-    private readonly List<TMP_Text> _gateLabels  = new();
+    private readonly List<Image>    _gateMarkers    = new();
+    private readonly List<TMP_Text> _gateLabels     = new();
+    private readonly List<Image>    _holdFills      = new(); // one entry per gate; null for non-Hold
+    private readonly List<Color>    _gateBaseColors = new(); // base amber/cyan/magenta per gate, used by pulse
 
     // Dynamically created components per round
     private TracingCursor _cursor;
     private TracingMist   _mist;
+
+    // Per-gate tuning constants
+    private const float HOLD_GATE_DURATION  = 0.9f; // seconds the player must hold the key
+    private const float HOLD_FILL_MAX_SIZE  = 32f;  // px at HoldProgress = 1
 
     // Key pool for gate randomization
     private static readonly KeyCode[] GATE_KEY_POOL =
     {
         KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T,
         KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.F,
+    };
+
+    // 8 compass directions used for accent-gate flicks.
+    private static readonly Vector2[] COMPASS_8 =
+    {
+        new Vector2( 1f,       0f      ),  // E
+        new Vector2( 0.7071f,  0.7071f ),  // NE
+        new Vector2( 0f,       1f      ),  // N
+        new Vector2(-0.7071f,  0.7071f ),  // NW
+        new Vector2(-1f,       0f      ),  // W
+        new Vector2(-0.7071f, -0.7071f ),  // SW
+        new Vector2( 0f,      -1f      ),  // S
+        new Vector2( 0.7071f, -0.7071f ),  // SE
     };
 
     // ── Public entry point ────────────────────────────────────────
@@ -154,16 +176,21 @@ public class TracingMinigameUI : MonoBehaviour
     private IEnumerator RunSingleRound(Vector2[] path, float[] cumulDist,
         float[] waypointTs, int roundNumber)
     {
-        // Generate random gate keys and build all visuals
-        KeyCode[] keys = GenerateGateKeys(waypointTs.Length);
+        // Generate per-gate randomized data: keys, types (Tap/Hold/Accent),
+        // hold durations, and accent directions.
+        int gateCount = waypointTs.Length;
+        KeyCode[]  keys          = GenerateGateKeys(gateCount);
+        GateType[] types         = GenerateGateTypes(gateCount, roundNumber);
+        float[]    holdDurations = GenerateHoldDurations(types);
+        Vector2[]  accentDirs    = GenerateAccentDirections(types);
 
         BuildPathVisuals(path);
         BuildFillSegments(path, cumulDist);
         // Cursor is created BEFORE gate visuals so gate markers (and their
         // key labels) render on top of the cursor. Otherwise, when the
         // cursor parks on an active gate the white dot hides the key letter.
-        CreateCursorAndMist(path, cumulDist, waypointTs, keys);
-        BuildGateVisuals(path, cumulDist, waypointTs, keys);
+        CreateCursorAndMist(path, cumulDist, waypointTs, keys, types, holdDurations, accentDirs);
+        BuildGateVisuals(path, cumulDist, waypointTs, keys, types, accentDirs);
 
         // Yield one frame so the Canvas computes the cursor's world position,
         // then warp the OS mouse so the player starts exactly on the trail.
@@ -199,13 +226,22 @@ public class TracingMinigameUI : MonoBehaviour
                     _gateMarkers[lastClearedGate].color = gateClearedColor;
             }
 
-            // Pulse the active gate when waiting for key press
-            if (_cursor.IsWaitingForKey && _cursor.CurrentGateIndex < _gateMarkers.Count)
+            // Active-gate visual feedback — pulse for Tap/Accent, fill ring for Hold.
+            if (_cursor.IsAtGate && _cursor.CurrentGateIndex < _gateMarkers.Count)
             {
-                float pulse = 0.6f + 0.4f * Mathf.Sin(Time.time * 6f);
-                var gc = gateColor;
-                gc.a = pulse;
-                _gateMarkers[_cursor.CurrentGateIndex].color = gc;
+                int gi = _cursor.CurrentGateIndex;
+                if (_cursor.CurrentGateState == GateState.Holding && gi < _holdFills.Count && _holdFills[gi] != null)
+                {
+                    float size = HOLD_FILL_MAX_SIZE * _cursor.HoldProgress;
+                    _holdFills[gi].rectTransform.sizeDelta = new Vector2(size, size);
+                }
+                else
+                {
+                    float pulse = 0.6f + 0.4f * Mathf.Sin(Time.time * 6f);
+                    var gc = _gateBaseColors[gi];
+                    gc.a = pulse;
+                    _gateMarkers[gi].color = gc;
+                }
             }
 
             // Win: blue reached the end
@@ -322,16 +358,28 @@ public class TracingMinigameUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Build gate markers with TMP key labels at each waypoint position.
+    /// Build gate markers with TMP key labels at each waypoint. Gate type drives
+    /// the visual layering so each type is identifiable from a distance:
+    ///   Tap    — amber   square + key letter.
+    ///   Hold   — cyan    square + key letter + green halo behind (shows fill target)
+    ///                  + inner green fill that grows with HoldProgress.
+    ///   Accent — magenta square + key letter + directional arrow suffix
+    ///                  + a protruding magenta line pointing in the required flick direction.
     /// </summary>
     private void BuildGateVisuals(Vector2[] path, float[] cumulDist,
-        float[] waypointTs, KeyCode[] keys)
+        float[] waypointTs, KeyCode[] keys, GateType[] types, Vector2[] accentDirs)
     {
         for (int i = 0; i < waypointTs.Length; i++)
         {
             Vector2 pos = RunePathData.SampleAt(path, cumulDist, waypointTs[i]);
+            GateType type = types[i];
+            Color baseColor = GateBaseColor(type);
 
-            // Gate marker circle
+            // 1. Pre-decoration (rendered BEHIND the gate marker)
+            if (type == GateType.Hold)    BuildHoldPreviewHalo(pos);
+            if (type == GateType.Accent)  BuildAccentArrowLine(pos, accentDirs[i]);
+
+            // 2. Outer gate marker square
             var go = new GameObject("Gate", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(minigamePanel.transform, false);
             _pathVisuals.Add(go);
@@ -342,11 +390,31 @@ public class TracingMinigameUI : MonoBehaviour
             rt.sizeDelta = new Vector2(36f, 36f);
 
             var img = go.GetComponent<Image>();
-            img.color = gateColor;
+            img.color = baseColor;
             img.raycastTarget = false;
             _gateMarkers.Add(img);
+            _gateBaseColors.Add(baseColor);
 
-            // Key label (child of gate marker)
+            // 3. Hold-fill overlay (inner green square, grows as Hold progresses).
+            Image holdFill = null;
+            if (type == GateType.Hold)
+            {
+                var fillGo = new GameObject("HoldFill", typeof(RectTransform), typeof(Image));
+                fillGo.transform.SetParent(go.transform, false);
+                fillGo.transform.SetSiblingIndex(0);
+                _pathVisuals.Add(fillGo);
+
+                var fillRt = fillGo.GetComponent<RectTransform>();
+                fillRt.anchorMin = fillRt.anchorMax = fillRt.pivot = new Vector2(0.5f, 0.5f);
+                fillRt.sizeDelta = Vector2.zero;
+
+                holdFill = fillGo.GetComponent<Image>();
+                holdFill.color = new Color(0.3f, 1f, 0.3f, 0.85f);
+                holdFill.raycastTarget = false;
+            }
+            _holdFills.Add(holdFill);
+
+            // 4. Key label (+ accent arrow suffix)
             var labelGo = new GameObject("KeyLabel", typeof(RectTransform));
             labelGo.transform.SetParent(go.transform, false);
             _pathVisuals.Add(labelGo);
@@ -358,8 +426,10 @@ public class TracingMinigameUI : MonoBehaviour
             labelRt.offsetMax = Vector2.zero;
 
             var label = labelGo.AddComponent<TextMeshProUGUI>();
-            label.text = keys[i].ToString();
-            label.fontSize = 28f;
+            string text = keys[i].ToString();
+            if (type == GateType.Accent) text += DirectionToArrow(accentDirs[i]);
+            label.text = text;
+            label.fontSize = 26f;
             label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
             label.color = Color.black;
@@ -368,10 +438,90 @@ public class TracingMinigameUI : MonoBehaviour
         }
     }
 
+    /// <summary>Per-type base color used for the gate marker and pulse animation.</summary>
+    private Color GateBaseColor(GateType type) => type switch
+    {
+        GateType.Hold   => holdGateColor,
+        GateType.Accent => accentGateColor,
+        _               => gateColor,
+    };
+
+    /// <summary>
+    /// Translucent green square behind a Hold gate showing the "fill-me" target zone.
+    /// Gives the player an instant visual cue that this gate requires holding before
+    /// they even reach it.
+    /// </summary>
+    private void BuildHoldPreviewHalo(Vector2 gatePos)
+    {
+        var go = new GameObject("HoldHalo", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(minigamePanel.transform, false);
+        _pathVisuals.Add(go);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = gatePos;
+        rt.sizeDelta = new Vector2(52f, 52f);
+
+        var img = go.GetComponent<Image>();
+        img.color = holdPreviewColor;
+        img.raycastTarget = false;
+    }
+
+    /// <summary>
+    /// Magenta line extending from an Accent gate outward in the required flick
+    /// direction. Tells the player — at a glance — which way to flick the mouse
+    /// before they even reach the gate.
+    /// </summary>
+    private void BuildAccentArrowLine(Vector2 gatePos, Vector2 dir)
+    {
+        Vector2 n = dir.normalized;
+        if (n.sqrMagnitude < 0.0001f) n = Vector2.up;
+
+        const float length    = 50f;
+        const float thickness = 6f;
+        const float gateHalf  = 18f; // outer marker is 36×36
+
+        // Anchor the rectangle at the gate edge so it grows outward.
+        Vector2 anchor = gatePos + n * gateHalf;
+
+        var go = new GameObject("AccentLine", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(minigamePanel.transform, false);
+        _pathVisuals.Add(go);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0f, 0.5f); // left edge at anchor, extends right in local-space
+        rt.anchoredPosition = anchor;
+        rt.sizeDelta = new Vector2(length, thickness);
+        float angle = Mathf.Atan2(n.y, n.x) * Mathf.Rad2Deg;
+        rt.localRotation = Quaternion.Euler(0, 0, angle);
+
+        var img = go.GetComponent<Image>();
+        img.color = accentGateColor;
+        img.raycastTarget = false;
+
+        // Arrow head — a slightly thicker square at the tip, offset perpendicular
+        // to the line to form a chevron feel without needing sprites.
+        var headGo = new GameObject("AccentHead", typeof(RectTransform), typeof(Image));
+        headGo.transform.SetParent(minigamePanel.transform, false);
+        _pathVisuals.Add(headGo);
+
+        var headRt = headGo.GetComponent<RectTransform>();
+        headRt.anchorMin = headRt.anchorMax = headRt.pivot = new Vector2(0.5f, 0.5f);
+        headRt.anchoredPosition = gatePos + n * (gateHalf + length);
+        headRt.sizeDelta = new Vector2(14f, 14f);
+        headRt.localRotation = Quaternion.Euler(0, 0, angle + 45f);
+
+        var headImg = headGo.GetComponent<Image>();
+        headImg.color = accentGateColor;
+        headImg.raycastTarget = false;
+    }
+
     // ── Dynamic cursor + mist creation ────────────────────────────
 
     private void CreateCursorAndMist(Vector2[] path, float[] cumulDist,
-        float[] waypointTs, KeyCode[] keys)
+        float[] waypointTs, KeyCode[] keys,
+        GateType[] types, float[] holdDurations, Vector2[] accentDirs)
     {
         // Cursor (visible dot on the path)
         var cursorGo = new GameObject("Cursor", typeof(RectTransform), typeof(Image),
@@ -389,6 +539,7 @@ public class TracingMinigameUI : MonoBehaviour
 
         _cursor = cursorGo.GetComponent<TracingCursor>();
         _cursor.Initialize(path, cumulDist, pathTolerance, waypointTs, keys,
+            types, holdDurations, accentDirs,
             _panelRect, _uiCamera);
 
         // Mist (timer only — red fill is rendered via fill segments, no visible dot)
@@ -431,6 +582,8 @@ public class TracingMinigameUI : MonoBehaviour
         _fillSegs.Clear();
         _gateMarkers.Clear();
         _gateLabels.Clear();
+        _holdFills.Clear();
+        _gateBaseColors.Clear();
         _cursor = null;
         _mist   = null;
     }
@@ -481,5 +634,78 @@ public class TracingMinigameUI : MonoBehaviour
         for (int i = 0; i < count; i++)
             keys[i] = GATE_KEY_POOL[UnityEngine.Random.Range(0, GATE_KEY_POOL.Length)];
         return keys;
+    }
+
+    /// <summary>
+    /// Fixed escalation across the 3 rounds:
+    ///   R1 — 5 Tap gates (teaches the baseline tracing + key mechanic).
+    ///   R2 — one random gate becomes Hold (introduces time-pressure holds).
+    ///   R3 — one random gate becomes Hold + a different gate becomes Accent
+    ///        (adds directional flick requirement — full conducting).
+    /// </summary>
+    private static GateType[] GenerateGateTypes(int count, int roundNumber)
+    {
+        var types = new GateType[count];
+        for (int i = 0; i < count; i++) types[i] = GateType.Tap;
+        if (count == 0) return types;
+
+        if (roundNumber >= 2)
+        {
+            int holdIdx = UnityEngine.Random.Range(0, count);
+            types[holdIdx] = GateType.Hold;
+        }
+        if (roundNumber >= 3)
+        {
+            // Pick a different index, still Tap, to become Accent.
+            for (int attempts = 0; attempts < 10; attempts++)
+            {
+                int idx = UnityEngine.Random.Range(0, count);
+                if (types[idx] == GateType.Tap)
+                {
+                    types[idx] = GateType.Accent;
+                    break;
+                }
+            }
+        }
+        return types;
+    }
+
+    private static float[] GenerateHoldDurations(GateType[] types)
+    {
+        var durations = new float[types.Length];
+        for (int i = 0; i < types.Length; i++)
+            durations[i] = (types[i] == GateType.Hold) ? HOLD_GATE_DURATION : 0f;
+        return durations;
+    }
+
+    private static Vector2[] GenerateAccentDirections(GateType[] types)
+    {
+        var dirs = new Vector2[types.Length];
+        for (int i = 0; i < types.Length; i++)
+        {
+            if (types[i] == GateType.Accent)
+                dirs[i] = COMPASS_8[UnityEngine.Random.Range(0, COMPASS_8.Length)];
+        }
+        return dirs;
+    }
+
+    /// <summary>Convert a unit direction vector to the matching Unicode arrow character (with leading space).</summary>
+    private static string DirectionToArrow(Vector2 dir)
+    {
+        if (dir.sqrMagnitude < 0.0001f) return string.Empty;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        int octant = Mathf.RoundToInt(((angle + 360f) % 360f) / 45f) % 8;
+        return octant switch
+        {
+            0 => " →",  // →  E
+            1 => " ↗",  // ↗  NE
+            2 => " ↑",  // ↑  N
+            3 => " ↖",  // ↖  NW
+            4 => " ←",  // ←  W
+            5 => " ↙",  // ↙  SW
+            6 => " ↓",  // ↓  S
+            7 => " ↘",  // ↘  SE
+            _ => " →"
+        };
     }
 }
