@@ -53,6 +53,10 @@ public class CraftingManager : MonoBehaviour
     [Header("UI — Status")]
     public TMP_Text statusText;
 
+    [Header("UI — Memo Card (pinned player memo, replaces full dossier)")]
+    [Tooltip("Read-only memo card. Shows the 3 keywords the player committed in CustomerGeneratorTest.")]
+    public MemoCardUI memoCard;
+
     [Header("Minigame")]
     [Tooltip("Assign the TracingMinigameUI component on the MinigamePanel.")]
     public TracingMinigameUI tracingMinigame;
@@ -93,6 +97,10 @@ public class CraftingManager : MonoBehaviour
 
         RefreshInventoryUI();
         RefreshConfirmButton();
+
+        if (memoCard != null)
+            memoCard.Populate(GameManager.Instance?.currentMemo);
+
         SetStatus("Select materials from your inventory.");
     }
 

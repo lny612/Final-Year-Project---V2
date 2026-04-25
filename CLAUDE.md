@@ -8,22 +8,31 @@ Fantasy wand-crafting game built in **Unity 6** (6000.0.58f2) using **URP**. Pla
 
 ## Architecture
 
-### Game Loop (4 scenes, cycled via GameManager)
+### Game Loop (7-day session, 7 scenes cycled via GameManager)
 
 ```
-CustomerGeneratorTest → MaterialGeneratorTest → CraftingScene → EvaluationScene → (loop)
+TitleScene (Start) → MorningScene (letter) → CustomerGeneratorTest →
+  MaterialGeneratorTest → CraftingScene → EvaluationScene → [rent if day 3/6] →
+  (day<7: MorningScene next day) | (day=7 or bankrupt: EndingScene → TitleScene/restart)
 ```
 
-1. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint
-2. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood
-3. **CraftingScene** — Player assigns materials to 3 slots (2 core + 1 wood), GPT-4o generates wand description, ComfyUI generates wand image; tracing minigame runs concurrently with API calls
-4. **EvaluationScene** — GPT-4o scores the wand match (0–100), awards gold + reputation, then loops back
+0. **TitleScene** — `TitleScreenUI`. Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene` (day 1 opens with the aunt's intro letter). Quit exits the app / stops play mode.
+1. **MorningScene** — `MorningLetterUI` pulls a reputation-tiered letter from `LetterLibrary` and types it out over a parchment panel. On rent-due mornings (days 3 and 6) a landlord rent-reminder is shown after the main letter. Continue button → customer scene.
+2. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint
+3. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood
+4. **CraftingScene** — Player assigns materials to 3 slots (2 core + 1 wood), GPT-4o generates wand description, ComfyUI generates wand image; tracing minigame runs concurrently with API calls
+5. **EvaluationScene** — GPT-4o scores the wand match (0–100), awards gold + reputation. Day-progress dots at top, rent-payment modal pops on days 3/6 before advance. Day 7 or bankruptcy routes to EndingScene.
+6. **EndingScene** — `EndingManager` picks one of 5 variants (Royal / Rival / Slum / BankruptEarly / BankruptLate), fades in a pre-generated illustration from `Resources/EndingArt/`, plays a dialogue typewriter, and offers restart.
 
 Additional scenes: `ComfyUITest` (standalone image generation test), `MinigameTest` (standalone tracing minigame test via `MinigameTestRunner`), `SampleScene` (unused).
 
-### Round Reset (`GameManager.StartNextRound`)
+### Day Advance vs Round Reset (`GameManager`)
 
-Each round clears `currentCustomer`, `availableMaterials`, `currentWandResult`, and `craftingQualityGrade` (reset to `'A'`). **Persisted across rounds:** `inventory`, `playerGold` (starts at 500), `playerReputation`.
+- **`AdvanceToNextDay()`** — new forward path called by `EvaluationManager`. Increments `currentDay`, clears per-round state, loads `MorningScene`. **Persisted across days:** `inventory`, `playerGold` (starts at 500), `playerReputation`, `peakReputation`, `wandsCrafted`, `lettersReceived`.
+- **`StartNextRound()`** — legacy path kept for `MinigameTest` and standalone entry points. Does NOT increment day or route through the morning scene.
+- **`ResetForNewPlaythrough()`** — called by the ending's Restart button; resets everything to day 1 defaults.
+- **Rent schedule:** `RENT_DUE_DAYS = {3, 6}`, `RENT_AMOUNTS = {250, 400}`. Billed at end of day 3 and day 6 via `RentPaymentUI` modal on the evaluation screen. Insufficient gold → Bankrupt ending (Early if day 3, Late if day 6).
+- **Ending thresholds:** `ROYAL_REP_MIN = 90` (≥ → Royal), `RIVAL_REP_MIN = 30` (≥ → Rival), else Slum. Per-day rep delta is −10 to +20, so ~5 good days is needed for Royal.
 
 ### Key Patterns
 
@@ -44,14 +53,37 @@ Each round clears `currentCustomer`, `availableMaterials`, `currentWandResult`, 
 
 The crafting ritual spans 4 tightly coupled scripts:
 
-- `TracingMinigameUI` — orchestrator: runs 3 rounds, builds path/fill-segment/gate visuals procedurally as UI GameObjects, updates red/blue trail fill each frame, tracks successes, computes final grade (3 wins→A, 2→B, 1→C, 0→F)
-- `TracingCursor` — player input: follows mouse along path with forward-only movement, blocked at gate markers until player presses the displayed keyboard key (cannot draw past an uncleared gate)
-- `TracingMist` — timer: advances MistT at constant speed; when MistT reaches 1.0 the round is lost. No visual dot — the red fill is rendered by TracingMinigameUI's fill segments
-- `RunePathData` — static data: normalized control points for 6 rune shapes, Catmull-Rom interpolation, cumulative distance math
+- `TracingMinigameUI` — orchestrator: runs 3 rounds, builds path/fill-segment/gate visuals procedurally as UI GameObjects, updates red/blue trail fill each frame, generates per-round gate-type composition, tracks successes, computes final grade (3 wins→A, 2→B, 1→C, 0→F)
+- `TracingCursor` — player input: follows mouse along path with forward-only movement. Carries a `GateState` machine (None / Tapping / Holding / AccentFlicking / AccentReturning) that blocks cursor advance while resolving the active gate. Also exposes `WarpOsMouseToStart()` which uses `UnityEngine.InputSystem.Mouse.current.WarpCursorPosition` (guarded by `ENABLE_INPUT_SYSTEM`) to snap the OS cursor to path t=0 at the start of every round
+- `TracingMist` — timer: advances MistT at constant speed; when MistT reaches 1.0 the round is lost. No visual dot — the red fill is rendered by TracingMinigameUI's fill segments. **The mist keeps advancing during all gate-resolution states**, so Hold/Accent gates cost real time
+- `RunePathData` — static data: normalized control points for 6 rune shapes (single-measure conductor gestures — Maestoso 4/4, Valse 3/4, Compound 6/8, Take Five 5/4, Quick March 2/4, Fermata Crescendo), Catmull-Rom interpolation, cumulative distance math, plus `CountOverlapPairs` / `HasSelfOverlap` / `ValidateAll` — an editor-only (`UNITY_EDITOR || DEVELOPMENT_BUILD`) self-overlap check run from a static constructor that warns when a shape's sampled path has >6 within-threshold pairs at ≥0.15 arc-length gap
 
-**Visual mechanic:** The trail fills red from the start (time-based, via TracingMist speed) and blue from the start (player-traced, via TracingCursor progress). Blue overrides red where the player has traced. Gate markers show randomized keyboard keys (from pool Q/W/E/R/T/A/S/D/F). Each round is a single attempt — no retries. Rune shapes are based on orchestral conductor beat patterns (Maestoso 4/4, Valse 3/4, Compound 6/8, Take Five 5/4, Quick March 2/4, plus a freeform Fermata Crescendo); each round has 5 gates placed at the baton's ictus points.
+**Gate types (three, `GateType` enum):**
+- **Tap** — amber square; press the displayed key once to clear.
+- **Hold** — cyan square with a translucent green halo behind (shows the fill target); press AND hold the key for `HOLD_GATE_DURATION` (0.9 s); inner green overlay grows with `TracingCursor.HoldProgress`; early release fizzles in place and the player can retry. Late release is free (but mist ate the extra time).
+- **Accent** — magenta square with a protruding magenta line + chevron pointing in a required flick direction (one of 8 compass points, also shown as a Unicode arrow `↑↗→↘↓↙←↖` after the key letter). Press the key, then flick the mouse ≥ `ACCENT_FLICK_MIN_DIST` (60 px) in the shown direction (±30°, `ACCENT_DIR_TOLERANCE` = cos 30°), then return to within `pathTolerance` of the gate.
+
+**Round escalation** (in `TracingMinigameUI.GenerateGateTypes`): R1 = 5 Tap; R2 = 4 Tap + 1 Hold (random index); R3 = 3 Tap + 1 Hold + 1 Accent (two different random indices). Keys, hold durations, and accent directions are generated per round. The pulse animation reads from `_gateBaseColors[gi]` so each gate pulses in its own color.
+
+**Visual mechanic:** The trail fills red from the start (time-based, via TracingMist speed) and blue from the start (player-traced, via TracingCursor progress). Blue overrides red where the player has traced. Each round is a single attempt — no retries. 5 gates per round at the rune's ictus points.
 
 All visuals are procedural UI (`Image` + `TextMeshProUGUI` components on dynamically created `GameObject`s) — no prefabs, no scene references beyond the minigame panel. `MinigameTestRunner` is a lightweight harness that auto-starts the minigame on scene load for isolated testing.
+
+### 7-Day Progression & Multi-Ending Subsystem
+
+Five tightly-coupled scripts + one static content file drive the day/letter/rent/ending flow:
+
+- `GameManager.cs` — owns all progression state (`currentDay`, `peakReputation`, `wandsCrafted`, `lettersReceived`, `bankruptedOnDay3`) + the rent/ending constants. Provides `AdvanceToNextDay()`, `IsRentDueToday()`, `GetRentDueToday()`, `DetermineEnding()`, `ResetForNewPlaythrough()`. Editor-only `[ContextMenu]` shortcuts jump to specific days / rep tiers / empty wallets for test speedup.
+- `LetterLibrary.cs` — pure static class (no MonoBehaviour, no `.asset` dependency). Holds 19 hand-authored letters: the day-1 intro from the player's aunt, plus Low/Mid/High variants for days 2–7, plus 2 landlord rent-reminders. `GetMorningLetter(day, tier)` and `GetRentReminder(day, amount)` are the two lookups. `LetterContent` is a struct (sender enum, from, subject, body).
+- `TypewriterText.cs` — reusable char-by-char reveal via TMP's `maxVisibleCharacters` (so rich-text tags like `<b>`/`<i>` don't split mid-tag). Click-anywhere-to-skip. Used by both `MorningLetterUI` and `EndingManager`.
+- `MorningLetterUI.cs` — scene controller for `MorningScene`. Reads `GameManager.currentDay` + reputation tier, fetches the letter, tints a wax seal by sender type (Aristocrat=gold, Royal=purple, Brigand=black, etc.), plays the typewriter. Rent-due mornings queue a second landlord letter after the main one.
+- `DayProgressUI.cs` — calendar-dot header on the evaluation screen (7 `Image` dots + optional rent-coin icons above days 3/6). `Refresh()` colors past/today/future states from `GameManager.currentDay`.
+- `RentPaymentUI.cs` — modal on evaluation scene. `Show(rentAmount, callback)`: if gold ≥ rent, enables Pay/Plead buttons (both → Paid, flavor-only); if gold < rent, enables "Accept fate" → Bankrupt. Sets `bankruptedOnDay3` so EndingManager can pick the right variant.
+- `EndingManager.cs` — scene controller for `EndingScene`. Resolves `EndingType` (Royal/Rival/Slum/BankruptEarly/BankruptLate), loads `Resources/EndingArt/{name}.png` (graceful placeholder tint if missing), fades in via `CanvasGroup`, types out hand-written ending dialogue (~5 lines each, verbatim strings in the script), displays stats ("Days survived · Letters · Peak rep · Wands"), restart button calls `ResetForNewPlaythrough()` then loads `MorningScene`.
+
+**Integration into EvaluationManager:** `Start()` calls `dayProgressUI.Refresh()`; `EvaluationPipeline` updates `peakReputation` + `wandsCrafted` after the reward apply; `OnNextCustomer()` routes through `RentPaymentUI.Show(...)` on rent days and `ProceedToNextDayOrEnding()` otherwise. Day 7 or bankruptcy loads `SCENE_ENDING`; otherwise `AdvanceToNextDay()` runs.
+
+**Ending art:** Pre-generated PNGs in `Assets/Resources/EndingArt/` (Royal.png, Rival.png, Slum.png, Bankrupt.png). Generate once via the `ComfyUITest` scene and drop them in — not runtime-generated so the climactic moment is reliable.
 
 ### Parallel Execution in CraftingScene
 
@@ -122,6 +154,13 @@ See `.claude/agents/` for full agent definitions and file ownership maps, and `.
 
 The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round path-tracing with red/blue fill race, 5 keyboard-key gates per round at conductor-ictus points, quality grading A/B/C/F based on round wins, reward multiplier) is fully coded but **needs manual Editor setup** — see `TODO-EDITOR` comment at `CraftingManager.cs:59` for MinigamePanel wiring instructions.
 
+The **7-day progression subsystem** (morning letters, rent days, multi-ending) is fully coded and scene-wired via Unity MCP (2026-04-24). `TitleScene` (Build index 0), `MorningScene` (5), and `EndingScene` (6) all built with placeholder tints; `EvaluationScene` has `DayProgressHeader` (7 dots + 💰 icons above day 3/6) and `RentPaymentPanel` (inactive by default) attached and wired. Remaining manual work:
+- Drop 4 PNGs into `Assets/Resources/EndingArt/` (Royal / Rival / Slum / Bankrupt) — the Ending scene loads these via `Resources.Load`; if missing, falls back to a tinted placeholder (warns in console). Generate via ComfyUITest once, drop in.
+- Replace placeholder art for owl (`OwlImage`), wax seal (`WaxSeal`), background parchment, etc. as desired — all are tinted Images right now.
+- See `Docs/SevenDayProgression.md` for full plan + verification steps.
+
+The **memo-gated dossier reading subsystem** (2026-04-24) is fully coded but needs scene wiring. In `CustomerGeneratorTest` the player must distil the 7 dossier fields into a 3-entry memo (Purpose / Personality / Element) by clicking content words in the dossier prose and assigning them to memo slots; Proceed is gated on memo completion. The memo then replaces the full dossier as the on-screen reference in `MaterialGeneratorTest` and `CraftingScene`, and drives ✦ match-hint glyphs on materials whose affinity overlaps the memo. Scripts: `PlayerMemo.cs`, `MemoFillUI.cs`, `MemoCardUI.cs` (+ hooks in `CustomerGenerator`, `MaterialGenerator`, `CraftingManager`, `MaterialCardUI`, `GameManager`). See `Docs/MemoFeature.md` for the TODO-EDITOR wiring list.
+
 ### Reward Formula (in EvaluationManager)
 
 ```
@@ -134,6 +173,7 @@ final      = base * qualityMultiplier   // A=1.0, B=0.85, C=0.7, F=0.4
 
 - `README.md` — Mermaid architecture diagram + per-round AI call table
 - `Docs/GDD.md` — Full game mechanics and design vision
-- `Docs/DossierSortingFeature.md` — Designed (not yet implemented): active "fill-the-card" reading step for the customer dossier + pinned reference in CraftingScene
+- `Docs/MemoFeature.md` — Active-reading gate: click words from dossier prose to fill a 3-entry memo (Purpose/Personality/Element). Memo replaces the full dossier in market + crafting scenes and drives material match hints.
+- `Docs/DossierSortingFeature.md` — Superseded by MemoFeature; kept for reference.
 - `.claude/rules/unity-csharp.md` — C# naming, async, JSON, UI conventions
 - `.claude/rules/file-safety.md` — What files to never touch, TODO-EDITOR format

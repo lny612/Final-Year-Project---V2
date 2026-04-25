@@ -49,6 +49,12 @@ public class EvaluationManager : MonoBehaviour
     [Header("UI — Status")]
     public TMP_Text statusText;
 
+    [Header("7-Day progression")]
+    [Tooltip("Calendar dots shown at top of screen.")]
+    public DayProgressUI  dayProgressUI;
+    [Tooltip("Modal shown on days 3 and 6 to collect rent.")]
+    public RentPaymentUI  rentPaymentUI;
+
     // ── Private ───────────────────────────────────────────────────
 
     private CustomerOrder _customer;
@@ -63,6 +69,8 @@ public class EvaluationManager : MonoBehaviour
 
         _customer = GameManager.Instance?.currentCustomer;
         _wand     = GameManager.Instance?.currentWandResult;
+
+        dayProgressUI?.Refresh();
 
         PopulateCustomer();
         PopulateWand();
@@ -167,7 +175,13 @@ public class EvaluationManager : MonoBehaviour
 
         GameManager.Instance?.AddGold(goldEarned);
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.playerReputation += reputationChange;
+            GameManager.Instance.peakReputation = Mathf.Max(
+                GameManager.Instance.peakReputation,
+                GameManager.Instance.playerReputation);
+            GameManager.Instance.wandsCrafted++;
+        }
 
         SetStatus("Evaluation complete.");
 
@@ -253,11 +267,38 @@ public class EvaluationManager : MonoBehaviour
         };
     }
 
-    // ── Next Customer ─────────────────────────────────────────────
+    // ── Advance to next day / trigger ending ──────────────────────
 
     private void OnNextCustomer()
     {
-        GameManager.Instance?.StartNextRound();
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+
+        if (gm.IsRentDueToday() && rentPaymentUI != null)
+        {
+            rentPaymentUI.Show(gm.GetRentDueToday(), result =>
+            {
+                if (result == RentPaymentUI.RentResult.Paid) ProceedToNextDayOrEnding();
+                else                                         GoToEnding();
+            });
+            return;
+        }
+
+        ProceedToNextDayOrEnding();
+    }
+
+    private void ProceedToNextDayOrEnding()
+    {
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+
+        if (gm.currentDay >= GameManager.TOTAL_DAYS) GoToEnding();
+        else                                         gm.AdvanceToNextDay();
+    }
+
+    private void GoToEnding()
+    {
+        GameManager.Instance?.LoadScene(GameManager.SCENE_ENDING);
     }
 
     // ── Prompts ───────────────────────────────────────────────────

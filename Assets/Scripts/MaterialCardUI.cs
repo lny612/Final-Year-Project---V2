@@ -34,6 +34,9 @@ public class MaterialCardUI : MonoBehaviour
     public Button   buyButton;
     public TMP_Text soldOutLabel;
 
+    // Runtime-created hint glyph (shown when this material matches the player's memo).
+    private GameObject _hintGlyph;
+
     // ── Public API ─────────────────────────────────────────────────
 
     public void SetData(MaterialData data)
@@ -67,6 +70,38 @@ public class MaterialCardUI : MonoBehaviour
     {
         if (buyButton    != null) buyButton.gameObject.SetActive(false);
         if (soldOutLabel != null) soldOutLabel.gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// Toggle the "matches your memo" hint glyph on this card. The glyph is
+    /// created lazily on first enable so no prefab changes are needed.
+    /// </summary>
+    public void SetHintGlyph(bool active)
+    {
+        if (!active && _hintGlyph == null) return;
+        if (_hintGlyph == null) _hintGlyph = BuildHintGlyph();
+        if (_hintGlyph != null) _hintGlyph.SetActive(active);
+    }
+
+    private GameObject BuildHintGlyph()
+    {
+        var go = new GameObject("HintGlyph", typeof(RectTransform));
+        go.transform.SetParent(transform, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(1f, 1f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot     = new Vector2(1f, 1f);
+        rt.anchoredPosition = new Vector2(-6f, -6f);
+        rt.sizeDelta = new Vector2(28f, 28f);
+
+        var tmp = go.AddComponent<TextMeshProUGUI>();
+        tmp.text              = "✦";        // ✦ four-pointed star
+        tmp.fontSize          = 24f;
+        tmp.alignment         = TextAlignmentOptions.Center;
+        tmp.color             = new Color(1f, 0.85f, 0.35f, 0.95f);
+        tmp.raycastTarget     = false;
+        tmp.enableVertexGradient = false;
+        return go;
     }
 
     public void ShowPlaceholder()

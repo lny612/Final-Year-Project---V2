@@ -25,7 +25,10 @@
 ```
 Day begins
   │
-  ├─ 1. READ       Two customer dossiers revealed. Player reads carefully.
+  ├─ 1. READ       Customer dossier revealed. Player distils it into a
+  │                3-entry memo (Purpose / Personality / Element) by
+  │                clicking keywords from the prose. Memo gates Proceed
+  │                and replaces the full dossier in later scenes.
   │
   ├─ 2. SHOP       AI generates 6 materials tailored (but not perfectly matched)
   │                to today's customers. Player spends gold to buy materials.
@@ -227,16 +230,35 @@ Inspired by Hogwarts Legacy's spell-learning mechanic. Performed 3 times in succ
 - A glowing rune trail appears with a start point and end point. Each trail is drawn from an orchestral conductor's beat pattern (4/4, 3/4, 6/8, 5/4, 2/4, or a freeform expressive cue) so tracing feels like conducting the magic with your wand
 - Gate markers sit on the trail, each displaying a randomized keyboard key. 5 gates per round, placed at the baton's ictus points (strong articulation instants where the conductor reverses direction)
 - A red fill begins advancing from the start as soon as the round begins, creating a "chased" feeling — if red fills the entire trail before the player finishes, the round is lost
+- When the round begins, the OS mouse cursor is warped to the trail's starting point so the player never loses precious seconds hunting for where to begin
 
 **How to play:**
 - The player traces the trail with the mouse. If the cursor stays within the tolerance zone (+N pixels from the path), the correctly traced portion fills blue
-- When the cursor reaches a gate marker, the player must press the shown keyboard key to proceed — the gate blocks further progress until the correct key is pressed
-- Drawing past a gate without pressing its key is not allowed — the blue fill does not advance beyond an uncleared gate
+- When the cursor reaches a gate marker, the gate resolution rules depend on the gate type (see below). In all cases the gate blocks forward progress until cleared
+- Drawing past a gate without clearing it is not allowed — the blue fill does not advance beyond an uncleared gate
 - **Win:** Blue fill reaches the end before red fill reaches the end
 - **Lose:** Red fill reaches the end of the trail first
 
+**Three gate types (easy to learn, hard to master):**
+
+| Type | Visual cue | How to clear | Failure |
+|---|---|---|---|
+| **Tap** (amber) | Amber square + key letter | Press the shown key once | — (just press the key) |
+| **Hold** (cyan) | Cyan square + green halo + inner green fill that grows | Hold the key for ~0.9 s until the inner fill reaches the edge of the marker, then release | Releasing too early resets the fill; player can retry in place. Late release is free but mist kept advancing |
+| **Accent** (magenta) | Magenta square + protruding directional arrow-line (one of 8 compass points) + `↑↗→↘↓↙←↖` suffix on key label | Press the shown key, then flick the mouse ≥60 px in the shown direction (±30° tolerance), then return the mouse to the trail | Wrong-direction flicks do nothing; player can re-aim. No explicit fail — time pressure is the failure |
+
+Crucially, **the red mist never pauses while resolving a gate.** Every hold and every accent is a commitment of time the player won't get back, so over-committing on specials means losing the round.
+
+**Round escalation** (fixed — teaches one new mechanic per round):
+
+| Round | Composition | New teaching |
+|---|---|---|
+| 1 | 5 Tap gates | Baseline tracing + key press + mist pressure |
+| 2 | 4 Tap + 1 Hold (random position) | Introduces the time-commitment hold |
+| 3 | 3 Tap + 1 Hold + 1 Accent (random different positions) | Full conducting — timing + directional gesture |
+
 **Three rounds:**
-Each round uses a different conducting pattern (3 of 6 picked uniquely per session). 5 gates land at the ictus points of each pattern, so the player presses 15 keys across a session. Fill speed stays constant at 0.12 normalized-units/sec (≈8.3s per round). Brief thematic transition between rounds. No retries — each round is a single win-or-lose attempt.
+Each round uses a different conducting pattern (3 of 6 picked uniquely per session). 5 gates land at the ictus points of each pattern. Fill speed stays constant at 0.12 normalized-units/sec (≈8.3s per round). Brief thematic transition between rounds. No retries — each round is a single win-or-lose attempt.
 
 **Quality grading:**
 

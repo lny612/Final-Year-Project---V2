@@ -48,6 +48,10 @@ public class CustomerGenerator : MonoBehaviour
     [Tooltip("Display text for constraint.")]
     public TMP_Text constraintText;
 
+    [Header("Memo Gate")]
+    [Tooltip("Reading-gate UI. Proceed button enables only when the memo is filled.")]
+    public MemoFillUI memoFillUI;
+
     // ── Private state ──────────────────────────────────────────────
 
     private bool _busy;
@@ -292,27 +296,45 @@ Return ONLY the JSON object.";
 
             PopulateDossier(customer);
 
-            // Push to GameManager so other scenes can read the customer
+            // Push to GameManager so other scenes can read the customer.
+            CustomerOrder order = new CustomerOrder
+            {
+                customerName  = customer["customerName"]?.ToString()  ?? "",
+                schoolOfMagic = customer["schoolOfMagic"]?.ToString() ?? "",
+                profession    = customer["profession"]?.ToString()     ?? "",
+                personality   = customer["personality"]?.ToString()   ?? "",
+                request       = customer["request"]?.ToString()       ?? "",
+                trueGoal      = customer["trueGoal"]?.ToString()      ?? "",
+                constraint    = customer["constraint"]?.ToString()    ?? "",
+            };
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.currentCustomer = new CustomerOrder
-                {
-                    customerName  = customer["customerName"]?.ToString()  ?? "",
-                    schoolOfMagic = customer["schoolOfMagic"]?.ToString() ?? "",
-                    profession    = customer["profession"]?.ToString()     ?? "",
-                    personality   = customer["personality"]?.ToString()   ?? "",
-                    request       = customer["request"]?.ToString()       ?? "",
-                    trueGoal      = customer["trueGoal"]?.ToString()      ?? "",
-                    constraint    = customer["constraint"]?.ToString()    ?? "",
-                };
+                GameManager.Instance.currentCustomer = order;
+                GameManager.Instance.currentMemo     = null;
             }
 
-            if (proceedButton != null) proceedButton.interactable = true;
-            SetStatus("Customer ready. Proceed to the market.");
+            // Memo gate: if wired, the player must fill the memo before Proceed
+            // enables. If not wired (standalone testing), Proceed enables immediately.
+            if (memoFillUI != null)
+            {
+                memoFillUI.Begin(order, OnMemoComplete);
+                SetStatus("Read the dossier. Fill the memo to proceed.");
+            }
+            else
+            {
+                if (proceedButton != null) proceedButton.interactable = true;
+                SetStatus("Customer ready. Proceed to the market.");
+            }
         }
 
         _busy = false;
         SetButtonInteractable(true);
+    }
+
+    private void OnMemoComplete()
+    {
+        if (proceedButton != null) proceedButton.interactable = true;
+        SetStatus("Memo complete. Proceed to the market.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────

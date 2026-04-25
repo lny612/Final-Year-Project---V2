@@ -30,7 +30,10 @@ public class MaterialGenerator : MonoBehaviour
     public TMP_Text goldText;          // shows "Gold: XXXg"
     public TMP_Text statusText;
 
-    [Header("UI — Customer Dossier")]
+    [Header("UI — Customer Dossier (legacy — hidden when memoCard is wired)")]
+    // TODO-EDITOR: Once MemoCardUI is wired below, delete these 7 dossier TMP_Text
+    //   GameObjects from the scene. The memo replaces them as the on-screen
+    //   reference so the player must rely on what they wrote down.
     public TMP_Text nameText;
     public TMP_Text schoolText;
     public TMP_Text professionText;
@@ -38,6 +41,10 @@ public class MaterialGenerator : MonoBehaviour
     public TMP_Text requestText;
     public TMP_Text trueGoalText;
     public TMP_Text constraintText;
+
+    [Header("UI — Memo Card (replaces the full dossier)")]
+    [Tooltip("Pinned read-only memo — shows the 3 keywords the player committed in CustomerGeneratorTest.")]
+    public MemoCardUI memoCard;
 
     [Header("UI — Material Cards")]
     [Tooltip("Parent transform for the 3 core cards.")]
@@ -237,6 +244,9 @@ Use exactly this structure:
         SetStatus("Waiting...");
         ClearDossier();
 
+        if (memoCard != null)
+            memoCard.Populate(GameManager.Instance?.currentMemo);
+
         if (goldText != null)
         {
             _goldDefaultColor = goldText.color;
@@ -328,6 +338,7 @@ Use exactly this structure:
         var woods = materials.FindAll(m => m.materialType == "wood");
         InstantiateCards(cores, coreCardContainer, _coreCards);
         InstantiateCards(woods, woodCardContainer, _woodCards);
+        ApplyMemoHints(cores, woods);
 
         // Step 5 — Queue all image generation requests in parallel
         var queue = new List<(MaterialCardUI ui, MaterialData data)>();
@@ -759,6 +770,30 @@ Apply the four design rules. Return ONLY the JSON object.";
         }
     }
 
+    /// <summary>
+    /// Toggle a ✦ glyph on each material card whose affinity overlaps the
+    /// player's memo. Cores compare against memo.element, woods against
+    /// memo.personality. If the player's memo is wrong, wrong materials get
+    /// hinted — the mechanic rewards careful reading in CustomerGeneratorTest.
+    /// </summary>
+    private void ApplyMemoHints(List<MaterialData> cores, List<MaterialData> woods)
+    {
+        var memo = GameManager.Instance?.currentMemo;
+        if (memo == null) return;
+
+        for (int i = 0; i < _coreCards.Count && i < cores.Count; i++)
+            _coreCards[i].SetHintGlyph(IsHintMatch(memo.element, cores[i].elementalAffinity));
+
+        for (int i = 0; i < _woodCards.Count && i < woods.Count; i++)
+            _woodCards[i].SetHintGlyph(IsHintMatch(memo.personality, woods[i].personalityMatch));
+    }
+
+    private static bool IsHintMatch(string memoWord, string materialField)
+    {
+        if (string.IsNullOrWhiteSpace(memoWord) || string.IsNullOrWhiteSpace(materialField)) return false;
+        return materialField.IndexOf(memoWord, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
     private void OnBuyCard(MaterialCardUI card, MaterialData mat)
     {
         if (GameManager.Instance == null) return;
@@ -824,6 +859,15 @@ Apply the four design rules. Return ONLY the JSON object.";
 
     private void DisplayCustomer(CustomerOrder c)
     {
+        // When a memo card is wired, the full dossier is intentionally hidden —
+        // the player must work from what they wrote down. Blank the legacy TMP
+        // fields so any leftover scene GameObjects render empty.
+        if (memoCard != null)
+        {
+            BlankDossierFields();
+            return;
+        }
+
         void Set(TMP_Text t, string label, string val)
         { if (t != null) t.text = $"<b>{label}</b>  {val}"; }
 
@@ -838,6 +882,12 @@ Apply the four design rules. Return ONLY the JSON object.";
 
     private void ClearDossier()
     {
+        if (memoCard != null)
+        {
+            BlankDossierFields();
+            return;
+        }
+
         void Clear(TMP_Text t, string label) { if (t != null) t.text = $"<b>{label}</b>  —"; }
         Clear(nameText,        "NAME:");
         Clear(schoolText,      "SCHOOL OF MAGIC:");
@@ -846,6 +896,17 @@ Apply the four design rules. Return ONLY the JSON object.";
         Clear(requestText,     "REQUEST:");
         Clear(trueGoalText,    "TRUE GOAL:");
         Clear(constraintText,  "CONSTRAINT:");
+    }
+
+    private void BlankDossierFields()
+    {
+        if (nameText        != null) nameText.text        = "";
+        if (schoolText      != null) schoolText.text      = "";
+        if (professionText  != null) professionText.text  = "";
+        if (personalityText != null) personalityText.text = "";
+        if (requestText     != null) requestText.text     = "";
+        if (trueGoalText    != null) trueGoalText.text    = "";
+        if (constraintText  != null) constraintText.text  = "";
     }
 
     // ── Shared helpers ────────────────────────────────────────────
