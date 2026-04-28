@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement class="material-card">
+
+        <ui:VisualElement class="card-nameplate">
+            <ui:Label name="card-name" text="Material name" class="card-name" />
+        </ui:VisualElement>
+
+        <ui:Label name="card-subline" text="— Core —" class="card-subline" />
+
+        <ui:VisualElement class="card-art">
+            <ui:VisualElement name="card-placeholder" class="card-placeholder" />
+            <ui:VisualElement name="card-image" class="card-image" />
+            <ui:Label name="card-hint-glyph" text="✦" class="card-hint-glyph" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="card-attributes">
+            <ui:Label name="card-field1" text="" class="card-field card-field-primary" />
+            <ui:Label name="card-field2" text="" class="card-field" />
+            <ui:Label name="card-field3" text="" class="card-field" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="card-footer">
+            <ui:VisualElement class="card-price">
+                <ui:VisualElement class="coin-icon coin-icon-small" />
+                <ui:Label name="card-price-amount" text="0" class="card-price-amount" />
+            </ui:VisualElement>
+
+            <ui:Button name="card-buy" text="Buy" class="card-buy" />
+            <ui:Label name="card-soldout" text="Bought" class="card-soldout" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

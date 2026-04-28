@@ -1,0 +1,409 @@
+/*
+ * DossierPanel.uss
+ *
+ * Cozy magical-fantasy parchment dossier styling.
+ * Palette:
+ *   warm dark wood       #3E2D1F  (backdrop fill)
+ *   warm wood mid        #6B4A2E  (panel borders, body text)
+ *   parchment cream      #F4E5C2  (panel fill)
+ *   parchment shadow     #E8D4A8  (inner shaded edges)
+ *   gold light           #C9A96E  (corner ornaments)
+ *   gold deep            #B8945C  (inner gold rule)
+ *   wax-seal red         #7A2E1F  (memo seal, primary button)
+ *   ink blue             #2E558C  (clickable words)
+ *   armed amber          #C58A1F  (currently armed word)
+ *   used grey            #888888  (committed words)
+ *
+ * Font: reuses LiberationSans (TMP's underlying TTF) for now.
+ * To swap to a custom serif later, drop a TTF into Assets/UI/Dossier/Fonts/
+ * and edit the single `-unity-font-definition` line in `.root`.
+ */
+
+.root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/LiberationSans.ttf");
+    color: rgb(62, 45, 31);
+    font-size: 14px;
+}
+
+/* ── Wood backdrop ───────────────────────────────────────────── */
+
+.wood-frame {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgb(62, 45, 31);
+}
+
+/* ── Parchment panel ─────────────────────────────────────────── */
+
+.parchment-panel {
+    position: absolute;
+    top: 36px;
+    right: 36px;
+    bottom: 88px;
+    left: 36px;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 6px;
+    padding: 36px 32px 28px 32px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.parchment-inner-border {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+/* ── Gold corner ornaments ───────────────────────────────────── */
+/* Each corner is 28×28; an inner 18×18 child draws the carved double-edge. */
+
+.gold-corner {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-color: rgb(201, 169, 110);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    align-items: center;
+    justify-content: center;
+}
+
+.gold-corner__inner {
+    width: 14px;
+    height: 14px;
+    background-color: rgb(184, 148, 92);
+    border-color: rgb(107, 74, 46);
+    border-width: 1px;
+    rotate: 45deg;
+}
+
+.gold-corner--tl {
+    top: 8px;
+    left: 8px;
+    border-top-left-radius: 8px;
+    border-bottom-right-radius: 12px;
+}
+
+.gold-corner--tr {
+    top: 8px;
+    right: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 12px;
+}
+
+.gold-corner--bl {
+    bottom: 8px;
+    left: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 12px;
+}
+
+.gold-corner--br {
+    bottom: 8px;
+    right: 8px;
+    border-bottom-right-radius: 8px;
+    border-top-left-radius: 12px;
+}
+
+/* ── Two-column layout inside the parchment ──────────────────── */
+
+.content-row {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/* ── Dossier (left column) ───────────────────────────────────── */
+
+.dossier-scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    margin-right: 20px;
+}
+
+.dossier-column {
+    flex-direction: column;
+    padding: 4px 12px 4px 4px;
+}
+
+.dossier-heading {
+    font-size: 14px;
+    color: rgb(140, 100, 60);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    letter-spacing: 6px;
+    margin-bottom: 4px;
+}
+
+.dossier-name {
+    font-size: 30px;
+    color: rgb(62, 45, 31);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+.dossier-divider {
+    height: 1px;
+    background-color: rgb(184, 148, 92);
+    margin: 4px 24px 18px 24px;
+}
+
+.dossier-section {
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+.dossier-section--quiet {
+    opacity: 0.85;
+}
+
+.dossier-section-title {
+    font-size: 11px;
+    color: rgb(122, 46, 31);
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+}
+
+.dossier-static-prose {
+    font-size: 15px;
+    color: rgb(62, 45, 31);
+    -unity-font-style: italic;
+    white-space: normal;
+    padding-left: 4px;
+}
+
+/* The prose container: a flex-wrap row of word Buttons + plain Labels. */
+.dossier-prose {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-left: 4px;
+}
+
+/* ── Word Buttons (clickable content words) ──────────────────── */
+
+.word-static {
+    font-size: 15px;
+    color: rgb(62, 45, 31);
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.word-clickable {
+    font-size: 15px;
+    color: rgb(46, 85, 140);
+    margin: 0 1px 0 0;
+    padding: 0 2px 0 2px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(46, 85, 140);
+    border-radius: 0;
+    -unity-font-style: normal;
+    transition-property: background-color, color;
+    transition-duration: 120ms;
+}
+
+.word-clickable:hover {
+    background-color: rgba(197, 138, 31, 0.18);
+    color: rgb(122, 80, 20);
+}
+
+.word-clickable:focus {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.word-armed {
+    color: rgb(197, 138, 31);
+    -unity-font-style: bold;
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(197, 138, 31);
+    background-color: rgba(197, 138, 31, 0.12);
+}
+
+.word-committed {
+    color: rgb(136, 136, 136);
+    border-bottom-width: 0;
+}
+
+.word-committed:hover {
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(136, 136, 136);
+}
+
+/* ── Memo card (right column) ────────────────────────────────── */
+
+.memo-card {
+    width: 260px;
+    flex-shrink: 0;
+    background-color: rgb(248, 235, 205);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 18px 16px 18px 16px;
+    flex-direction: column;
+}
+
+.memo-card__seal {
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    background-color: rgb(122, 46, 31);
+    border-color: rgb(70, 22, 14);
+    border-width: 2px;
+    border-radius: 11px;
+}
+
+.memo-card__title {
+    font-size: 18px;
+    color: rgb(62, 45, 31);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.memo-card__hint {
+    font-size: 11px;
+    color: rgb(140, 110, 80);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 14px;
+}
+
+.memo-row {
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+.memo-row__prompt {
+    font-size: 12px;
+    color: rgb(122, 46, 31);
+    -unity-font-style: italic;
+    white-space: normal;
+    margin-bottom: 4px;
+    padding-left: 4px;
+}
+
+.memo-slot {
+    font-size: 17px;
+    color: rgb(62, 45, 31);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 8px 8px 8px 8px;
+    min-height: 36px;
+    transition-property: background-color, border-color, translate;
+    transition-duration: 120ms;
+}
+
+.memo-slot:hover {
+    background-color: rgb(252, 240, 215);
+    border-color: rgb(201, 169, 110);
+}
+
+.memo-slot--filled {
+    background-color: rgb(252, 240, 215);
+    border-bottom-color: rgb(122, 46, 31);
+}
+
+/* ── Status bar / primary buttons ────────────────────────────── */
+
+.status-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 36px;
+    right: 36px;
+    height: 56px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(78, 56, 38);
+    border-color: rgb(201, 169, 110);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 0 14px 0 18px;
+}
+
+.status-label {
+    font-size: 13px;
+    color: rgb(244, 229, 194);
+    -unity-font-style: italic;
+}
+
+.status-bar__spacer {
+    flex-grow: 1;
+}
+
+.primary-button {
+    font-size: 13px;
+    color: rgb(244, 229, 194);
+    -unity-font-style: bold;
+    background-color: rgb(122, 46, 31);
+    border-color: rgb(201, 169, 110);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 8px 16px 8px 16px;
+    margin-left: 10px;
+    letter-spacing: 1px;
+    transition-property: background-color, color;
+    transition-duration: 120ms;
+}
+
+.primary-button:hover {
+    background-color: rgb(150, 60, 38);
+}
+
+.primary-button:disabled {
+    background-color: rgb(94, 70, 50);
+    color: rgb(180, 160, 130);
+}
+
+.primary-button--ghost {
+    background-color: rgba(244, 229, 194, 0.08);
+    color: rgb(244, 229, 194);
+}
+
+.primary-button--ghost:hover {
+    background-color: rgba(244, 229, 194, 0.18);
+}
+
+/* ── Ink-blot pop element (created at runtime by the controller) ─ */
+
+.ink-blot {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background-color: rgb(31, 31, 46);
+    border-radius: 7px;
+    left: 8px;
+    top: 8px;
+    opacity: 0.85;
+}

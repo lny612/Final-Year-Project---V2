@@ -119,6 +119,71 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &197933010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 197933013}
+  - component: {fileID: 197933012}
+  - component: {fileID: 197933011}
+  m_Layer: 0
+  m_Name: MinigameUIDocument
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &197933011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 197933010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d267609f90788a946a8dbefcf1961bc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  document: {fileID: 197933012}
+--- !u!114 &197933012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 197933010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: b84bcad57eb1830478ad7a5ff5833b1f, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: ad46a3019ad30bf49bbd4568b27fe624, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!4 &197933013
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 197933010}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &303733771
 GameObject:
   m_ObjectHideFlags: 0
@@ -429,15 +494,19 @@ MonoBehaviour:
   minigamePanel: {fileID: 1009073684}
   roundText: {fileID: 2056851338}
   instructionText: {fileID: 2012534810}
+  chromeController: {fileID: 197933011}
   mistSpeed: 0.12
-  waypointHoldTime: 0.4
   pathTolerance: 40
-  maxTotalRetries: 9
   pathColor: {r: 0.31, g: 0.93, b: 0.97, a: 1}
   pathGlowColor: {r: 0.31, g: 0.93, b: 0.97, a: 0.25}
+  tracedColor: {r: 0.47, g: 0.71, b: 1, a: 0.95}
   mistColor: {r: 0.9, g: 0.15, b: 0.15, a: 0.7}
   cursorColor: {r: 1, g: 1, b: 1, a: 0.95}
-  waypointColor: {r: 0.31, g: 0.93, b: 0.97, a: 0.5}
+  gateColor: {r: 0.95, g: 0.78, b: 0.4, a: 0.95}
+  holdGateColor: {r: 0.55, g: 0.85, b: 1, a: 0.95}
+  accentGateColor: {r: 0.95, g: 0.5, b: 0.85, a: 0.95}
+  gateClearedColor: {r: 0.45, g: 0.95, b: 0.55, a: 0.65}
+  holdPreviewColor: {r: 0.45, g: 0.95, b: 0.55, a: 0.22}
 --- !u!1 &1251485805
 GameObject:
   m_ObjectHideFlags: 0
@@ -1004,3 +1073,4 @@ SceneRoots:
   - {fileID: 1251485809}
   - {fileID: 303733774}
   - {fileID: 1349946510}
+  - {fileID: 197933013}

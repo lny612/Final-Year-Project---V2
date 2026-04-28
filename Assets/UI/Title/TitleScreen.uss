@@ -1,0 +1,205 @@
+/* ==========================================================================
+   TitleScreen.uss
+   Parchment-style main menu inspired by Potion Craft's title page.
+   Palette: warm sepia parchment, charcoal ink, muted gold accents.
+   All visuals are procedural (radial-ish gradients, borders, layered planes)
+   so the screen looks finished without requiring imported textures.
+   ========================================================================== */
+
+/* ── Palette tokens ─────────────────────────────────────────────────────── */
+:root {
+    --parchment-base:    rgb(232, 213, 178);
+    --parchment-warm:    rgb(217, 192, 150);
+    --parchment-deep:    rgb(190, 160, 112);
+    --parchment-shadow:  rgba(110, 78, 36, 0.22);
+    --ink-dark:          rgb(46, 32, 22);
+    --ink-soft:          rgb(86, 64, 44);
+    --ink-faded:         rgba(46, 32, 22, 0.55);
+    --gold-leaf:         rgb(150, 116, 60);
+    --gold-leaf-soft:    rgba(150, 116, 60, 0.45);
+}
+
+/* ── Root: full-screen parchment plate ──────────────────────────────────── */
+.root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgb(232, 213, 178);
+    -unity-font-style: normal;
+}
+
+/* Base parchment colour wash. */
+.parchment {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(232, 213, 178);
+}
+
+/* Subtle warm grain — mid-toned plane to break up the flat colour. */
+.grain {
+    position: absolute;
+    left: 6%; right: 6%; top: 4%; bottom: 4%;
+    background-color: rgba(190, 160, 112, 0.18);
+    border-radius: 4px;
+}
+
+/* Edge vignette: a slightly darker ring drawn with thick borders, faking
+   the foxed/aged edges of a parchment sheet. */
+.vignette {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-left-width:   60px;
+    border-right-width:  60px;
+    border-top-width:    44px;
+    border-bottom-width: 44px;
+    border-left-color:   rgba(110, 78, 36, 0.16);
+    border-right-color:  rgba(110, 78, 36, 0.16);
+    border-top-color:    rgba(110, 78, 36, 0.10);
+    border-bottom-color: rgba(110, 78, 36, 0.20);
+}
+
+/* ── Faux corner woodcut decorations (optional flavour) ────────────────── */
+.corner-art {
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    background-color: rgba(150, 116, 60, 0.18);
+    border-radius: 50%;
+}
+.corner-art--tl { left: 56px;  top: 40px; }
+.corner-art--tr { right: 56px; top: 40px; }
+.corner-art--bl { left: 56px;  bottom: 40px; }
+.corner-art--br { right: 56px; bottom: 40px; }
+
+/* ── Centred content column ─────────────────────────────────────────────── */
+.content {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Title block: leaves flank a stacked serif title ───────────────────── */
+.title-block {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+}
+
+.title-text {
+    -unity-text-align: middle-center;
+    color: rgb(46, 32, 22);
+    font-size: 132px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    margin: 0 36px;
+    white-space: normal;
+    text-shadow: 1px 1px 0 rgba(110, 78, 36, 0.25);
+}
+
+/* Stylised "leaf" wreaths drawn as rounded gold-leaf clusters. */
+.leaf-flourish {
+    width: 140px;
+    height: 200px;
+    background-color: rgba(150, 116, 60, 0.45);
+    border-radius: 50% 14% 50% 14%;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgba(150, 116, 60, 0.65);
+    border-right-color: rgba(150, 116, 60, 0.65);
+    border-top-color: rgba(150, 116, 60, 0.65);
+    border-bottom-color: rgba(150, 116, 60, 0.65);
+    opacity: 0.85;
+}
+
+.leaf-flourish--left {
+    rotate: -18deg;
+    margin-right: -28px;
+}
+
+.leaf-flourish--right {
+    rotate: 18deg;
+    scale: -1 1;
+    margin-left: -28px;
+}
+
+/* Decorative ink rule under the title. */
+.title-underline {
+    width: 360px;
+    height: 2px;
+    background-color: rgba(46, 32, 22, 0.55);
+    margin-top: 12px;
+    margin-bottom: 18px;
+    border-radius: 1px;
+}
+
+/* ── Tagline ───────────────────────────────────────────────────────────── */
+.tagline-text {
+    -unity-text-align: middle-center;
+    color: rgb(86, 64, 44);
+    font-size: 22px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    margin-bottom: 56px;
+}
+
+/* ── Button stack ──────────────────────────────────────────────────────── */
+.button-stack {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-button {
+    -unity-text-align: middle-center;
+    color: rgb(46, 32, 22);
+    background-color: rgba(255, 255, 255, 0);
+    background-image: none;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    font-size: 44px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    transition-property: color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+
+.menu-button:hover {
+    color: rgb(150, 116, 60);
+    scale: 1.04 1.04;
+}
+
+.menu-button:focus {
+    color: rgb(150, 116, 60);
+}
+
+.menu-button:active {
+    color: rgb(46, 32, 22);
+    translate: 0 2px;
+    scale: 0.98 0.98;
+}
+
+/* ── Version stamp ─────────────────────────────────────────────────────── */
+.version-text {
+    position: absolute;
+    right: 28px;
+    bottom: 22px;
+    color: rgba(46, 32, 22, 0.55);
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-font-style: italic;
+}

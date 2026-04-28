@@ -498,6 +498,7 @@ MonoBehaviour:
   proceedButton: {fileID: 95000004}
   resultPanel: {fileID: 90000000}
   statusText: {fileID: 100000003}
+  memoCard: {fileID: 0}
   tracingMinigame: {fileID: 2045098645}
 --- !u!1 &45000000
 GameObject:
@@ -551,6 +552,10 @@ MonoBehaviour:
     request: 
     trueGoal: 
     constraint: 
+  currentMemo:
+    purpose: 
+    personality: 
+    element: 
   availableMaterials: []
   inventory: []
   playerGold: 500
@@ -562,6 +567,11 @@ MonoBehaviour:
     imagePrompt: 
     wandImage: {fileID: 0}
   craftingQualityGrade: 65
+  currentDay: 1
+  peakReputation: 0
+  wandsCrafted: 0
+  lettersReceived: 0
+  bankruptedOnDay3: 0
 --- !u!1 &50000000
 GameObject:
   m_ObjectHideFlags: 0
@@ -4386,6 +4396,71 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &519482199
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 519482202}
+  - component: {fileID: 519482201}
+  - component: {fileID: 519482200}
+  m_Layer: 0
+  m_Name: MinigameUIDocument
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &519482200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519482199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d267609f90788a946a8dbefcf1961bc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  document: {fileID: 519482201}
+--- !u!114 &519482201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519482199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: b84bcad57eb1830478ad7a5ff5833b1f, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: ad46a3019ad30bf49bbd4568b27fe624, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!4 &519482202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519482199}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1527363997
 GameObject:
   m_ObjectHideFlags: 0
@@ -4577,15 +4652,19 @@ MonoBehaviour:
   minigamePanel: {fileID: 2045098643}
   roundText: {fileID: 72766165}
   instructionText: {fileID: 1527363999}
+  chromeController: {fileID: 519482200}
   mistSpeed: 0.12
-  waypointHoldTime: 0.4
   pathTolerance: 40
-  maxTotalRetries: 9
   pathColor: {r: 0.31, g: 0.93, b: 0.97, a: 1}
   pathGlowColor: {r: 0.31, g: 0.93, b: 0.97, a: 0.25}
+  tracedColor: {r: 0.47, g: 0.71, b: 1, a: 0.95}
   mistColor: {r: 0.9, g: 0.15, b: 0.15, a: 0.7}
   cursorColor: {r: 1, g: 1, b: 1, a: 0.95}
-  waypointColor: {r: 0.31, g: 0.93, b: 0.97, a: 0.5}
+  gateColor: {r: 0.95, g: 0.78, b: 0.4, a: 0.95}
+  holdGateColor: {r: 0.55, g: 0.85, b: 1, a: 0.95}
+  accentGateColor: {r: 0.95, g: 0.5, b: 0.85, a: 0.95}
+  gateClearedColor: {r: 0.45, g: 0.95, b: 0.55, a: 0.65}
+  holdPreviewColor: {r: 0.45, g: 0.95, b: 0.55, a: 0.22}
 --- !u!114 &2045098646
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4633,3 +4712,4 @@ SceneRoots:
   - {fileID: 30000001}
   - {fileID: 40000001}
   - {fileID: 45000001}
+  - {fileID: 519482202}

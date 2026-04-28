@@ -1,0 +1,61 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="MaterialMarket.uss" />
+
+    <ui:VisualElement name="market-root" class="market-root" picking-mode="Ignore">
+
+        <!-- ── Top bar ───────────────────────────────────────────── -->
+        <ui:VisualElement name="market-topbar" class="market-topbar">
+            <ui:Button name="market-back" text="◀" class="market-back" />
+
+            <ui:VisualElement class="market-title-plate">
+                <ui:Label name="market-title" text="Market" class="market-title" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="market-gold" class="market-gold">
+                <ui:VisualElement class="coin-icon" />
+                <ui:Label name="gold-amount" text="0" class="gold-amount" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Body ──────────────────────────────────────────────── -->
+        <ui:VisualElement class="market-body">
+
+            <!-- Memo column (replaces the category column from the references) -->
+            <ui:VisualElement class="market-memo-panel">
+                <ui:Label text="Your memo" class="memo-heading" />
+
+                <ui:VisualElement class="memo-slot">
+                    <ui:Label text="Purpose" class="memo-label" />
+                    <ui:Label name="memo-purpose" text="—" class="memo-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="memo-slot">
+                    <ui:Label text="Personality" class="memo-label" />
+                    <ui:Label name="memo-personality" text="—" class="memo-value" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="memo-slot">
+                    <ui:Label text="Element" class="memo-label" />
+                    <ui:Label name="memo-element" text="—" class="memo-value" />
+                </ui:VisualElement>
+
+                <ui:Label text="✦ glyph hints when a material aligns with your memo." class="memo-footnote" />
+            </ui:VisualElement>
+
+            <!-- Cards area -->
+            <ui:VisualElement class="market-cards">
+                <ui:Label text="— Monster Cores —" class="market-section-label" />
+                <ui:VisualElement name="core-row" class="market-card-row" />
+
+                <ui:Label text="— Woods —" class="market-section-label" />
+                <ui:VisualElement name="wood-row" class="market-card-row" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Footer ────────────────────────────────────────────── -->
+        <ui:VisualElement class="market-footer">
+            <ui:Label name="market-status" text="Waiting..." class="market-status" />
+            <ui:Button name="market-proceed" text="Begin Crafting →" class="market-proceed" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

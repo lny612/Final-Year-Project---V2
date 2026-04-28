@@ -56,6 +56,19 @@ public class MaterialGenerator : MonoBehaviour
     [Tooltip("Prefab instantiated once per material.")]
     public GameObject materialCardPrefab;
 
+    // ── UI Toolkit (cozy market) ───────────────────────────────────
+    // TODO-EDITOR: In MaterialGeneratorTest scene, add a UIDocument GameObject
+    //   whose Source Asset = Assets/UI/Market/MaterialMarket.uxml and whose
+    //   Panel Settings = a new "MarketPanelSettings" asset (Create > UI Toolkit
+    //   > Panel Settings, Scale With Screen Size 1920x1080, Match 0.5).
+    //   Add a MaterialMarketUI component to the same GameObject, drop the
+    //   UIDocument into its Ui Document field, drop MaterialCard.uxml into its
+    //   Card Template field, then drag the GameObject into the field below.
+    //   Disable the legacy Canvas hierarchy in the scene once this is wired.
+    [Header("UI — Toolkit (new cozy market)")]
+    [Tooltip("If assigned, market display routes through UI Toolkit. The legacy UGUI fields above are still updated for backward compatibility but the new screen reads from this controller.")]
+    public MaterialMarketUI marketUI;
+
     // ── Private state ──────────────────────────────────────────────
 
     private bool _busy;
@@ -63,6 +76,13 @@ public class MaterialGenerator : MonoBehaviour
     private readonly List<MaterialCardUI> _woodCards = new();
     private Color _goldDefaultColor = Color.white;
     private Coroutine _goldFlashCoroutine;
+
+    // Flat ordered list mirroring the UI Toolkit card grid.
+    // Indices 0..2 = cores, 3..5 = woods. Used to resolve buy clicks coming
+    // from MaterialMarketUI.OnBuyClicked.
+    private const int CORE_SLOTS = 3;
+    private readonly List<MaterialData> _orderedMaterials = new();
+    private readonly bool[] _orderedSoldOut = new bool[6];
 
     // ── Customer generation prompts ────────────────────────────────
     // (Identical to CustomerGenerator.cs — kept here so this script is self-contained.)
@@ -250,8 +270,9 @@ Use exactly this structure:
         if (goldText != null)
         {
             _goldDefaultColor = goldText.color;
-            UpdateGoldDisplay();
         }
+        UpdateGoldDisplay();
+
         if (proceedButton != null)
         {
             proceedButton.interactable = false;
@@ -261,6 +282,17 @@ Use exactly this structure:
         if (backButton != null)
             backButton.onClick.AddListener(
                 () => GameManager.Instance?.LoadScene(GameManager.SCENE_CUSTOMER));
+
+        if (marketUI != null)
+        {
+            marketUI.OnBackClicked    += () => GameManager.Instance?.LoadScene(GameManager.SCENE_CUSTOMER);
+            marketUI.OnProceedClicked += () => GameManager.Instance?.LoadScene(GameManager.SCENE_CRAFTING);
+            marketUI.OnBuyClicked     += OnBuyByGlobalIndex;
+            marketUI.RefreshMemo(GameManager.Instance?.currentMemo);
+            marketUI.SetGold(GameManager.Instance != null ? GameManager.Instance.playerGold : 0);
+            marketUI.SetProceedEnabled(false);
+            marketUI.SetStatus("Waiting...");
+        }
 
         // Auto-start if arriving from CustomerGenerator with a customer already set
         if (GameManager.Instance?.currentCustomer != null
@@ -338,12 +370,23 @@ Use exactly this structure:
         var woods = materials.FindAll(m => m.materialType == "wood");
         InstantiateCards(cores, coreCardContainer, _coreCards);
         InstantiateCards(woods, woodCardContainer, _woodCards);
+
+        // Mirror the same lists into the UI Toolkit market and rebuild
+        // the global-index → MaterialData mapping used by buy clicks.
+        _orderedMaterials.Clear();
+        _orderedMaterials.AddRange(cores);
+        _orderedMaterials.AddRange(woods);
+        for (int i = 0; i < _orderedSoldOut.Length; i++) _orderedSoldOut[i] = false;
+        marketUI?.BuildCards(cores, woods);
+
         ApplyMemoHints(cores, woods);
 
         // Step 5 — Queue all image generation requests in parallel
-        var queue = new List<(MaterialCardUI ui, MaterialData data)>();
-        for (int i = 0; i < _coreCards.Count && i < cores.Count; i++) queue.Add((_coreCards[i], cores[i]));
-        for (int i = 0; i < _woodCards.Count && i < woods.Count; i++) queue.Add((_woodCards[i], woods[i]));
+        var queue = new List<(MaterialCardUI ui, MaterialData data, int globalIndex)>();
+        for (int i = 0; i < cores.Count; i++)
+            queue.Add((i < _coreCards.Count ? _coreCards[i] : null, cores[i], i));
+        for (int i = 0; i < woods.Count; i++)
+            queue.Add((i < _woodCards.Count ? _woodCards[i] : null, woods[i], CORE_SLOTS + i));
 
         int completed = 0;
         int total = queue.Count;
@@ -351,14 +394,16 @@ Use exactly this structure:
 
         for (int i = 0; i < total; i++)
         {
-            var (cardUI, mat) = queue[i];
+            var (cardUI, mat, globalIndex) = queue[i];
+            int capturedIndex = globalIndex;
             StartCoroutine(RunImageGeneration(mat.imagePrompt, tex =>
             {
                 completed++;
                 if (tex != null)
                 {
                     mat.generatedImage = tex;
-                    cardUI.SetImage(tex);
+                    if (cardUI != null) cardUI.SetImage(tex);
+                    marketUI?.SetCardImage(capturedIndex, tex);
                 }
                 SetStatus($"Generated image {completed} of {total}...");
             }));
@@ -781,11 +826,19 @@ Apply the four design rules. Return ONLY the JSON object.";
         var memo = GameManager.Instance?.currentMemo;
         if (memo == null) return;
 
-        for (int i = 0; i < _coreCards.Count && i < cores.Count; i++)
-            _coreCards[i].SetHintGlyph(IsHintMatch(memo.element, cores[i].elementalAffinity));
+        for (int i = 0; i < cores.Count; i++)
+        {
+            bool match = IsHintMatch(memo.element, cores[i].elementalAffinity);
+            if (i < _coreCards.Count) _coreCards[i].SetHintGlyph(match);
+            marketUI?.SetHintGlyph(i, match);
+        }
 
-        for (int i = 0; i < _woodCards.Count && i < woods.Count; i++)
-            _woodCards[i].SetHintGlyph(IsHintMatch(memo.personality, woods[i].personalityMatch));
+        for (int i = 0; i < woods.Count; i++)
+        {
+            bool match = IsHintMatch(memo.personality, woods[i].personalityMatch);
+            if (i < _woodCards.Count) _woodCards[i].SetHintGlyph(match);
+            marketUI?.SetHintGlyph(CORE_SLOTS + i, match);
+        }
     }
 
     private static bool IsHintMatch(string memoWord, string materialField)
@@ -807,31 +860,77 @@ Apply the four design rules. Return ONLY the JSON object.";
         GameManager.Instance.SpendGold(mat.price);
         GameManager.Instance.AddToInventory(mat);
         card.SetSoldOut();
+
+        // Mirror sold-out state to the UI Toolkit grid if this material lives there.
+        int idx = _orderedMaterials.IndexOf(mat);
+        if (idx >= 0)
+        {
+            _orderedSoldOut[idx] = true;
+            marketUI?.MarkSoldOut(idx);
+        }
+
+        UpdateGoldDisplay();
+        CheckProceedButton();
+    }
+
+    /// <summary>
+    /// Buy handler for the UI Toolkit market. Looks up the material by its
+    /// flat index (0..2 cores, 3..5 woods).
+    /// </summary>
+    private void OnBuyByGlobalIndex(int idx)
+    {
+        if (GameManager.Instance == null) return;
+        if (idx < 0 || idx >= _orderedMaterials.Count) return;
+        if (_orderedSoldOut[idx]) return;
+
+        var mat = _orderedMaterials[idx];
+
+        if (!GameManager.Instance.CanAfford(mat.price))
+        {
+            FlashGoldRed();
+            return;
+        }
+
+        GameManager.Instance.SpendGold(mat.price);
+        GameManager.Instance.AddToInventory(mat);
+        _orderedSoldOut[idx] = true;
+        marketUI?.MarkSoldOut(idx);
+
+        // Also flag the legacy UGUI card if it's still in the scene.
+        if (idx < CORE_SLOTS && idx < _coreCards.Count)
+            _coreCards[idx]?.SetSoldOut();
+        else if (idx >= CORE_SLOTS && (idx - CORE_SLOTS) < _woodCards.Count)
+            _woodCards[idx - CORE_SLOTS]?.SetSoldOut();
+
         UpdateGoldDisplay();
         CheckProceedButton();
     }
 
     private void UpdateGoldDisplay()
     {
-        if (goldText == null) return;
         int gold = GameManager.Instance != null ? GameManager.Instance.playerGold : 0;
-        goldText.text = $"Gold: {gold}g";
+        if (goldText != null) goldText.text = $"Gold: {gold}g";
+        marketUI?.SetGold(gold);
     }
 
     private void CheckProceedButton()
     {
-        if (proceedButton == null || GameManager.Instance == null) return;
+        if (GameManager.Instance == null) return;
         var inv = GameManager.Instance.inventory;
         bool hasCore = inv.Exists(m => m.materialType == "core");
         bool hasWood = inv.Exists(m => m.materialType == "wood");
-        proceedButton.interactable = hasCore && hasWood;
+        if (proceedButton != null) proceedButton.interactable = hasCore && hasWood;
+        marketUI?.SetProceedEnabled(hasCore && hasWood);
     }
 
     private void FlashGoldRed()
     {
-        if (goldText == null) return;
-        if (_goldFlashCoroutine != null) StopCoroutine(_goldFlashCoroutine);
-        _goldFlashCoroutine = StartCoroutine(DoFlashGoldRed());
+        if (goldText != null)
+        {
+            if (_goldFlashCoroutine != null) StopCoroutine(_goldFlashCoroutine);
+            _goldFlashCoroutine = StartCoroutine(DoFlashGoldRed());
+        }
+        marketUI?.FlashGoldRed();
     }
 
     private IEnumerator DoFlashGoldRed()
@@ -855,6 +954,10 @@ Apply the four design rules. Return ONLY the JSON object.";
             foreach (Transform c in coreCardContainer) Destroy(c.gameObject);
         if (woodCardContainer != null)
             foreach (Transform c in woodCardContainer) Destroy(c.gameObject);
+
+        _orderedMaterials.Clear();
+        for (int i = 0; i < _orderedSoldOut.Length; i++) _orderedSoldOut[i] = false;
+        marketUI?.ClearCards();
     }
 
     private void DisplayCustomer(CustomerOrder c)
@@ -981,6 +1084,7 @@ Apply the four design rules. Return ONLY the JSON object.";
     private void SetStatus(string msg)
     {
         if (statusText != null) statusText.text = msg;
+        marketUI?.SetStatus(msg);
         Debug.Log("[MaterialGenerator] " + msg);
     }
 

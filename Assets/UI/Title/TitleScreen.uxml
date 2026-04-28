@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="TitleScreen.uss" />
+
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <ui:VisualElement name="parchment" class="parchment" picking-mode="Ignore" />
+        <ui:VisualElement name="grain" class="grain" picking-mode="Ignore" />
+        <ui:VisualElement name="vignette" class="vignette" picking-mode="Ignore" />
+
+        <ui:VisualElement name="cornerArtTL" class="corner-art corner-art--tl" picking-mode="Ignore" />
+        <ui:VisualElement name="cornerArtTR" class="corner-art corner-art--tr" picking-mode="Ignore" />
+        <ui:VisualElement name="cornerArtBL" class="corner-art corner-art--bl" picking-mode="Ignore" />
+        <ui:VisualElement name="cornerArtBR" class="corner-art corner-art--br" picking-mode="Ignore" />
+
+        <ui:VisualElement name="content" class="content" picking-mode="Ignore">
+
+            <ui:VisualElement name="titleBlock" class="title-block" picking-mode="Ignore">
+                <ui:VisualElement class="leaf-flourish leaf-flourish--left" picking-mode="Ignore" />
+                <ui:Label name="titleText" class="title-text" text="The Wand&#10;Atelier" />
+                <ui:VisualElement class="leaf-flourish leaf-flourish--right" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="titleUnderline" class="title-underline" picking-mode="Ignore" />
+
+            <ui:Label name="taglineText" class="tagline-text" text="Seven days to make a name. Or lose one." />
+
+            <ui:VisualElement name="buttonStack" class="button-stack">
+                <ui:Button name="startButton" class="menu-button" text="Start" />
+                <ui:Button name="quitButton"  class="menu-button" text="Quit" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <ui:Label name="versionText" class="version-text" text="v0.1" />
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,100 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="DossierPanel.uss" />
+
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <ui:VisualElement name="woodBackdrop" class="wood-frame" picking-mode="Ignore" />
+
+        <ui:VisualElement name="parchmentPanel" class="parchment-panel">
+
+            <ui:VisualElement class="gold-corner gold-corner--tl" picking-mode="Ignore">
+                <ui:VisualElement class="gold-corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gold-corner gold-corner--tr" picking-mode="Ignore">
+                <ui:VisualElement class="gold-corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gold-corner gold-corner--bl" picking-mode="Ignore">
+                <ui:VisualElement class="gold-corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gold-corner gold-corner--br" picking-mode="Ignore">
+                <ui:VisualElement class="gold-corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="parchment-inner-border" picking-mode="Ignore" />
+
+            <ui:VisualElement name="content" class="content-row">
+
+                <ui:ScrollView name="dossierScroll" class="dossier-scroll" mode="Vertical">
+                    <ui:VisualElement name="dossierColumn" class="dossier-column">
+
+                        <ui:Label name="dossierHeading" class="dossier-heading" text="Customer Dossier" />
+                        <ui:Label name="customerName" class="dossier-name" text="—" />
+                        <ui:VisualElement class="dossier-divider" />
+
+                        <ui:VisualElement name="schoolSection" class="dossier-section">
+                            <ui:Label class="dossier-section-title" text="ELEMENT" />
+                            <ui:VisualElement name="schoolProse" class="dossier-prose" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="professionSection" class="dossier-section">
+                            <ui:Label class="dossier-section-title" text="PROFESSION" />
+                            <ui:VisualElement name="professionProse" class="dossier-prose" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="personalitySection" class="dossier-section">
+                            <ui:Label class="dossier-section-title" text="PERSONALITY" />
+                            <ui:VisualElement name="personalityProse" class="dossier-prose" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="requestSection" class="dossier-section">
+                            <ui:Label class="dossier-section-title" text="REQUEST" />
+                            <ui:VisualElement name="requestProse" class="dossier-prose" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="trueGoalSection" class="dossier-section">
+                            <ui:Label class="dossier-section-title" text="TRUE GOAL" />
+                            <ui:VisualElement name="trueGoalProse" class="dossier-prose" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="constraintSection" class="dossier-section dossier-section--quiet">
+                            <ui:Label class="dossier-section-title" text="CONSTRAINT" />
+                            <ui:Label name="constraintText" class="dossier-static-prose" text="—" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                </ui:ScrollView>
+
+                <ui:VisualElement name="memoCard" class="memo-card">
+                    <ui:VisualElement class="memo-card__seal" picking-mode="Ignore" />
+                    <ui:Label class="memo-card__title" text="Field Memo" />
+                    <ui:Label class="memo-card__hint" text="Click a word in the dossier, then a memo slot below." />
+
+                    <ui:VisualElement name="purposeRow" class="memo-row">
+                        <ui:Label class="memo-row__prompt" text="What do they really want?" />
+                        <ui:Button name="purposeSlot" class="memo-slot" text="" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="personalityRow" class="memo-row">
+                        <ui:Label class="memo-row__prompt" text="What temperament hides beneath?" />
+                        <ui:Button name="personalitySlot" class="memo-slot" text="" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="elementRow" class="memo-row">
+                        <ui:Label class="memo-row__prompt" text="What element calls to them?" />
+                        <ui:Button name="elementSlot" class="memo-slot" text="" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <ui:VisualElement name="statusBar" class="status-bar">
+            <ui:Label name="statusLabel" class="status-label" text="Waiting..." />
+            <ui:VisualElement class="status-bar__spacer" />
+            <ui:Button name="generateButton" class="primary-button primary-button--ghost" text="Summon a customer" />
+            <ui:Button name="proceedButton" class="primary-button" text="Proceed to Market" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

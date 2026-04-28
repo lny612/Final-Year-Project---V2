@@ -1,0 +1,47 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="MinigamePanel.uss" />
+
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <ui:VisualElement name="vignetteOuter" class="vignette-outer" picking-mode="Ignore" />
+        <ui:VisualElement name="vignetteInner" class="vignette-inner" picking-mode="Ignore" />
+
+        <ui:VisualElement name="titleFrame" class="title-frame" picking-mode="Ignore">
+            <ui:VisualElement class="flourish flourish--left" picking-mode="Ignore">
+                <ui:VisualElement class="flourish__bar" picking-mode="Ignore" />
+                <ui:VisualElement class="flourish__diamond" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="titleLabel" class="title-label" text="REVELIO" picking-mode="Ignore" />
+            <ui:VisualElement class="flourish flourish--right" picking-mode="Ignore">
+                <ui:VisualElement class="flourish__diamond" picking-mode="Ignore" />
+                <ui:VisualElement class="flourish__bar" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="roundPill" class="round-pill" picking-mode="Ignore">
+            <ui:Label name="roundLabel" class="round-label" text="Round 1 of 3" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="playFrame" class="play-frame" picking-mode="Ignore">
+            <ui:VisualElement class="corner corner--tl" picking-mode="Ignore">
+                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="corner corner--tr" picking-mode="Ignore">
+                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="corner corner--bl" picking-mode="Ignore">
+                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="corner corner--br" picking-mode="Ignore">
+                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="instructionBar" class="instruction-bar" picking-mode="Ignore">
+            <ui:VisualElement class="instruction-rule instruction-rule--left" picking-mode="Ignore" />
+            <ui:Label name="instructionLabel" class="instruction-label" text="Trace the rune to its end..." picking-mode="Ignore" />
+            <ui:VisualElement class="instruction-rule instruction-rule--right" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

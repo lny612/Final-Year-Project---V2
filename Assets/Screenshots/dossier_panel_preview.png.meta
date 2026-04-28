@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 33bd26a75a634f64ba4d1b883664e777
+guid: 0028ed798e7ccab46b3da74dc9c901b7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8349849333563738921
-    second: "\uC2A4\uD06C\uB9B0\uC0F7 2026-04-24 191446_0"
+      213: 8949059196952942494
+    second: dossier_panel_preview_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uC2A4\uD06C\uB9B0\uC0F7 2026-04-24 191446_0"
+      name: dossier_panel_preview_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 2553
-        height: 1508
+        width: 1280
+        height: 720
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7d4b6e045406f1c80800000000000000
-      internalID: -8349849333563738921
+      spriteID: e97925cece1713c70800000000000000
+      internalID: 8949059196952942494
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\uC2A4\uD06C\uB9B0\uC0F7 2026-04-24 191446_0": -8349849333563738921
+      dossier_panel_preview_0: 8949059196952942494
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

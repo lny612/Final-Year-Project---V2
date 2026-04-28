@@ -22,11 +22,16 @@ public class TracingMinigameUI : MonoBehaviour
     [Tooltip("The full-screen panel that covers crafting UI during the minigame.")]
     public GameObject minigamePanel;
 
-    [Tooltip("Top-center text showing 'Round N of 3'.")]
+    [Tooltip("Top-center text showing 'Round N of 3' (legacy UGUI fallback).")]
     public TMP_Text roundText;
 
-    [Tooltip("Bottom instruction text.")]
+    [Tooltip("Bottom instruction text (legacy UGUI fallback).")]
     public TMP_Text instructionText;
+
+    [Tooltip("Optional UI Toolkit chrome controller for the styled REVELIO frame.\n" +
+            "If assigned, the round + instruction text are mirrored onto the UXML labels.\n" +
+            "TODO-EDITOR: Drag MinigameUIDocument here (see MinigamePanelController.cs for setup).")]
+    public MinigamePanelController chromeController;
 
     [Header("Tuning")]
     [Tooltip("Red fill speed in normalized path-units per second.")]
@@ -35,17 +40,17 @@ public class TracingMinigameUI : MonoBehaviour
     [Tooltip("Max distance (pixels) the mouse can be from the path.")]
     public float pathTolerance = 40f;
 
-    [Header("Colors")]
-    public Color pathColor        = new Color(0.31f, 0.93f, 0.97f, 1f);    // cyan outline
-    public Color pathGlowColor    = new Color(0.31f, 0.93f, 0.97f, 0.25f);
-    public Color tracedColor      = new Color(0.2f, 0.5f, 1f, 0.85f);      // blue fill
-    public Color mistColor        = new Color(0.9f, 0.15f, 0.15f, 0.7f);   // red fill
-    public Color cursorColor      = new Color(1f, 1f, 1f, 0.95f);
-    public Color gateColor        = new Color(1f, 0.85f, 0.3f, 0.85f);     // amber — Tap gate
-    public Color holdGateColor    = new Color(0.35f, 0.9f, 1f, 0.9f);      // cyan — Hold gate
-    public Color accentGateColor  = new Color(1f, 0.4f, 0.95f, 0.9f);      // magenta — Accent gate
-    public Color gateClearedColor = new Color(0.3f, 1f, 0.3f, 0.6f);       // green cleared
-    public Color holdPreviewColor = new Color(0.3f, 1f, 0.3f, 0.22f);      // green halo — Hold target zone
+    [Header("Colors — palette tuned to mini game reference.png")]
+    public Color pathColor        = new Color(0.90f, 0.78f, 0.45f, 1.00f);  // gold rune outline
+    public Color pathGlowColor    = new Color(0.90f, 0.78f, 0.45f, 0.30f);  // gold halo
+    public Color tracedColor      = new Color(0.47f, 0.71f, 1.00f, 0.95f);  // cool rune-blue trail
+    public Color mistColor        = new Color(0.85f, 0.25f, 0.20f, 0.85f);  // ember red mist
+    public Color cursorColor      = new Color(1.00f, 0.96f, 0.85f, 1.00f);  // warm white cursor
+    public Color gateColor        = new Color(0.95f, 0.78f, 0.40f, 0.95f);  // amber-gold diamond — Tap
+    public Color holdGateColor    = new Color(0.55f, 0.85f, 1.00f, 0.95f);  // ice blue diamond — Hold
+    public Color accentGateColor  = new Color(0.95f, 0.50f, 0.85f, 0.95f);  // rose magenta diamond — Accent
+    public Color gateClearedColor = new Color(0.45f, 0.95f, 0.55f, 0.65f);  // bright green cleared
+    public Color holdPreviewColor = new Color(0.45f, 0.95f, 0.55f, 0.22f);  // green halo — Hold target zone
 
     // ── Private state ─────────────────────────────────────────────
 
@@ -116,6 +121,7 @@ public class TracingMinigameUI : MonoBehaviour
             : null;
 
         minigamePanel.SetActive(true);
+        if (chromeController != null) chromeController.SetVisible(true);
         StartCoroutine(RunAllRounds());
     }
 
@@ -146,29 +152,26 @@ public class TracingMinigameUI : MonoBehaviour
         // Compute grade and finish
         char grade = ComputeGrade(_totalSuccesses);
 
-        if (roundText != null)
-            roundText.text = $"Crafting Quality: {grade}";
-        if (instructionText != null)
-            instructionText.text = grade switch
-            {
-                'A' => "Flawless ritual!",
-                'F' => "The ritual faltered...",
-                _   => "Ritual complete."
-            };
+        SetRoundLabel($"Crafting Quality: {grade}");
+        SetInstructionLabel(grade switch
+        {
+            'A' => "Flawless ritual!",
+            'F' => "The ritual faltered...",
+            _   => "Ritual complete."
+        });
 
         yield return new WaitForSeconds(1.5f);
 
         ClearRoundVisuals();
         minigamePanel.SetActive(false);
+        if (chromeController != null) chromeController.SetVisible(false);
         _onComplete?.Invoke(grade);
     }
 
     private IEnumerator ShowTransition(int roundNumber)
     {
-        if (roundText != null)
-            roundText.text = $"Round {roundNumber} of 3";
-        if (instructionText != null)
-            instructionText.text = "Trace the path! Press the shown key at each gate.";
+        SetRoundLabel($"Round {roundNumber} of 3");
+        SetInstructionLabel("Trace the path! Press the shown key at each gate.");
 
         yield return new WaitForSeconds(1.2f);
     }
@@ -198,12 +201,10 @@ public class TracingMinigameUI : MonoBehaviour
         _cursor.WarpOsMouseToStart();
 
         // Brief countdown
-        if (instructionText != null)
-            instructionText.text = "Get ready...";
+        SetInstructionLabel("Get ready...");
         yield return new WaitForSeconds(0.8f);
 
-        if (instructionText != null)
-            instructionText.text = "Trace!";
+        SetInstructionLabel("Trace!");
 
         _cursor.SetActive(true);
         _mist.SetActive(true);
@@ -267,16 +268,28 @@ public class TracingMinigameUI : MonoBehaviour
         if (won)
         {
             _totalSuccesses++;
-            if (instructionText != null)
-                instructionText.text = "Rune sealed!";
+            SetInstructionLabel("Rune sealed!");
         }
         else
         {
-            if (instructionText != null)
-                instructionText.text = "The mist consumed the path...";
+            SetInstructionLabel("The mist consumed the path...");
         }
 
         yield return new WaitForSeconds(1f);
+    }
+
+    /// <summary>Update both the legacy UGUI roundText and the UIToolkit chrome label (if wired).</summary>
+    private void SetRoundLabel(string text)
+    {
+        if (roundText != null) roundText.text = text;
+        if (chromeController != null) chromeController.SetRoundText(text);
+    }
+
+    /// <summary>Update both the legacy UGUI instructionText and the UIToolkit chrome label (if wired).</summary>
+    private void SetInstructionLabel(string text)
+    {
+        if (instructionText != null) instructionText.text = text;
+        if (chromeController != null) chromeController.SetInstructionText(text);
     }
 
     // ── Path visual construction ──────────────────────────────────
@@ -379,7 +392,7 @@ public class TracingMinigameUI : MonoBehaviour
             if (type == GateType.Hold)    BuildHoldPreviewHalo(pos);
             if (type == GateType.Accent)  BuildAccentArrowLine(pos, accentDirs[i]);
 
-            // 2. Outer gate marker square
+            // 2. Outer gate marker — rotated 45° to read as a diamond (matches reference art).
             var go = new GameObject("Gate", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(minigamePanel.transform, false);
             _pathVisuals.Add(go);
@@ -388,6 +401,7 @@ public class TracingMinigameUI : MonoBehaviour
             rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = new Vector2(36f, 36f);
+            rt.localRotation = Quaternion.Euler(0, 0, 45f);
 
             var img = go.GetComponent<Image>();
             img.color = baseColor;
@@ -414,7 +428,8 @@ public class TracingMinigameUI : MonoBehaviour
             }
             _holdFills.Add(holdFill);
 
-            // 4. Key label (+ accent arrow suffix)
+            // 4. Key label (+ accent arrow suffix). Counter-rotate by -45° so the
+            // letter stays upright inside the diamond-rotated parent gate.
             var labelGo = new GameObject("KeyLabel", typeof(RectTransform));
             labelGo.transform.SetParent(go.transform, false);
             _pathVisuals.Add(labelGo);
@@ -424,6 +439,7 @@ public class TracingMinigameUI : MonoBehaviour
             labelRt.anchorMax = Vector2.one;
             labelRt.offsetMin = Vector2.zero;
             labelRt.offsetMax = Vector2.zero;
+            labelRt.localRotation = Quaternion.Euler(0, 0, -45f);
 
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             string text = keys[i].ToString();
@@ -461,6 +477,7 @@ public class TracingMinigameUI : MonoBehaviour
         rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = gatePos;
         rt.sizeDelta = new Vector2(52f, 52f);
+        rt.localRotation = Quaternion.Euler(0, 0, 45f); // match diamond gate
 
         var img = go.GetComponent<Image>();
         img.color = holdPreviewColor;

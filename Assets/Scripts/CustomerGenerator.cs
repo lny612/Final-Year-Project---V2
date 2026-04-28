@@ -52,6 +52,10 @@ public class CustomerGenerator : MonoBehaviour
     [Tooltip("Reading-gate UI. Proceed button enables only when the memo is filled.")]
     public MemoFillUI memoFillUI;
 
+    [Header("Memo Gate (UI Toolkit)")]
+    [Tooltip("UI Toolkit replacement for the dossier + memo. If assigned, this is preferred over memoFillUI.")]
+    public DossierPanelController dossierPanel;
+
     // ── Private state ──────────────────────────────────────────────
 
     private bool _busy;
@@ -313,9 +317,15 @@ Return ONLY the JSON object.";
                 GameManager.Instance.currentMemo     = null;
             }
 
-            // Memo gate: if wired, the player must fill the memo before Proceed
-            // enables. If not wired (standalone testing), Proceed enables immediately.
-            if (memoFillUI != null)
+            // Memo gate: prefer the UI Toolkit panel if assigned, else fall back
+            // to the legacy uGUI MemoFillUI. If neither is wired (standalone test),
+            // Proceed enables immediately.
+            if (dossierPanel != null)
+            {
+                dossierPanel.Begin(order, OnMemoComplete);
+                SetStatus("Read the dossier. Fill the memo to proceed.");
+            }
+            else if (memoFillUI != null)
             {
                 memoFillUI.Begin(order, OnMemoComplete);
                 SetStatus("Read the dossier. Fill the memo to proceed.");

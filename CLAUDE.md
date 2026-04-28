@@ -16,7 +16,7 @@ TitleScene (Start) → MorningScene (letter) → CustomerGeneratorTest →
   (day<7: MorningScene next day) | (day=7 or bankrupt: EndingScene → TitleScene/restart)
 ```
 
-0. **TitleScene** — `TitleScreenUI`. Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene` (day 1 opens with the aunt's intro letter). Quit exits the app / stops play mode.
+0. **TitleScene** — `TitleScreenController` (UI Toolkit, parchment-style menu via `Assets/UI/Title/TitleScreen.uxml`+`.uss`). Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene` (day 1 opens with the aunt's intro letter). Quit exits the app / stops play mode. Legacy `TitleScreenUI.cs` (uGUI) still in repo but its Canvas widgets are disabled — kept for fallback/reference only.
 1. **MorningScene** — `MorningLetterUI` pulls a reputation-tiered letter from `LetterLibrary` and types it out over a parchment panel. On rent-due mornings (days 3 and 6) a landlord rent-reminder is shown after the main letter. Continue button → customer scene.
 2. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint
 3. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood
@@ -160,6 +160,27 @@ The **7-day progression subsystem** (morning letters, rent days, multi-ending) i
 - See `Docs/SevenDayProgression.md` for full plan + verification steps.
 
 The **memo-gated dossier reading subsystem** (2026-04-24) is fully coded but needs scene wiring. In `CustomerGeneratorTest` the player must distil the 7 dossier fields into a 3-entry memo (Purpose / Personality / Element) by clicking content words in the dossier prose and assigning them to memo slots; Proceed is gated on memo completion. The memo then replaces the full dossier as the on-screen reference in `MaterialGeneratorTest` and `CraftingScene`, and drives ✦ match-hint glyphs on materials whose affinity overlaps the memo. Scripts: `PlayerMemo.cs`, `MemoFillUI.cs`, `MemoCardUI.cs` (+ hooks in `CustomerGenerator`, `MaterialGenerator`, `CraftingManager`, `MaterialCardUI`, `GameManager`). See `Docs/MemoFeature.md` for the TODO-EDITOR wiring list.
+
+### UI Toolkit Migration (in progress, 2026-04-25)
+
+The project is migrating from uGUI (Canvas + RectTransform + Image/TMP) to **UI Toolkit** (UIDocument + UXML + USS). Per-scene wiring uses one `*UIDocument` GameObject per scene with a UXML source and a controller MonoBehaviour. Legacy uGUI Canvas children stay in scene hierarchies but are disabled (not deleted) so they can be reverted if needed.
+
+**Folder layout:** `Assets/UI/<feature>/<feature>Panel.uxml`, `<feature>Panel.uss`, `<feature>PanelSettings.asset`. Folders so far: `Title/`, `Dossier/`, `Market/`, `Minigame/`.
+
+**Scene status (2026-04-25):**
+- ✅ `TitleScene` — wired. `TitleUIDocument` GameObject hosts `UIDocument` + `TitleScreenController` (new script). Pulls UXML `Assets/UI/Title/TitleScreen.uxml`, USS `TitleScreen.uss`, panel `TitlePanelSettings.asset` (ScaleWithScreenSize 1920×1080, match 0.5). Visual style: Potion-Craft-style parchment with leaf flourishes flanking a stacked serif title; only Start + Quit buttons. Old `TitleScreenUI` still attached to Canvas but Canvas children all disabled.
+- ✅ `CustomerGeneratorTest` — wired. `DossierUIDocument` hosts `UIDocument` + `DossierPanelController`. UXML `DossierPanel.uxml` + USS `DossierPanel.uss` + `DossierPanelSettings.asset` (ConstantPixelSize, refDpi 96). `CustomerGenerator.dossierPanel` field points at the controller; the controller mirrors `MemoFillUI` gameplay (click word → click slot, three slots = memo complete = Proceed enabled). Old uGUI dossier text fields disabled under Canvas.
+- 🟡 `MaterialGeneratorTest` (Market) — UXML/USS/PanelSettings authored in `Assets/UI/Market/` and `MaterialMarketUI.cs` exists, but no `*UIDocument` GameObject wired in scene yet.
+- 🟡 `CraftingScene` (Minigame panel) — UXML/USS/PanelSettings authored in `Assets/UI/Minigame/` and `MinigamePanelController.cs` exists, but no `*UIDocument` GameObject wired in scene yet.
+- ❌ `MorningScene`, `EvaluationScene`, `EndingScene` — still uGUI only.
+
+**Pattern** (used in both wired scenes):
+1. `Assets/UI/<feature>/<feature>PanelSettings.asset` — created via `execute_code` with `PanelSettings` + `AssetDatabase.CreateAsset`.
+2. Scene-root GameObject `<Feature>UIDocument` with `UIDocument` (panelSettings + sourceAsset) + `<Feature>...Controller`.
+3. Controller does `document.rootVisualElement.Q<>()` lookups in a `Bootstrap()` called from `OnEnable`. Click handlers via `button.clicked += …`.
+4. Scene's old uGUI children → `SetActive(false)` (kept, not deleted, per migration plan).
+
+**UI Toolkit gotcha:** when wiring a UIDocument's `panelSettings`/`sourceAsset` via MCP `set_property`, the visual tree doesn't auto-refresh in the editor — toggle `doc.enabled = false; doc.enabled = true;` to force a rebuild before `Q<>()` lookups will succeed at edit time. At play time `OnEnable` does this automatically.
 
 ### Reward Formula (in EvaluationManager)
 

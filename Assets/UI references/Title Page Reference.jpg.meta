@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c3b69fa1b663a8b4ba1a1883140174f9
+guid: 1fc8f003280b07144befc3f0a297a62c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3232283474643339649
-    second: "\uC2A4\uD06C\uB9B0\uC0F7 2026-04-24 201426_0"
+      213: -1923475988716503646
+    second: Title Page Reference_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uC2A4\uD06C\uB9B0\uC0F7 2026-04-24 201426_0"
+      name: Title Page Reference_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1932
-        height: 864
+        width: 686
+        height: 386
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f76b4802e4f9423d0800000000000000
-      internalID: -3232283474643339649
+      spriteID: 2ad3f8e77c07e45e0800000000000000
+      internalID: -1923475988716503646
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\uC2A4\uD06C\uB9B0\uC0F7 2026-04-24 201426_0": -3232283474643339649
+      Title Page Reference_0: -1923475988716503646
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
