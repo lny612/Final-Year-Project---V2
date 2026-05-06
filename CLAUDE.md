@@ -20,10 +20,10 @@ TitleScene (Start) → MorningScene (letter) → CustomerGeneratorTest →
 
 Scene files live at `Assets/Scenes/{0..7}.{Name}.unity` — the `N.` prefix orders them in the Project window. `SceneManager.LoadScene` matches by suffix, so `GameManager.SCENE_*` constants stay un-prefixed (`"TitleScene"`, `"MinigameTest"`, etc.). Build settings ordered: 0 Title · 1 Morning · 2 Customer · 3 Material · 4 Crafting · **5 MinigameTest (production)** · 6 Evaluation · 7 Ending.
 
-0. **TitleScene** — `TitleScreenController` (UI Toolkit, parchment-style menu via `Assets/UI/Title/TitleScreen.uxml`+`.uss`). Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene` (day 1 opens with the aunt's intro letter). Quit exits the app / stops play mode. Legacy `TitleScreenUI.cs` (uGUI) still in repo but its Canvas widgets are disabled — kept for fallback/reference only.
-1. **MorningScene** — `MorningScreenController` (UI Toolkit, `Assets/UI/Morning/MorningScene.{uxml,uss}`). Background uses `Assets/Texture/Morning Scene.png` (cozy fantasy shop interior). HUD: parchment day plaque (top-left), gold purse (top-right), centered parchment letter panel with wax seal + ScrollView body, "Read the Dossier" continue button. Pulls a reputation-tiered letter from `LetterLibrary` and types it out via the typewriter. On rent-due mornings (days 3 and 6) the landlord rent-reminder is queued after the main letter. Legacy `MorningLetterUI` Canvas children disabled.
-2. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint. UI Toolkit dossier panel (`DossierPanelController`) gates Proceed on a 3-entry memo.
-3. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood. UXML/USS authored but UIDocument GO not yet wired (still uGUI driver).
+0. **TitleScene** — `TitleScreenController` (UI Toolkit, parchment-style menu via `Assets/UI/Title/TitleScreen.uxml`+`.uss`). Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene`. Quit exits the app / stops play mode. Legacy `TitleScreenUI.cs` (uGUI) still in repo but its Canvas widgets are disabled — kept for fallback/reference only.
+1. **MorningScene** — `MorningScreenController` (UI Toolkit). Pulls a reputation-tiered letter from `LetterLibrary` and types it out. On rent-due mornings (days 3 and 6) the landlord rent-reminder is queued after the main letter. Customer pre-generation kicks off here so the next scene loads instantly. Legacy `MorningLetterUI` Canvas children disabled.
+2. **CustomerGeneratorTest** — GPT-4o generates (or consumes pre-gen) a fantasy customer; UI Toolkit dossier panel (`DossierPanelController`) gates Proceed on a 4-entry memo (Element / Personality / Purpose / Reinforcement). Material pre-generation (text + 6 ComfyUI images) cascades on the persistent GameManager host so MaterialGeneratorTest opens with images already streaming.
+3. **MaterialGeneratorTest** — UI Toolkit market (`MaterialMarketUI` on `MarketUIDocument`). Consumes pre-genned materials when available, polls for in-flight images. Woods-first gating: only one wood may be bought, and cores stay hidden until the player picks one. Memo-match highlighting tints description words blue inline (`MemoStemmer`).
 4. **CraftingScene** — Player assigns materials to 3 slots (2 core + 1 wood). `CraftingManager` is *selection only* now — on confirm it stashes picks on `GameManager.chosenCore1/Core2/Wood`, removes them from inventory, and calls `LoadScene(SCENE_MINIGAME)`. UI Toolkit workbench via `CraftingWorkbenchUI`.
 5. **MinigameTest** — production scene that hosts the tracing ritual and the wand-generation pipeline in parallel (see "MinigameScene handoff" below). `MinigameSceneRunner` orchestrates both; on completion it loads `EvaluationScene`.
 6. **EvaluationScene** — GPT-4o scores the wand match (0–100). `EvaluationResultController` (UI Toolkit) drives a theatrical reveal: banner → wand → scoreboard (Conjuring/Materials/Customer Fit/Reward) → final letter Grade. Companion VFX: `WandSparkles` ParticleSystem + `PostFX Volume` (URP Bloom). Day-progress dots are still computed but not part of the new reveal; rent-payment modal pops on days 3/6 before advance. Day 7 or bankruptcy routes to EndingScene.
@@ -44,9 +44,9 @@ Additional scenes: `ComfyUITest` (standalone image-generation test), `SampleScen
 - **GameManager** is a `DontDestroyOnLoad` singleton holding all cross-scene state (customer, materials, inventory, gold, reputation, wand result, craftingQualityGrade). Access via `GameManager.Instance`.
 - Each scene has its own manager script (CustomerGenerator, MaterialGenerator, CraftingManager, EvaluationManager) that owns its UI references and API call coroutines
 - All OpenAI calls use `UnityWebRequest` POST to chat completions, expecting JSON-only responses parsed with `Newtonsoft.Json.Linq`
-- ComfyUI integration: POST workflow JSON to `/prompt` → poll `/history/{id}` every 1.5s (60s timeout) → GET `/view` to download image as Texture2D. All three image-gen scripts have a `FindNodeByClass` fallback that resolves nodes by `class_type` if the configured node ID doesn't match the workflow (guards against stale Inspector overrides).
-- **Duplicated helpers** — `LoadApiKey`, `PostOpenAI`, and `StripCodeFences` are copy-pasted in MaterialGenerator, CraftingManager, and EvaluationManager. CustomerGenerator has the same logic inlined differently. When modifying API call helpers, update all four scene manager files.
-- **Duplicated prompts** — `MaterialGenerator.cs` contains a full copy of the customer generation prompts from `CustomerGenerator.cs` (noted in a code comment: "kept here so this script is self-contained"). If you change customer generation prompts, update both files.
+- ComfyUI integration: POST workflow JSON to `/prompt` → poll `/history/{id}` → GET `/view` to download image as Texture2D. `MaterialService.FindNodeByClass` resolves node ids by `class_type` when a stale Inspector override doesn't match.
+- **Shared services** — Customer + material generation prompts and HTTP helpers live in two static classes: `CustomerService.cs` (customer text) and `MaterialService.cs` (material text + 6-parallel-image pipeline + `PreGenAsync` convenience entry). Scene managers (`MorningScreenController`, `CustomerGenerator`, `MaterialGenerator`) call into these so prompts can't drift between scripts.
+- **Pre-generation pipeline** — `MorningScreenController` pre-generates the customer the moment the morning scene loads; on success it cascades into `MaterialService.PreGenAsync`. Both coroutines run on the persistent `GameManager` (DontDestroyOnLoad) so they survive scene transitions. Downstream scenes consume `GameManager.pendingCustomer` / `pendingMaterials` and skip their own roundtrips. `EvaluationManager` runs its own evaluation API call — that one is per-wand and not pre-genable.
 
 ### External Dependencies
 
@@ -87,7 +87,7 @@ Five tightly-coupled scripts + one static content file drive the day/letter/rent
 - `GameManager.cs` — owns all progression state (`currentDay`, `peakReputation`, `wandsCrafted`, `lettersReceived`, `bankruptedOnDay3`) + the rent/ending constants. Provides `AdvanceToNextDay()`, `IsRentDueToday()`, `GetRentDueToday()`, `DetermineEnding()`, `ResetForNewPlaythrough()`. Editor-only `[ContextMenu]` shortcuts jump to specific days / rep tiers / empty wallets for test speedup.
 - `LetterLibrary.cs` — pure static class (no MonoBehaviour, no `.asset` dependency). Holds 19 hand-authored letters: the day-1 intro from the player's aunt, plus Low/Mid/High variants for days 2–7, plus 2 landlord rent-reminders. `GetMorningLetter(day, tier)` and `GetRentReminder(day, amount)` are the two lookups. `LetterContent` is a struct (sender enum, from, subject, body).
 - `TypewriterText.cs` — reusable char-by-char reveal via TMP's `maxVisibleCharacters` (so rich-text tags like `<b>`/`<i>` don't split mid-tag). Click-anywhere-to-skip. Used by both `MorningLetterUI` and `EndingManager`.
-- `MorningLetterUI.cs` — scene controller for `MorningScene`. Reads `GameManager.currentDay` + reputation tier, fetches the letter, tints a wax seal by sender type (Aristocrat=gold, Royal=purple, Brigand=black, etc.), plays the typewriter. Rent-due mornings queue a second landlord letter after the main one.
+- `MorningScreenController.cs` — UI Toolkit scene controller for `MorningScene`. Reads `GameManager.currentDay` + reputation tier, fetches the letter, tints a wax seal by sender type, plays the typewriter, and kicks off customer + material pre-generation in the background. (Legacy `MorningLetterUI.cs` is still attached to the disabled Canvas children for revert; it does not run.)
 - `DayProgressUI.cs` — calendar-dot header on the evaluation screen (7 `Image` dots + optional rent-coin icons above days 3/6). `Refresh()` colors past/today/future states from `GameManager.currentDay`.
 - `RentPaymentUI.cs` — modal on evaluation scene. `Show(rentAmount, callback)`: if gold ≥ rent, enables Pay/Plead buttons (both → Paid, flavor-only); if gold < rent, enables "Accept fate" → Bankrupt. Sets `bankruptedOnDay3` so EndingManager can pick the right variant.
 - `EndingManager.cs` — scene controller for `EndingScene`. Resolves `EndingType` (Royal/Rival/Slum/BankruptEarly/BankruptLate), loads `Resources/EndingArt/{name}.png` (graceful placeholder tint if missing), fades in via `CanvasGroup`, types out hand-written ending dialogue (~5 lines each, verbatim strings in the script), displays stats ("Days survived · Letters · Peak rep · Wands"), restart button calls `ResetForNewPlaythrough()` then loads `MorningScene`.
@@ -116,7 +116,7 @@ If `tracingMinigame` is null (e.g. broken Inspector wiring), the minigame is ski
 
 ## Scripts Location
 
-All C# scripts are in `Assets/Scripts/`. Flat structure, no subdirectories. Notable scripts added during the UI Toolkit / scene-split push: `MorningScreenController`, `CraftingWorkbenchUI`, `MinigameSceneRunner`, `EvaluationResultController`. The legacy `MinigameTestRunner.cs` test harness was deleted — `MinigameSceneRunner` is the production replacement.
+All C# scripts are in `Assets/Scripts/`. Flat structure, no subdirectories. Notable controllers from the UI Toolkit push: `MorningScreenController`, `DossierPanelController`, `MaterialMarketUI`, `CraftingWorkbenchUI`, `MinigamePanelController`, `MinigameSceneRunner`, `EvaluationResultController`. Static service helpers: `CustomerService`, `MaterialService`, `MemoStemmer`, `LetterLibrary`. **Deleted in the legacy cleanup pass:** `MaterialCardUI.cs`, `MemoCardUI.cs`, `MemoFillUI.cs`, `MinigameTestRunner.cs`, plus `Assets/Prefabs/MaterialCard.prefab`. `TitleScreenUI.cs` and `MorningLetterUI.cs` are kept on disabled Canvas children for revert/reference only.
 
 ## Build & Run
 
@@ -156,8 +156,8 @@ Key non-default packages: `com.unity.nuget.newtonsoft-json` (JSON parsing), `com
 ## AI Team Pipeline
 
 2 specialist programmers + 1 technical artist work in **parallel via worktree-isolated sub-agents**:
-- **systems-programmer** — GameManager, scene managers (CustomerGenerator, MaterialGenerator, CraftingManager, EvaluationManager), data classes, API integrations, ComfyUITest
-- **ui-programmer** — MaterialCardUI, MaterialTooltip, TooltipTrigger, new UI components
+- **systems-programmer** — GameManager, scene managers (CustomerGenerator, MaterialGenerator, CraftingManager, EvaluationManager), CustomerService / MaterialService, data classes, API integrations, ComfyUITest
+- **ui-programmer** — DossierPanelController, MaterialMarketUI, CraftingWorkbenchUI, EvaluationResultController, MinigamePanelController, new UI components
 - **technical-artist** — VFX, shaders, particles, materials (new files only)
 
 Workflow: Leader -> Designer (design doc) -> Programmers + Technical Artist (parallel worktrees) -> Review.
@@ -172,23 +172,23 @@ The **7-day progression subsystem** (morning letters, rent days, multi-ending) i
 - Replace placeholder art for owl (`OwlImage`), wax seal (`WaxSeal`), background parchment, etc. as desired — all are tinted Images right now.
 - See `Docs/SevenDayProgression.md` for full plan + verification steps.
 
-The **memo-gated dossier reading subsystem** (2026-04-24) is fully coded but needs scene wiring. In `CustomerGeneratorTest` the player must distil the 7 dossier fields into a 3-entry memo (Purpose / Personality / Element) by clicking content words in the dossier prose and assigning them to memo slots; Proceed is gated on memo completion. The memo then replaces the full dossier as the on-screen reference in `MaterialGeneratorTest` and `CraftingScene`, and drives ✦ match-hint glyphs on materials whose affinity overlaps the memo. Scripts: `PlayerMemo.cs`, `MemoFillUI.cs`, `MemoCardUI.cs` (+ hooks in `CustomerGenerator`, `MaterialGenerator`, `CraftingManager`, `MaterialCardUI`, `GameManager`). See `Docs/MemoFeature.md` for the TODO-EDITOR wiring list.
+The **memo-gated dossier reading subsystem** is wired and shipped. `DossierPanelController` runs the gameplay: drag-select across dossier prose to highlight phrases, then click or drag the highlight onto one of four memo slots (Element / Personality / Purpose / Reinforcement). Each slot accepts multiple chips. Proceed enables when every slot has at least one chip. The completed memo lives on `GameManager.currentMemo` (`PlayerMemo` data class — string fields joined by `, ` for multi-entry slots), and is consumed by `MaterialMarketUI` (✦ match-hint glyphs + inline `MemoStemmer` blue-tint of matching description words) and `CraftingWorkbenchUI`.
 
-### UI Toolkit Migration (in progress, 2026-04-25)
+### UI Toolkit Migration
 
-The project is migrating from uGUI (Canvas + RectTransform + Image/TMP) to **UI Toolkit** (UIDocument + UXML + USS). Per-scene wiring uses one `*UIDocument` GameObject per scene with a UXML source and a controller MonoBehaviour. Legacy uGUI Canvas children stay in scene hierarchies but are disabled (not deleted) so they can be reverted if needed.
+UI Toolkit (UIDocument + UXML + USS) is the production presentation layer. Per-scene wiring uses one `*UIDocument` GameObject per scene with a UXML source and a controller MonoBehaviour.
 
-**Folder layout:** `Assets/UI/<feature>/<feature>Panel.uxml`, `<feature>Panel.uss`, `<feature>PanelSettings.asset`. Folders so far: `Title/`, `Dossier/`, `Market/`, `Minigame/`, `Morning/`, `Crafting/`, `Evaluation/`.
+**Folder layout:** `Assets/UI/<feature>/<feature>Panel.uxml`, `<feature>Panel.uss`, `<feature>PanelSettings.asset`. Folders: `Title/`, `Dossier/`, `Market/`, `Minigame/`, `Morning/`, `Crafting/`, `Evaluation/`.
 
-**Scene status (2026-04-29):**
-- ✅ `TitleScene` — `TitleUIDocument` + `TitleScreenController.cs`. Parchment menu with Start + Quit. Old `TitleScreenUI` Canvas children disabled.
-- ✅ `CustomerGeneratorTest` — `DossierUIDocument` + `DossierPanelController.cs`. Memo gameplay (click word → click slot).
-- ✅ `MorningScene` — `MorningUIDocument` + `MorningScreenController.cs`. Background `Assets/Texture/Morning Scene.png`. HUD: parchment day plaque + gold purse + centered letter panel with wax seal & ScrollView body. PanelSettings: ScaleWithScreenSize 1920×1080.
-- ✅ `EvaluationScene` — `EvaluationUIDocument` + `EvaluationResultController.cs`. Theatrical reveal (banner → wand → scoreboard → grade letter), `WandSparkles` ParticleSystem + `PostFX Volume` (URP Bloom). Legacy uGUI panels disabled.
-- ✅ `CraftingScene` workbench — `CraftingWorkbenchUIDocument` + `CraftingWorkbenchUI.cs`. Result modal removed (handoff to MinigameScene).
-- ✅ `MinigameTest` chrome — `MinigameUIDocument` + `MinigamePanelController.cs`. Wood-frame UXML/USS rebuilt; PanelSettings `sortingOrder = -10` so Canvas-hosted procedural gameplay renders on top.
-- 🟡 `MaterialGeneratorTest` — UXML/USS/PanelSettings authored, no `*UIDocument` GO yet.
-- ❌ `EndingScene` — still uGUI only.
+**Scene status:**
+- ✅ `TitleScene` — `TitleUIDocument` + `TitleScreenController`. Legacy `TitleScreenUI` Canvas children disabled.
+- ✅ `MorningScene` — `MorningUIDocument` + `MorningScreenController`. Legacy `MorningLetterUI` Canvas children disabled.
+- ✅ `CustomerGeneratorTest` — `DossierUIDocument` + `DossierPanelController`. Disabled legacy Canvas children kept for revert.
+- ✅ `MaterialGeneratorTest` — `MarketUIDocument` + `MaterialMarketUI`. Disabled legacy Canvas was deleted in the cleanup pass; the prefab `Assets/Prefabs/MaterialCard.prefab` and the `MaterialCardUI.cs` script were deleted as orphans.
+- ✅ `CraftingScene` — `CraftingWorkbenchUIDocument` + `CraftingWorkbenchUI`.
+- ✅ `MinigameTest` — `MinigameUIDocument` + `MinigamePanelController`. PanelSettings `sortingOrder = -10` so Canvas-hosted procedural gameplay renders on top.
+- ✅ `EvaluationScene` — `EvaluationUIDocument` + `EvaluationResultController`. Dead legacy widgets on the Canvas (Background/LeftPanel/CenterPanel/RightPanel/StatusText) were deleted; only `DayProgressHeader` and `RentPaymentPanel` remain on the Canvas (driven by `DayProgressUI` / `RentPaymentUI`).
+- ❌ `EndingScene` — still uGUI only (`EndingManager` directly drives Canvas widgets).
 
 **Pattern** (used in both wired scenes):
 1. `Assets/UI/<feature>/<feature>PanelSettings.asset` — created via `execute_code` with `PanelSettings` + `AssetDatabase.CreateAsset`.
@@ -210,7 +210,7 @@ final      = base * qualityMultiplier   // A=1.0, B=0.85, C=0.7, F=0.4
 
 - `README.md` — Mermaid architecture diagram + per-round AI call table
 - `Docs/GDD.md` — Full game mechanics and design vision
-- `Docs/MemoFeature.md` — Active-reading gate: click words from dossier prose to fill a 3-entry memo (Purpose/Personality/Element). Memo replaces the full dossier in market + crafting scenes and drives material match hints.
+- `Docs/MemoFeature.md` — Drag-to-highlight reading gate: select phrases from dossier prose, drop on memo slots. 4-slot memo (Element/Personality/Purpose/Reinforcement) drives ✦ match hints in the market and inline blue-tint of memo-matching description words.
 - `Docs/DossierSortingFeature.md` — Superseded by MemoFeature; kept for reference.
 - `.claude/rules/unity-csharp.md` — C# naming, async, JSON, UI conventions
 - `.claude/rules/file-safety.md` — What files to never touch, TODO-EDITOR format

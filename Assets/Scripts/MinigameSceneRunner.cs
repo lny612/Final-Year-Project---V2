@@ -6,9 +6,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// TODO-EDITOR: Wire 5.MinigameTest.unity (now the production minigame scene)
-//   1. Replace the existing "Test Runner" GameObject's MinigameTestRunner
-//      component with this MinigameSceneRunner.
+// TODO-EDITOR: Wire 5.MinigameTest.unity (production minigame scene)
+//   1. The "Test Runner" GameObject hosts this script.
 //   2. Wire `tracingMinigame` to the TracingMinigameUI on Canvas/Minigame Panel.
 //   3. (Optional) Wire `statusText` to a TMP_Text on Canvas — surfaces
 //      "Forging the wand..." while the OpenAI/ComfyUI calls run in parallel.

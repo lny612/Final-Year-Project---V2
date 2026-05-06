@@ -42,7 +42,7 @@ Assign every file change to exactly one programmer:
 | File | Owner | Changes |
 |------|-------|---------|
 | GameManager.cs | systems-programmer | Add new shared state fields |
-| MaterialCardUI.cs | ui-programmer | Add new display method |
+| MaterialMarketUI.cs | ui-programmer | Add new display method |
 ```
 
 ### Interface Contracts

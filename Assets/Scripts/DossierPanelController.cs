@@ -124,7 +124,7 @@ public class DossierPanelController : MonoBehaviour
     private bool   _bootstrapped;
     private Action _onComplete;
 
-    // ── Stop-words (mirror of MemoFillUI; keep in sync for parity) ──
+    // ── Stop-words ──────────────────────────────────────────────────
 
     private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -251,6 +251,42 @@ public class DossierPanelController : MonoBehaviour
 
     private static bool IsWordChar(char c) => char.IsLetter(c) || c == '\'' || c == '-';
 
+    /// <summary>
+    /// Convert a non-word run (whitespace + punctuation) into something UI Toolkit
+    /// will actually render with visible width. UI Toolkit's text layer trims any
+    /// run of whitespace at the start/end of a Label and collapses internal runs,
+    /// so a Label whose text is "\n" or "  " ends up width-zero and adjacent
+    /// words look glued — the Request field suffers most because GPT-4o frequently
+    /// emits embedded newlines there (its prompt example spans multiple lines).
+    /// Strategy: collapse every consecutive whitespace run (space, tab, CR, LF,
+    /// anything <see cref="char.IsWhiteSpace"/> matches) into a single non-
+    /// breaking space — preserved as a real glyph. Non-whitespace punctuation
+    /// (commas, periods, dashes, quotes) passes through untouched.
+    /// </summary>
+    private static string NormalizeWhitespaceForDisplay(string raw)
+    {
+        if (string.IsNullOrEmpty(raw)) return raw;
+        var sb = new System.Text.StringBuilder(raw.Length);
+        bool prevWasSpace = false;
+        foreach (var c in raw)
+        {
+            if (char.IsWhiteSpace(c))
+            {
+                if (!prevWasSpace)
+                {
+                    sb.Append(' ');
+                    prevWasSpace = true;
+                }
+            }
+            else
+            {
+                sb.Append(c);
+                prevWasSpace = false;
+            }
+        }
+        return sb.ToString();
+    }
+
     private void BuildSource(SourceKey key, VisualElement container, string raw)
     {
         if (container == null) return;
@@ -291,8 +327,15 @@ public class DossierPanelController : MonoBehaviour
                 while (i < raw.Length && !IsWordChar(raw[i])) i++;
                 string ws = raw.Substring(start, i - start);
 
+                // UI Toolkit Labels strip leading/trailing ASCII whitespace, which
+                // makes a Label whose content is a regular space collapse to width
+                // zero — adjacent words then look glued. Substitute NBSP for the
+                // displayed text only; the data-side text keeps the original chars
+                // so phrase commit reconstructs faithfully.
+                string display = NormalizeWhitespaceForDisplay(ws);
+
                 var wv = new WordView { text = ws, isWord = false };
-                var lbl = new Label(ws);
+                var lbl = new Label(display);
                 lbl.AddToClassList("word-static");
                 lbl.pickingMode = PickingMode.Ignore;
                 wv.element = lbl;
@@ -432,10 +475,14 @@ public class DossierPanelController : MonoBehaviour
         int lo = Mathf.Min(_highlightStart, _highlightEnd);
         int hi = Mathf.Max(_highlightStart, _highlightEnd);
 
+        // Highlight EVERY token in the range — eligible words AND the spacing /
+        // stop-word tokens between them — so the yellow swipe is continuous.
+        // Committed (already-used) tokens are excluded so prior commits stay
+        // visually struck out.
         for (int i = 0; i < _highlightField.words.Count; i++)
         {
             var w = _highlightField.words[i];
-            bool shouldHighlight = i >= lo && i <= hi && w.isWord && !w.committed;
+            bool shouldHighlight = i >= lo && i <= hi && !w.committed;
             if (shouldHighlight && !w.highlighted)
             {
                 w.highlighted = true;

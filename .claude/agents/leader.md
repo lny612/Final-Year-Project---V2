@@ -69,9 +69,10 @@ You coordinate work. You NEVER edit C# files, shaders, or Unity assets directly.
 | `CustomerOrder.cs` | systems-programmer |
 | `MaterialData.cs` | systems-programmer |
 | `WandResult.cs` | systems-programmer |
-| `MaterialCardUI.cs` | ui-programmer |
-| `MaterialTooltip.cs` | ui-programmer |
-| `TooltipTrigger.cs` | ui-programmer |
+| `MaterialMarketUI.cs` / `DossierPanelController.cs` / `CraftingWorkbenchUI.cs` / `EvaluationResultController.cs` / `MinigamePanelController.cs` / `TitleScreenController.cs` / `MorningScreenController.cs` | ui-programmer |
+| `MemoStemmer.cs` | ui-programmer |
+| `MaterialTooltip.cs` / `TooltipTrigger.cs` | ui-programmer |
+| All `Assets/UI/**/*.uxml` and `*.uss` | ui-programmer |
 | New `*VFX*`, `*Effect*`, `*Particle*`, `*.shader` files | technical-artist |
 
 ## When NOT to Parallelize

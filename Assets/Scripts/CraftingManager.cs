@@ -37,11 +37,7 @@ public class CraftingManager : MonoBehaviour
     [Header("UI — Status")]
     public TMP_Text statusText;
 
-    [Header("UI — Memo Card (pinned player memo, replaces full dossier)")]
-    [Tooltip("Read-only memo card. Shows the 3 keywords the player committed in CustomerGeneratorTest.")]
-    public MemoCardUI memoCard;
-
-    [Header("UI Toolkit (new wandcrafter's bench)")]
+    [Header("UI Toolkit (wandcrafter's bench)")]
     [Tooltip("Optional. When assigned, the legacy uGUI inventory/slots above are disabled in scene; the new UI Toolkit panel becomes the player-facing surface.")]
     public CraftingWorkbenchUI workbenchUI;
 
@@ -74,8 +70,6 @@ public class CraftingManager : MonoBehaviour
         RefreshInventoryUI();
         RefreshConfirmButton();
 
-        if (memoCard != null)
-            memoCard.Populate(GameManager.Instance?.currentMemo);
         if (workbenchUI != null)
             workbenchUI.SetMemo(GameManager.Instance?.currentMemo);
 

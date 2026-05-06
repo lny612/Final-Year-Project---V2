@@ -29,9 +29,9 @@
             <ui:VisualElement name="market-left" class="market-left">
 
                 <ui:VisualElement name="market-categories" class="market-categories">
-                    <ui:Button name="cat-cores" class="market-cat market-cat--selected" text="Cores" />
-                    <ui:VisualElement class="market-cat-divider" picking-mode="Ignore" />
-                    <ui:Button name="cat-woods" class="market-cat" text="Woods" />
+                    <ui:Button name="cat-woods" class="market-cat market-cat--selected" text="Woods" />
+                    <ui:VisualElement name="cat-divider" class="market-cat-divider hidden" picking-mode="Ignore" />
+                    <ui:Button name="cat-cores" class="market-cat hidden" text="Cores" />
                 </ui:VisualElement>
 
                 <ui:VisualElement name="market-memo-panel" class="market-memo-panel">
@@ -62,10 +62,12 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- RIGHT scrollable cards -->
+            <!-- RIGHT scrollable cards. Woods are visible at scene load; cores
+                 stay hidden until the player buys a wood (then MaterialMarketUI
+                 toggles the `hidden` class on `cat-cores` + `core-row`). -->
             <ui:ScrollView name="market-cards" class="market-cards">
-                <ui:VisualElement name="core-row" class="market-card-row" />
-                <ui:VisualElement name="wood-row" class="market-card-row hidden" />
+                <ui:VisualElement name="wood-row" class="market-card-row" />
+                <ui:VisualElement name="core-row" class="market-card-row hidden" />
             </ui:ScrollView>
         </ui:VisualElement>
 

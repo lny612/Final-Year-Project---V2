@@ -2,7 +2,7 @@ using System;
 
 /// <summary>
 /// The player's hand-written memo distilled from the customer dossier.
-/// Authored in CustomerGeneratorTest via MemoFillUI, consumed in
+/// Authored in CustomerGeneratorTest via DossierPanelController, consumed in
 /// MaterialGeneratorTest (drives material match hints) and CraftingScene
 /// (pinned as the sole on-screen reference since the full dossier is hidden).
 /// </summary>

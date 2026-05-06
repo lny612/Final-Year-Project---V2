@@ -858,10 +858,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: 'occurs in oddly '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 77d009362b5f0954f8ead73e3762c5d1, type: 2}
+  m_sharedMaterial: {fileID: -180565450052312604, guid: 77d009362b5f0954f8ead73e3762c5d1, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1054,7 +1054,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -1379,9 +1379,10 @@ MonoBehaviour:
     trueGoal: 
     constraint: 
   currentMemo:
-    purpose: 
-    personality: 
     element: 
+    personality: 
+    purpose: 
+    reinforcement: 
   pendingCustomer:
     customerName: 
     schoolOfMagic: 
@@ -1391,6 +1392,8 @@ MonoBehaviour:
     trueGoal: 
     constraint: 
   pendingCustomerInProgress: 0
+  pendingMaterials: []
+  pendingMaterialsInProgress: 0
   availableMaterials: []
   inventory: []
   playerGold: 500
