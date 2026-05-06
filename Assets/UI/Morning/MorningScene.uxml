@@ -1,0 +1,69 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="MorningScene.uss" />
+
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <!-- Full-bleed cozy shop background. -->
+        <ui:VisualElement name="background" class="background" picking-mode="Ignore" />
+
+        <!-- Warm vignette + subtle scrim so foreground UI stays legible. -->
+        <ui:VisualElement name="vignette" class="vignette" picking-mode="Ignore" />
+        <ui:VisualElement name="scrim"    class="scrim"    picking-mode="Ignore" />
+
+        <!-- Top-bar HUD: day plaque on the left, gold purse on the right. -->
+        <ui:VisualElement name="topBar" class="top-bar" picking-mode="Ignore">
+
+            <ui:VisualElement name="dayBadge" class="day-badge">
+                <ui:VisualElement class="badge-corner badge-corner--tl" picking-mode="Ignore" />
+                <ui:VisualElement class="badge-corner badge-corner--tr" picking-mode="Ignore" />
+                <ui:VisualElement class="badge-corner badge-corner--bl" picking-mode="Ignore" />
+                <ui:VisualElement class="badge-corner badge-corner--br" picking-mode="Ignore" />
+                <ui:Label name="dayLabel"  class="day-label"  text="DAY" />
+                <ui:Label name="dayNumber" class="day-number" text="1" />
+                <ui:Label name="daySubtle" class="day-subtle" text="of 7" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="goldBadge" class="gold-badge">
+                <ui:VisualElement name="coinIcon" class="coin-icon" picking-mode="Ignore" />
+                <ui:Label name="goldNumber" class="gold-number" text="500" />
+                <ui:Label name="goldUnit"   class="gold-unit"   text="g" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Centered letter parchment. -->
+        <ui:VisualElement name="letterStage" class="letter-stage" picking-mode="Ignore">
+            <ui:VisualElement name="letterPanel" class="letter-panel">
+
+                <ui:VisualElement class="parchment-inner-border" picking-mode="Ignore" />
+
+                <ui:VisualElement class="gold-corner gold-corner--tl" picking-mode="Ignore" />
+                <ui:VisualElement class="gold-corner gold-corner--tr" picking-mode="Ignore" />
+                <ui:VisualElement class="gold-corner gold-corner--bl" picking-mode="Ignore" />
+                <ui:VisualElement class="gold-corner gold-corner--br" picking-mode="Ignore" />
+
+                <ui:VisualElement name="letterHeader" class="letter-header">
+                    <ui:VisualElement name="waxSeal" class="wax-seal">
+                        <ui:Label class="wax-seal-glyph" text="✦" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="letterHeaderText" class="letter-header-text">
+                        <ui:Label name="subjectText" class="subject-text" text="The shop is yours now" />
+                        <ui:Label name="fromText"    class="from-text"    text="— Aunt Wrenna (posthumous)" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="header-rule" picking-mode="Ignore" />
+
+                <ui:ScrollView name="bodyScroll" class="body-scroll">
+                    <ui:Label name="bodyText" class="body-text" text="" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Footer action: Continue / Read dossier. -->
+        <ui:VisualElement name="footer" class="footer" picking-mode="Ignore">
+            <ui:Label name="hintLabel" class="hint-label" text="Click to skip the typewriter." />
+            <ui:Button name="continueButton" class="continue-button" text="Meet the first customer" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

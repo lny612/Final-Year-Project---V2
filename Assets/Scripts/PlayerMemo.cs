@@ -9,18 +9,20 @@ using System;
 [Serializable]
 public class PlayerMemo
 {
-    public string purpose;      // word picked from request or trueGoal
-    public string personality;  // word picked from personality or profession
-    public string element;      // word picked from schoolOfMagic
+    public string element;        // What element calls to them?
+    public string personality;    // What temperament hides beneath?
+    public string purpose;        // What purpose does the wand carry?
+    public string reinforcement;  // What must it reinforce — what must it conceal?
 
     public bool IsComplete() =>
-        !string.IsNullOrEmpty(purpose) &&
+        !string.IsNullOrEmpty(element) &&
         !string.IsNullOrEmpty(personality) &&
-        !string.IsNullOrEmpty(element);
+        !string.IsNullOrEmpty(purpose) &&
+        !string.IsNullOrEmpty(reinforcement);
 }
 
 /// <summary>
 /// Which memo slot a piece of dossier prose belongs to.
-/// Used by MemoFillUI to map source fields -> valid target slots.
+/// Order matches the order rows appear in the field-memo card.
 /// </summary>
-public enum PlayerMemoField { Purpose, Personality, Element }
+public enum PlayerMemoField { Element, Personality, Purpose, Reinforcement }

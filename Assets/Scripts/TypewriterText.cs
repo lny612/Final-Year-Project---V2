@@ -51,6 +51,16 @@ public class TypewriterText : MonoBehaviour
     {
         if (target == null) yield break;
 
+        // Host GO must be active: TMP needs it to render and we StartCoroutine on
+        // ourselves below. Editor wiring sometimes leaves the text GO inactive.
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
+        if (!gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning($"[TypewriterText] '{name}' has an inactive parent; " +
+                             "cannot start typewriter. Activate the parent in the Inspector.");
+            yield break;
+        }
+
         if (_routine != null) StopCoroutine(_routine);
         _routine = StartCoroutine(PlayInternal(text));
         yield return _routine;
@@ -60,6 +70,13 @@ public class TypewriterText : MonoBehaviour
     public void PlayFromStart(string text)
     {
         if (target == null) return;
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
+        if (!gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning($"[TypewriterText] '{name}' has an inactive parent; " +
+                             "cannot start typewriter. Activate the parent in the Inspector.");
+            return;
+        }
         if (_routine != null) StopCoroutine(_routine);
         _routine = StartCoroutine(PlayInternal(text));
     }

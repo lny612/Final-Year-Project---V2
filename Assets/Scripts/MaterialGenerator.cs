@@ -295,12 +295,164 @@ Use exactly this structure:
         }
 
         // Auto-start if arriving from CustomerGenerator with a customer already set
-        if (GameManager.Instance?.currentCustomer != null
-            && GameManager.Instance.availableMaterials.Count == 0)
+        var gm = GameManager.Instance;
+        if (gm?.currentCustomer != null && gm.availableMaterials.Count == 0)
         {
-            DisplayCustomer(GameManager.Instance.currentCustomer);
-            StartCoroutine(MaterialsPipeline(GameManager.Instance.currentCustomer, ownBusy: true));
+            DisplayCustomer(gm.currentCustomer);
+
+            // Fast path: pre-gen kicked off in MorningScene/CustomerScene may
+            // already have the materials (text + some images). Skip the OpenAI
+            // roundtrip and just poll for any in-flight images.
+            if (gm.pendingMaterials != null || gm.pendingMaterialsInProgress)
+                StartCoroutine(UsePreGenMaterials(gm));
+            else
+                StartCoroutine(MaterialsPipeline(gm.currentCustomer, ownBusy: true));
         }
+    }
+
+    // ── Pre-generation consumption path ─────────────────────────────
+
+    private IEnumerator UsePreGenMaterials(GameManager gm)
+    {
+        _busy = true;
+        SetButtonInteractable(false);
+        ClearCards();
+
+        // If text isn't done yet, wait — capped so a stuck flag never blocks.
+        if (gm.pendingMaterials == null)
+        {
+            SetStatus("Laying out the wares...");
+            const float MaxWaitSeconds = 12f;
+            float waited = 0f;
+            while (gm.pendingMaterials == null && gm.pendingMaterialsInProgress && waited < MaxWaitSeconds)
+            {
+                waited += Time.unscaledDeltaTime;
+                yield return null;
+            }
+        }
+
+        // Pre-gen text failed? Fall through to a fresh pipeline.
+        if (gm.pendingMaterials == null)
+        {
+            Debug.LogWarning("[MaterialGenerator] Pre-gen materials missing; firing a fresh pipeline.");
+            yield return StartCoroutine(MaterialsPipeline(gm.currentCustomer, ownBusy: false));
+            yield break;
+        }
+
+        // Consume the pre-genned list.
+        var materials = gm.pendingMaterials;
+        gm.pendingMaterials   = null;
+        gm.availableMaterials = materials;
+
+        var cores = materials.FindAll(m => m.materialType == "core");
+        var woods = materials.FindAll(m => m.materialType == "wood");
+        InstantiateCards(cores, coreCardContainer, _coreCards);
+        InstantiateCards(woods, woodCardContainer, _woodCards);
+
+        _orderedMaterials.Clear();
+        _orderedMaterials.AddRange(cores);
+        _orderedMaterials.AddRange(woods);
+        for (int i = 0; i < _orderedSoldOut.Length; i++) _orderedSoldOut[i] = false;
+        marketUI?.BuildCards(cores, woods);
+
+        ApplyMemoHints(cores, woods);
+
+        // Apply any images already populated by pre-gen, then poll for the rest.
+        ApplyKnownImages(cores, woods);
+
+        if (gm.pendingMaterialsInProgress)
+            yield return StartCoroutine(PollPreGenImages(cores, woods));
+
+        // Any image still missing after pre-gen finished? Fire a per-card retry
+        // so the player isn't stuck looking at placeholders.
+        yield return StartCoroutine(RetryMissingImages(cores, woods));
+
+        SetStatus("Done.");
+        Finish();
+    }
+
+    private void ApplyKnownImages(List<MaterialData> cores, List<MaterialData> woods)
+    {
+        for (int i = 0; i < cores.Count; i++)
+        {
+            var tex = cores[i].generatedImage;
+            if (tex == null) continue;
+            if (i < _coreCards.Count) _coreCards[i].SetImage(tex);
+            marketUI?.SetCardImage(i, tex);
+        }
+        for (int i = 0; i < woods.Count; i++)
+        {
+            var tex = woods[i].generatedImage;
+            if (tex == null) continue;
+            if (i < _woodCards.Count) _woodCards[i].SetImage(tex);
+            marketUI?.SetCardImage(CORE_SLOTS + i, tex);
+        }
+    }
+
+    private IEnumerator PollPreGenImages(List<MaterialData> cores, List<MaterialData> woods)
+    {
+        var gm = GameManager.Instance;
+        int total = cores.Count + woods.Count;
+        SetStatus($"Generating {total} images...");
+
+        const float pollInterval = 0.25f;
+        const float maxSeconds   = 90f;
+        float waited = 0f;
+
+        while (waited < maxSeconds)
+        {
+            ApplyKnownImages(cores, woods);
+            int gotImages = CountWithImages(cores) + CountWithImages(woods);
+            SetStatus($"Generating {gotImages} of {total} images...");
+            if (gotImages >= total) break;
+            if (gm == null || !gm.pendingMaterialsInProgress) break;
+            yield return new WaitForSeconds(pollInterval);
+            waited += pollInterval;
+        }
+
+        ApplyKnownImages(cores, woods);
+    }
+
+    private IEnumerator RetryMissingImages(List<MaterialData> cores, List<MaterialData> woods)
+    {
+        var queue = new List<(MaterialCardUI ui, MaterialData mat, int globalIdx)>();
+        for (int i = 0; i < cores.Count; i++)
+            if (cores[i].generatedImage == null)
+                queue.Add((i < _coreCards.Count ? _coreCards[i] : null, cores[i], i));
+        for (int i = 0; i < woods.Count; i++)
+            if (woods[i].generatedImage == null)
+                queue.Add((i < _woodCards.Count ? _woodCards[i] : null, woods[i], CORE_SLOTS + i));
+
+        if (queue.Count == 0) yield break;
+
+        int remaining = queue.Count;
+        SetStatus($"Generating {queue.Count} remaining images...");
+
+        foreach (var (cardUI, mat, idx) in queue)
+        {
+            int captured = idx;
+            var capturedCard = cardUI;
+            var capturedMat  = mat;
+            StartCoroutine(RunImageGeneration(mat.imagePrompt, tex =>
+            {
+                if (tex != null)
+                {
+                    capturedMat.generatedImage = tex;
+                    if (capturedCard != null) capturedCard.SetImage(tex);
+                    marketUI?.SetCardImage(captured, tex);
+                }
+                remaining--;
+            }));
+        }
+
+        while (remaining > 0) yield return null;
+    }
+
+    private static int CountWithImages(List<MaterialData> list)
+    {
+        int n = 0;
+        foreach (var m in list) if (m.generatedImage != null) n++;
+        return n;
     }
 
     // ── Public API ─────────────────────────────────────────────────
@@ -844,7 +996,17 @@ Apply the four design rules. Return ONLY the JSON object.";
     private static bool IsHintMatch(string memoWord, string materialField)
     {
         if (string.IsNullOrWhiteSpace(memoWord) || string.IsNullOrWhiteSpace(materialField)) return false;
-        return materialField.IndexOf(memoWord, StringComparison.OrdinalIgnoreCase) >= 0;
+        // Memo entries may now be a comma-joined list of multiple highlights
+        // (e.g. "fire, lightning"). Any single token substring-matching the
+        // material's field counts as a hit.
+        var tokens = memoWord.Split(new[] { ',', ';', '/' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var raw in tokens)
+        {
+            var token = raw.Trim();
+            if (token.Length == 0) continue;
+            if (materialField.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+        }
+        return false;
     }
 
     private void OnBuyCard(MaterialCardUI card, MaterialData mat)

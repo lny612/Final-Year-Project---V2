@@ -43,9 +43,13 @@ public class MaterialMarketUI : MonoBehaviour
     private Label _statusLabel;
     private Button _proceedButton;
     private Button _backButton;
+    private Button _catCores;
+    private Button _catWoods;
     private Label _memoPurpose;
     private Label _memoPersonality;
     private Label _memoElement;
+    private Label _memoReinforcement;
+    private string _activeCategory = "cores"; // "cores" | "woods"
 
     private readonly List<CardSlot> _cards = new();
     private Coroutine _flashCoroutine;
@@ -94,9 +98,12 @@ public class MaterialMarketUI : MonoBehaviour
         _statusLabel     = _root.Q<Label>("market-status");
         _proceedButton   = _root.Q<Button>("market-proceed");
         _backButton      = _root.Q<Button>("market-back");
-        _memoPurpose     = _root.Q<Label>("memo-purpose");
-        _memoPersonality = _root.Q<Label>("memo-personality");
-        _memoElement     = _root.Q<Label>("memo-element");
+        _catCores        = _root.Q<Button>("cat-cores");
+        _catWoods        = _root.Q<Button>("cat-woods");
+        _memoElement       = _root.Q<Label>("memo-element");
+        _memoPersonality   = _root.Q<Label>("memo-personality");
+        _memoPurpose       = _root.Q<Label>("memo-purpose");
+        _memoReinforcement = _root.Q<Label>("memo-reinforcement");
 
         if (_backButton != null)
             _backButton.clicked += () => OnBackClicked?.Invoke();
@@ -105,6 +112,20 @@ public class MaterialMarketUI : MonoBehaviour
             _proceedButton.clicked += () => OnProceedClicked?.Invoke();
             _proceedButton.SetEnabled(false);
         }
+
+        if (_catCores != null) _catCores.clicked += () => SelectCategory("cores");
+        if (_catWoods != null) _catWoods.clicked += () => SelectCategory("woods");
+        SelectCategory(_activeCategory);
+    }
+
+    private void SelectCategory(string cat)
+    {
+        _activeCategory = cat;
+        bool isCores = cat == "cores";
+        _catCores?.EnableInClassList("market-cat--selected",  isCores);
+        _catWoods?.EnableInClassList("market-cat--selected", !isCores);
+        _coreRow?.EnableInClassList("hidden", !isCores);
+        _woodRow?.EnableInClassList("hidden",  isCores);
     }
 
     // ── Public API used by MaterialGenerator ───────────────────────
@@ -140,9 +161,10 @@ public class MaterialMarketUI : MonoBehaviour
 
     public void RefreshMemo(PlayerMemo memo)
     {
-        SetMemoSlot(_memoPurpose,     memo?.purpose);
-        SetMemoSlot(_memoPersonality, memo?.personality);
-        SetMemoSlot(_memoElement,     memo?.element);
+        SetMemoSlot(_memoElement,       memo?.element);
+        SetMemoSlot(_memoPersonality,   memo?.personality);
+        SetMemoSlot(_memoPurpose,       memo?.purpose);
+        SetMemoSlot(_memoReinforcement, memo?.reinforcement);
     }
 
     private static void SetMemoSlot(Label l, string val)

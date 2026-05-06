@@ -1,6 +1,6 @@
 # Dossier Sorting Feature — Design Doc
 
-**Status:** Superseded by `Docs/MemoFeature.md` (2026-04-24). The 7-slot sort proved to be busywork with no downstream consequence; the memo mechanic distils the dossier into 3 keywords that carry into market + crafting scenes instead. This doc is kept for reference.
+**Status:** Superseded by `Docs/MemoFeature.md` (2026-04-24); the memo replacement is now live in production via `DossierPanelController` (UI Toolkit). The 7-slot sort proved to be busywork with no downstream consequence; the memo mechanic distils the dossier into 3 keywords that carry into market + crafting scenes instead. This doc is kept for reference.
 **Scenes affected:** `CustomerGeneratorTest`, `CraftingScene`
 
 ## Problem

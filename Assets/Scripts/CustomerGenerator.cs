@@ -1,10 +1,7 @@
-using System;
 using System.Collections;
-using System.IO;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
@@ -15,6 +12,15 @@ public class CustomerGenerator : MonoBehaviour
     [Header("OpenAI Settings")]
     [Tooltip("OpenAI chat completions endpoint.")]
     public string openAIUrl = "https://api.openai.com/v1/chat/completions";
+
+    [Header("Material Pre-generation")]
+    [Tooltip("If true, fires off the material text + image API requests as soon as " +
+             "a customer is set so MaterialGenerator scene can skip most of its wait.")]
+    public bool preGenerateMaterials = true;
+    [Tooltip("ComfyUI endpoint used for material image pre-generation.")]
+    public string comfyUIUrl = MaterialService.DefaultComfyUIUrl;
+    public string clipNodeId = MaterialService.DefaultClipNodeId;
+    public string ksamplerNodeId = MaterialService.DefaultKSamplerNodeId;
 
     [Header("UI — Controls")]
     [Tooltip("The Generate button — disabled during a request.")]
@@ -60,112 +66,8 @@ public class CustomerGenerator : MonoBehaviour
 
     private bool _busy;
 
-    // ── Prompts ───────────────────────────────────────────────────
-
-    private const string SystemPrompt =
-@"You are a character designer for a fantasy wand-crafting game.
-Your job is to generate customer orders for a wand shop.
-
-Each customer is a unique fantasy character who needs a custom wand.
-Every field you write must follow a strict internal logic chain:
-
-  schoolOfMagic -> profession -> request -> trueGoal -> constraint
-
-Rules for each field:
-
-customerName
-  A fantasy name that feels fitting for this character.
-
-schoolOfMagic
-  The element or discipline this person uses.
-  Examples: Storm magic, Hydromancy, Shadow magic, Pyromancy, Necromancy.
-
-profession
-  Their specific job. It must logically match their school of magic.
-  Do not write a generic job title. Write HOW they use their magic in their work.
-  Examples:
-    - Storm magic -> ""Assassin mage who uses lightning for the final blow""
-    - Hydromancy  -> ""Field medic who uses water magic to perform emergency healing""
-    - Shadow magic -> ""Bounty hunter who uses shadow magic to track and corner targets""
-
-personality
-  Exactly 3 traits. At least one must be in tension with the others.
-  Format: ""Trait, trait, trait""
-  Example: ""Outwardly calm, internally panicked, fiercely protective""
-
-request
-  What they say out loud in the shop. Written in first person, conversational tone.
-  It must describe a specific practical problem they want the wand to solve.
-  The problem must be a logical drawback of their school of magic used in their profession.
-  Do NOT make this a generic ""I want a powerful wand"" request.
-  Example: ""I need a wand that lets me control the exact pressure of my water flow.
-            Too much force and I damage the wound instead of closing it.""
-
-trueGoal
-  What they actually want to achieve - more specific and ambitious than the request.
-  Must include the profession's core demand (speed, precision, range, etc.)
-  and show why those demands are in slight tension with each other.
-  Example: ""To perform precise, high-speed healing on multiple patients
-            in rapid succession without losing control of the flow""
-
-constraint
-  Their magical limitation. It must directly explain WHY the problem in the request happens.
-  The cruelest constraints are ones that activate at the worst possible moment given their job.
-  Example: ""Her water magic amplifies in intensity when she is emotionally distressed -
-            exactly when she needs it most delicate""
-
-Return ONLY valid JSON. No markdown. No explanation. No extra text.
-Use exactly this structure:
-{
-  ""customerName"": string,
-  ""schoolOfMagic"": string,
-  ""profession"": string,
-  ""personality"": string,
-  ""request"": string,
-  ""trueGoal"": string,
-  ""constraint"": string
-}";
-
-    private const string UserPrompt =
-@"Generate a new customer. Here are three examples of the correct style.
-Study the logical chain in each one before generating a new character.
-The new character must use a different school of magic from all three examples.
-
-EXAMPLE 1:
-{
-  ""customerName"": ""Elyra Voss"",
-  ""schoolOfMagic"": ""Storm magic"",
-  ""profession"": ""Assassin mage who uses lightning for the final blow"",
-  ""personality"": ""Meticulous, deeply self-doubting, quietly competitive"",
-  ""request"": ""I need something discreet for my job. I want the wand to prevent flashing so I can conjure my magic without visible sign."",
-  ""trueGoal"": ""To perform a high-stakes lightning spell quickly at the exact right moment without it being too visible"",
-  ""constraint"": ""Her magic surges unpredictably when she feels watched""
-}
-
-EXAMPLE 2:
-{
-  ""customerName"": ""Dorian Ashveil"",
-  ""schoolOfMagic"": ""Shadow magic"",
-  ""profession"": ""Bounty hunter who uses shadow magic to track and corner targets"",
-  ""personality"": ""Calculating, emotionally detached, secretly paranoid"",
-  ""request"": ""I need a wand that keeps my shadow spells from dispersing mid-chase. My bindings keep collapsing the moment my target starts running."",
-  ""trueGoal"": ""To cast shadow binding spells reliably at full sprint without losing hold of the spell"",
-  ""constraint"": ""His magic destabilises when his concentration splits between moving and casting simultaneously""
-}
-
-EXAMPLE 3:
-{
-  ""customerName"": ""Sable Mirehn"",
-  ""schoolOfMagic"": ""Hydromancy"",
-  ""profession"": ""Field medic who uses water magic to perform emergency healing"",
-  ""personality"": ""Outwardly calm, internally panicked, fiercely protective"",
-  ""request"": ""I need a wand that lets me control the exact pressure of my water flow. Too much force and I damage the wound instead of closing it."",
-  ""trueGoal"": ""To perform precise, high-speed healing on multiple patients in rapid succession without losing control of the flow"",
-  ""constraint"": ""Her water magic amplifies in intensity when she is emotionally distressed - exactly when she needs it most delicate""
-}
-
-Now generate one new customer following the same logical chain.
-Return ONLY the JSON object.";
+    // Customer prompts now live in CustomerService.cs so MorningScreenController
+    // can pre-generate against the same prompts.
 
     // ── Unity lifecycle ────────────────────────────────────────────
 
@@ -179,6 +81,11 @@ Return ONLY the JSON object.";
             proceedButton.onClick.AddListener(() =>
                 GameManager.Instance?.LoadScene(GameManager.SCENE_MARKET));
         }
+
+        // Auto-generate the customer the moment the scene loads. The legacy
+        // "Summon a customer" button is gone — the morning scene's "Read the
+        // Dossier" button is now the only entry point into this scene.
+        GenerateCustomer();
     }
 
     // ── Public API — wired to the button ──────────────────────────
@@ -195,150 +102,120 @@ Return ONLY the JSON object.";
     {
         _busy = true;
         SetButtonInteractable(false);
-        SetStatus("Loading API key...");
 
-        // ── Load API key from StreamingAssets/config.json ─────────
-        string configPath = Path.Combine(Application.streamingAssetsPath, "config.json");
-        string apiKey = null;
+        var gm = GameManager.Instance;
 
-#if UNITY_ANDROID && !UNITY_EDITOR
-        using (var cfgReq = UnityWebRequest.Get(configPath))
+        // ── Fast path: MorningScene already kicked off the API request and
+        // either has the result or is still waiting for the response. Use it
+        // instead of doing a second roundtrip.
+        if (gm != null && (gm.pendingCustomer != null || gm.pendingCustomerInProgress))
         {
-            yield return cfgReq.SendWebRequest();
-            if (cfgReq.result == UnityWebRequest.Result.Success)
+            if (gm.pendingCustomer == null)
             {
-                try { apiKey = JObject.Parse(cfgReq.downloadHandler.text)["openAIApiKey"]?.ToString(); }
-                catch { }
+                SetStatus("Greeting the customer...");
+                // Defensive timeout: if pendingCustomerInProgress somehow gets
+                // stuck (e.g. coroutine host destroyed mid-flight), bail to a
+                // fresh request after 10s instead of looping forever.
+                const float MaxWaitSeconds = 10f;
+                float waited = 0f;
+                while (gm.pendingCustomerInProgress && waited < MaxWaitSeconds)
+                {
+                    waited += Time.unscaledDeltaTime;
+                    yield return null;
+                }
+                if (gm.pendingCustomerInProgress)
+                {
+                    Debug.LogWarning("[CustomerGenerator] Pre-gen took too long; firing a fresh request.");
+                    gm.pendingCustomerInProgress = false;
+                }
             }
-        }
-#else
-        if (File.Exists(configPath))
-        {
-            try { apiKey = JObject.Parse(File.ReadAllText(configPath))["openAIApiKey"]?.ToString(); }
-            catch { }
-        }
-#endif
 
-        if (string.IsNullOrEmpty(apiKey) || apiKey == "YOUR_KEY_HERE")
-        {
-            ReportError("Error: no API key found in StreamingAssets/config.json");
-            yield break;
+            if (gm.pendingCustomer != null)
+            {
+                var order = gm.pendingCustomer;
+                gm.pendingCustomer = null;
+                UseOrder(order);
+                _busy = false;
+                SetButtonInteractable(true);
+                yield break;
+            }
+            // pendingCustomer was cleared with no result (failure during pre-gen);
+            // fall through to a fresh request below.
         }
 
         SetStatus("Generating customer...");
 
-        // ── Build request body ────────────────────────────────────
-        var body = new JObject
+        CustomerOrder generated = null;
+        string error = null;
+        yield return CustomerService.GenerateAsync(openAIUrl, (order, err) =>
         {
-            ["model"]    = "gpt-4o",
-            ["messages"] = new JArray
-            {
-                new JObject { ["role"] = "system", ["content"] = SystemPrompt },
-                new JObject { ["role"] = "user",   ["content"] = UserPrompt   }
-            }
-        };
+            generated = order;
+            error     = err;
+        });
 
-        byte[] bodyBytes = System.Text.Encoding.UTF8.GetBytes(body.ToString());
-
-        using (var req = new UnityWebRequest(openAIUrl, "POST"))
+        if (generated == null)
         {
-            req.uploadHandler   = new UploadHandlerRaw(bodyBytes);
-            req.downloadHandler = new DownloadHandlerBuffer();
-            req.SetRequestHeader("Content-Type",  "application/json");
-            req.SetRequestHeader("Authorization", "Bearer " + apiKey);
-
-            yield return req.SendWebRequest();
-
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                ReportError("Error: could not reach OpenAI. Check your API key and internet connection.");
-                Debug.LogError("[CustomerGenerator] HTTP error: " + req.error +
-                               "\nResponse: " + req.downloadHandler.text);
-                yield break;
-            }
-
-            // ── Extract content string from response ──────────────
-            string content = null;
-            try
-            {
-                var response = JObject.Parse(req.downloadHandler.text);
-                content = response["choices"]?[0]?["message"]?["content"]?.ToString();
-            }
-            catch (Exception ex)
-            {
-                ReportError("Error: unexpected response format from OpenAI.");
-                Debug.LogError("[CustomerGenerator] Response parse error: " + ex.Message);
-                yield break;
-            }
-
-            if (string.IsNullOrEmpty(content))
-            {
-                ReportError("Error: unexpected response format from OpenAI.");
-                yield break;
-            }
-
-            // ── Strip markdown code fences if present ─────────────
-            content = content.Trim();
-            if (content.StartsWith("```"))
-            {
-                int firstNewline = content.IndexOf('\n');
-                int lastFence    = content.LastIndexOf("```");
-                if (firstNewline >= 0 && lastFence > firstNewline)
-                    content = content.Substring(firstNewline, lastFence - firstNewline).Trim();
-            }
-
-            // ── Parse the customer JSON ───────────────────────────
-            JObject customer;
-            try { customer = JObject.Parse(content); }
-            catch (Exception ex)
-            {
-                ReportError("Error: unexpected response format from OpenAI.");
-                Debug.LogError("[CustomerGenerator] Customer JSON parse error: " + ex.Message +
-                               "\nRaw content: " + content);
-                yield break;
-            }
-
-            PopulateDossier(customer);
-
-            // Push to GameManager so other scenes can read the customer.
-            CustomerOrder order = new CustomerOrder
-            {
-                customerName  = customer["customerName"]?.ToString()  ?? "",
-                schoolOfMagic = customer["schoolOfMagic"]?.ToString() ?? "",
-                profession    = customer["profession"]?.ToString()     ?? "",
-                personality   = customer["personality"]?.ToString()   ?? "",
-                request       = customer["request"]?.ToString()       ?? "",
-                trueGoal      = customer["trueGoal"]?.ToString()      ?? "",
-                constraint    = customer["constraint"]?.ToString()    ?? "",
-            };
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.currentCustomer = order;
-                GameManager.Instance.currentMemo     = null;
-            }
-
-            // Memo gate: prefer the UI Toolkit panel if assigned, else fall back
-            // to the legacy uGUI MemoFillUI. If neither is wired (standalone test),
-            // Proceed enables immediately.
-            if (dossierPanel != null)
-            {
-                dossierPanel.Begin(order, OnMemoComplete);
-                SetStatus("Read the dossier. Fill the memo to proceed.");
-            }
-            else if (memoFillUI != null)
-            {
-                memoFillUI.Begin(order, OnMemoComplete);
-                SetStatus("Read the dossier. Fill the memo to proceed.");
-            }
-            else
-            {
-                if (proceedButton != null) proceedButton.interactable = true;
-                SetStatus("Customer ready. Proceed to the market.");
-            }
+            ReportError("Error: " + (error ?? "could not generate customer."));
+            yield break;
         }
+
+        UseOrder(generated);
 
         _busy = false;
         SetButtonInteractable(true);
+    }
+
+    private void UseOrder(CustomerOrder order)
+    {
+        // Mirror the populated fields onto the legacy uGUI dossier (still used
+        // as a fallback if neither memo controller is wired).
+        var customer = new JObject
+        {
+            ["customerName"]  = order.customerName,
+            ["schoolOfMagic"] = order.schoolOfMagic,
+            ["profession"]    = order.profession,
+            ["personality"]   = order.personality,
+            ["request"]       = order.request,
+            ["trueGoal"]      = order.trueGoal,
+            ["constraint"]    = order.constraint,
+        };
+        PopulateDossier(customer);
+
+        var gmHere = GameManager.Instance;
+        if (gmHere != null)
+        {
+            gmHere.currentCustomer = order;
+            gmHere.currentMemo     = null;
+
+            // Kick off material pre-generation if MorningScene didn't already do it.
+            // Hosted on GameManager so the coroutine survives scene transitions.
+            if (preGenerateMaterials
+                && gmHere.pendingMaterials == null
+                && !gmHere.pendingMaterialsInProgress)
+            {
+                gmHere.StartCoroutine(MaterialService.PreGenAsync(
+                    gmHere, gmHere, order, openAIUrl, comfyUIUrl, clipNodeId, ksamplerNodeId));
+            }
+        }
+
+        // Memo gate: prefer the UI Toolkit panel if assigned, else fall back
+        // to the legacy uGUI MemoFillUI. If neither is wired (standalone test),
+        // Proceed enables immediately.
+        if (dossierPanel != null)
+        {
+            dossierPanel.Begin(order, OnMemoComplete);
+            SetStatus("Read the dossier. Fill the memo to proceed.");
+        }
+        else if (memoFillUI != null)
+        {
+            memoFillUI.Begin(order, OnMemoComplete);
+            SetStatus("Read the dossier. Fill the memo to proceed.");
+        }
+        else
+        {
+            if (proceedButton != null) proceedButton.interactable = true;
+            SetStatus("Customer ready. Proceed to the market.");
+        }
     }
 
     private void OnMemoComplete()

@@ -56,9 +56,9 @@
                             <ui:VisualElement name="trueGoalProse" class="dossier-prose" />
                         </ui:VisualElement>
 
-                        <ui:VisualElement name="constraintSection" class="dossier-section dossier-section--quiet">
+                        <ui:VisualElement name="constraintSection" class="dossier-section">
                             <ui:Label class="dossier-section-title" text="CONSTRAINT" />
-                            <ui:Label name="constraintText" class="dossier-static-prose" text="—" />
+                            <ui:VisualElement name="constraintProse" class="dossier-prose" />
                         </ui:VisualElement>
 
                     </ui:VisualElement>
@@ -67,21 +67,26 @@
                 <ui:VisualElement name="memoCard" class="memo-card">
                     <ui:VisualElement class="memo-card__seal" picking-mode="Ignore" />
                     <ui:Label class="memo-card__title" text="Field Memo" />
-                    <ui:Label class="memo-card__hint" text="Click a word in the dossier, then a memo slot below." />
+                    <ui:Label class="memo-card__hint" text="Drag across words to highlight. Click or drag the highlight onto a slot." />
 
-                    <ui:VisualElement name="purposeRow" class="memo-row">
-                        <ui:Label class="memo-row__prompt" text="What do they really want?" />
-                        <ui:Button name="purposeSlot" class="memo-slot" text="" />
+                    <ui:VisualElement name="elementRow" class="memo-row">
+                        <ui:Label class="memo-row__prompt" text="What element calls to them?" />
+                        <ui:VisualElement name="elementSlot" class="memo-slot" />
                     </ui:VisualElement>
 
                     <ui:VisualElement name="personalityRow" class="memo-row">
                         <ui:Label class="memo-row__prompt" text="What temperament hides beneath?" />
-                        <ui:Button name="personalitySlot" class="memo-slot" text="" />
+                        <ui:VisualElement name="personalitySlot" class="memo-slot" />
                     </ui:VisualElement>
 
-                    <ui:VisualElement name="elementRow" class="memo-row">
-                        <ui:Label class="memo-row__prompt" text="What element calls to them?" />
-                        <ui:Button name="elementSlot" class="memo-slot" text="" />
+                    <ui:VisualElement name="purposeRow" class="memo-row">
+                        <ui:Label class="memo-row__prompt" text="What purpose does the wand carry?" />
+                        <ui:VisualElement name="purposeSlot" class="memo-slot" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="reinforcementRow" class="memo-row">
+                        <ui:Label class="memo-row__prompt" text="What must it reinforce — what must it conceal?" />
+                        <ui:VisualElement name="reinforcementSlot" class="memo-slot" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -92,7 +97,6 @@
         <ui:VisualElement name="statusBar" class="status-bar">
             <ui:Label name="statusLabel" class="status-label" text="Waiting..." />
             <ui:VisualElement class="status-bar__spacer" />
-            <ui:Button name="generateButton" class="primary-button primary-button--ghost" text="Summon a customer" />
             <ui:Button name="proceedButton" class="primary-button" text="Proceed to Market" />
         </ui:VisualElement>
 

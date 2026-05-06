@@ -1,0 +1,161 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="CraftingWorkbench.uss" />
+
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <!-- Wood-grain plate + grain overlay + edge vignette -->
+        <ui:VisualElement name="woodPlate"   class="wood-plate"   picking-mode="Ignore" />
+        <ui:VisualElement name="woodGrain"   class="wood-grain"   picking-mode="Ignore" />
+        <ui:VisualElement name="woodVignette" class="wood-vignette" picking-mode="Ignore" />
+
+        <!-- Header strip with serif title -->
+        <ui:VisualElement name="header" class="header" picking-mode="Ignore">
+            <ui:Label name="headerTitle" class="header-title" text="The Wandcrafter's Bench" />
+            <ui:VisualElement class="header-rule" picking-mode="Ignore" />
+            <ui:Label name="headerSub" class="header-sub" text="Two cores meet a single wood. Reason carefully." />
+        </ui:VisualElement>
+
+        <!-- Three-column workspace: memo · circle · inventory -->
+        <ui:VisualElement name="workspace" class="workspace">
+
+            <!-- LEFT: customer memo (parchment card) -->
+            <ui:VisualElement name="memoColumn" class="memo-column">
+                <ui:VisualElement name="memoCard" class="memo-card">
+                    <ui:Label class="memo-heading" text="The Customer" />
+                    <ui:VisualElement class="memo-rule" picking-mode="Ignore" />
+
+                    <ui:VisualElement class="memo-row">
+                        <ui:Label class="memo-key" text="Element" />
+                        <ui:Label name="memoElement" class="memo-val" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="memo-row">
+                        <ui:Label class="memo-key" text="Personality" />
+                        <ui:Label name="memoPersonality" class="memo-val" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="memo-row">
+                        <ui:Label class="memo-key" text="Purpose" />
+                        <ui:Label name="memoPurpose" class="memo-val" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="memo-row">
+                        <ui:Label class="memo-key" text="Reinforce / Conceal" />
+                        <ui:Label name="memoReinforcement" class="memo-val" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="memo-pin memo-pin-tl" picking-mode="Ignore" />
+                    <ui:VisualElement class="memo-pin memo-pin-tr" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- CENTER: magic circle with triangular slots + confirm + status -->
+            <ui:VisualElement name="craftColumn" class="craft-column">
+
+                <ui:VisualElement name="circleStage" class="circle-stage" picking-mode="Ignore">
+
+                    <!-- Layered procedural magic circle -->
+                    <ui:VisualElement class="circle-glow"   picking-mode="Ignore" />
+                    <ui:VisualElement class="circle-outer"  picking-mode="Ignore" />
+                    <ui:VisualElement class="circle-runes"  picking-mode="Ignore" />
+                    <ui:VisualElement class="circle-middle" picking-mode="Ignore" />
+                    <ui:VisualElement class="circle-inner"  picking-mode="Ignore" />
+                    <ui:VisualElement class="circle-star"   picking-mode="Ignore" />
+                    <ui:VisualElement class="circle-heart"  picking-mode="Ignore" />
+
+                    <!-- Triangle vertex spokes (drawn as thin gold lines) -->
+                    <ui:VisualElement class="spoke spoke-top" picking-mode="Ignore" />
+                    <ui:VisualElement class="spoke spoke-bl"  picking-mode="Ignore" />
+                    <ui:VisualElement class="spoke spoke-br"  picking-mode="Ignore" />
+
+                    <!-- TOP vertex: Wood (the spine) -->
+                    <ui:VisualElement name="slotWood" class="slot slot-top">
+                        <ui:Label class="slot-tag" text="Wood" />
+                        <ui:VisualElement name="slot3Well" class="slot-well" picking-mode="Ignore">
+                            <ui:VisualElement class="slot-rim-outer" picking-mode="Ignore" />
+                            <ui:VisualElement class="slot-rim-inner" picking-mode="Ignore" />
+                            <ui:VisualElement name="slot3Image" class="slot-image" picking-mode="Ignore" />
+                            <ui:Label name="slot3Empty" class="slot-empty" text="empty" />
+                        </ui:VisualElement>
+                        <ui:Label name="slot3Name" class="slot-name" text="Wood (required)" />
+                        <ui:Button name="slot3Clear" class="slot-clear" text="×" />
+                    </ui:VisualElement>
+
+                    <!-- BOTTOM-LEFT vertex: Core 1 -->
+                    <ui:VisualElement name="slotCore1" class="slot slot-bl">
+                        <ui:Label class="slot-tag" text="Core" />
+                        <ui:VisualElement name="slot1Well" class="slot-well" picking-mode="Ignore">
+                            <ui:VisualElement class="slot-rim-outer" picking-mode="Ignore" />
+                            <ui:VisualElement class="slot-rim-inner" picking-mode="Ignore" />
+                            <ui:VisualElement name="slot1Image" class="slot-image" picking-mode="Ignore" />
+                            <ui:Label name="slot1Empty" class="slot-empty" text="empty" />
+                        </ui:VisualElement>
+                        <ui:Label name="slot1Name" class="slot-name" text="Core 1 (required)" />
+                        <ui:Button name="slot1Clear" class="slot-clear" text="×" />
+                    </ui:VisualElement>
+
+                    <!-- BOTTOM-RIGHT vertex: Core 2 -->
+                    <ui:VisualElement name="slotCore2" class="slot slot-br">
+                        <ui:Label class="slot-tag" text="Core" />
+                        <ui:VisualElement name="slot2Well" class="slot-well" picking-mode="Ignore">
+                            <ui:VisualElement class="slot-rim-outer" picking-mode="Ignore" />
+                            <ui:VisualElement class="slot-rim-inner" picking-mode="Ignore" />
+                            <ui:VisualElement name="slot2Image" class="slot-image" picking-mode="Ignore" />
+                            <ui:Label name="slot2Empty" class="slot-empty" text="empty" />
+                        </ui:VisualElement>
+                        <ui:Label name="slot2Name" class="slot-name" text="Core 2 (optional)" />
+                        <ui:Button name="slot2Clear" class="slot-clear" text="×" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <ui:Button name="confirmButton" class="confirm-button" text="Forge the Wand" />
+
+                <ui:Label name="statusText" class="status-text" text="Select materials from your inventory." />
+
+            </ui:VisualElement>
+
+            <!-- RIGHT: inventory list -->
+            <ui:VisualElement name="inventoryColumn" class="inventory-column">
+                <ui:VisualElement name="inventoryCard" class="inventory-card">
+                    <ui:Label class="inventory-heading" text="Materials" />
+                    <ui:VisualElement class="inventory-rule" picking-mode="Ignore" />
+
+                    <ui:Label class="inventory-section" text="Cores" />
+                    <ui:ScrollView name="coreScroll" class="inventory-scroll">
+                        <ui:VisualElement name="coreList" class="inventory-list" />
+                    </ui:ScrollView>
+
+                    <ui:Label class="inventory-section" text="Woods" />
+                    <ui:ScrollView name="woodScroll" class="inventory-scroll">
+                        <ui:VisualElement name="woodList" class="inventory-list" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- Result modal (hidden until pipeline + minigame complete) -->
+        <ui:VisualElement name="resultPanel" class="result-modal hidden">
+            <ui:VisualElement class="modal-backdrop" />
+            <ui:VisualElement class="result-card">
+                <ui:Label name="resultTitle" class="result-title" text="—" />
+                <ui:VisualElement class="result-rule" picking-mode="Ignore" />
+
+                <ui:VisualElement class="result-body">
+                    <ui:VisualElement class="result-image-frame">
+                        <ui:VisualElement name="resultImage" class="result-image" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="result-meta">
+                        <ui:Label name="resultDesc" class="result-desc" text="" />
+                        <ui:Label class="result-attribs-heading" text="Properties" />
+                        <ui:Label name="resultAttribs" class="result-attribs" text="" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:Button name="proceedButton" class="proceed-button" text="Present to the Customer" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

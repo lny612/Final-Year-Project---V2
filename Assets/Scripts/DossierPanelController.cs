@@ -19,21 +19,18 @@ using UnityEngine.UIElements;
 //        - Leave the old "Memo Fill UI" field assigned for now (fallback during migration).
 //   5. Disable (do NOT delete) the old uGUI dossier panel and memo panel under Canvas.
 //      Delete only after end-to-end verification of the new panel.
-//
-// TODO-EDITOR: Optional font swap
-//   Drop a serif TTF (e.g. EB Garamond, IM Fell English) into Assets/UI/Dossier/Fonts/
-//   then edit the single `-unity-font-definition` line at the top of DossierPanel.uss.
 
 /// <summary>
-/// UI Toolkit replacement for the dossier panel + memo-fill gate.
-/// Mirrors the gameplay of <see cref="MemoFillUI"/>: the player clicks a content
-/// word inside the dossier prose to arm it, then clicks one of the three memo
-/// slots to commit. When all three slots commit, <see cref="GameManager.currentMemo"/>
-/// is populated and the supplied onComplete callback fires.
+/// UI Toolkit dossier panel + memo-fill gate.
 ///
-/// All chrome (parchment panel, gold corners, status bar) is authored in
-/// DossierPanel.uxml + DossierPanel.uss; this controller only owns data binding,
-/// per-word Button construction, and the arm/commit state machine.
+/// Reading flow:
+/// 1. Drag across content words inside any prose section to highlight a phrase.
+/// 2. The highlighted phrase becomes BOTH clickable and draggable.
+/// 3. Click a memo slot, or drop the dragged highlight onto a slot, to commit
+///    the phrase as a chip in that slot.
+/// 4. Each slot accepts multiple chips. Click a chip's × to remove it.
+/// 5. When all three slots hold at least one chip, the memo is complete and
+///    Proceed enables.
 /// </summary>
 [DisallowMultipleComponent]
 public class DossierPanelController : MonoBehaviour
@@ -42,56 +39,79 @@ public class DossierPanelController : MonoBehaviour
     [Tooltip("UIDocument that hosts DossierPanel.uxml. Usually on the same GameObject.")]
     public UIDocument document;
 
-    [Header("Generate / Proceed buttons (UI Toolkit)")]
-    [Tooltip("Optional: if assigned, clicking the in-panel \"Summon a customer\" button calls this.")]
-    public CustomerGenerator customerGenerator;
-
+    [Header("Proceed button (UI Toolkit)")]
     [Tooltip("If true, the in-panel Proceed button loads SCENE_MARKET on click.")]
     public bool wireProceedButton = true;
 
-    // ── Source / commit data ─────────────────────────────────────────
+    // ── Source data ─────────────────────────────────────────────────
 
-    private enum SourceKey { Request, TrueGoal, Personality, Profession, School }
+    private enum SourceKey { Request, TrueGoal, Personality, Profession, School, Constraint }
 
-    private class Token
+    private class WordView
     {
-        public string text;
-        public bool   isWord;
-        public bool   used;
+        public Label   element;       // visual element (Label) for this token
+        public string  text;          // word text (or whitespace/punct)
+        public bool    isWord;        // eligible for selection
+        public bool    highlighted;   // currently part of the active highlight run
+        public bool    committed;     // already part of a slot chip — locked
     }
 
     private class SourceField
     {
-        public SourceKey   key;
-        public VisualElement container;
-        public List<Token> tokens = new();
-        public List<VisualElement> wordElements = new();   // 1:1 with tokens; null for non-word tokens
+        public SourceKey       key;
+        public VisualElement   container;
+        public List<WordView>  words = new();
+    }
+
+    private class ChipEntry
+    {
+        public string         text;          // joined phrase shown on the chip
+        public SourceKey      sourceKey;     // which prose field it came from
+        public int            firstTokenIdx; // inclusive — for restoring on remove
+        public int            lastTokenIdx;  // inclusive
+        public VisualElement  chipElement;   // the chip VisualElement in the slot
     }
 
     private readonly List<SourceField> _sources = new();
-    private readonly Dictionary<PlayerMemoField, Commitment> _committed = new();
-
-    private class Commitment
+    private readonly Dictionary<PlayerMemoField, List<ChipEntry>> _slotEntries = new()
     {
-        public SourceKey source;
-        public int       tokenIndex;
-        public string    word;
-    }
+        { PlayerMemoField.Element,       new List<ChipEntry>() },
+        { PlayerMemoField.Personality,   new List<ChipEntry>() },
+        { PlayerMemoField.Purpose,       new List<ChipEntry>() },
+        { PlayerMemoField.Reinforcement, new List<ChipEntry>() },
+    };
 
-    private SourceKey _armedSource;
-    private int       _armedTokenIndex = -1;
-    private string    _armedWord;
-    private bool      _hasArmed;
+    // ── Active highlight (after drag-select / single click) ─────────
 
-    private Action _onComplete;
+    private SourceField _highlightField;
+    private int         _highlightStart = -1;
+    private int         _highlightEnd   = -1;
 
-    // ── Cached element refs (resolved in Bootstrap) ──────────────────
+    // ── Pointer state ───────────────────────────────────────────────
+
+    private enum PointerMode { Idle, Selecting, MaybeDragging, Dragging }
+    private PointerMode _pointerMode = PointerMode.Idle;
+    private int      _capturedPointerId;
+    private Vector2  _pointerDownPos;
+    private VisualElement _dragGhost;
+    private const float DRAG_THRESHOLD_PX = 4f;
+
+    // Hard cap on how many eligible words can sit in a single highlight run.
+    private const int MAX_HIGHLIGHT_WORDS = 5;
+
+    // ── Slot UI cache ───────────────────────────────────────────────
+
+    private VisualElement _purposeSlot;
+    private VisualElement _personalitySlot;
+    private VisualElement _elementSlot;
+    private VisualElement _reinforcementSlot;
+    private VisualElement _slotDropTarget;  // currently highlighted as drop target (style only)
+
+    // ── Cached element refs (resolved in Bootstrap) ─────────────────
 
     private VisualElement _root;
     private Label         _customerNameLabel;
-    private Label         _constraintLabel;
     private Label         _statusLabel;
-    private Button        _generateButton;
     private Button        _proceedButton;
 
     private VisualElement _schoolProse;
@@ -99,14 +119,12 @@ public class DossierPanelController : MonoBehaviour
     private VisualElement _personalityProse;
     private VisualElement _requestProse;
     private VisualElement _trueGoalProse;
+    private VisualElement _constraintProse;
 
-    private Button _purposeSlot;
-    private Button _personalitySlot;
-    private Button _elementSlot;
+    private bool   _bootstrapped;
+    private Action _onComplete;
 
-    private bool _bootstrapped;
-
-    // ── Stop-words (mirror of MemoFillUI; keep in sync for parity) ───
+    // ── Stop-words (mirror of MemoFillUI; keep in sync for parity) ──
 
     private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -128,12 +146,9 @@ public class DossierPanelController : MonoBehaviour
         "something","anything","nothing","everything","someone","anyone"
     };
 
-    // ── Unity lifecycle ──────────────────────────────────────────────
+    // ── Unity lifecycle ─────────────────────────────────────────────
 
-    private void OnEnable()
-    {
-        Bootstrap();
-    }
+    private void OnEnable() => Bootstrap();
 
     private void Bootstrap()
     {
@@ -144,9 +159,7 @@ public class DossierPanelController : MonoBehaviour
         _root = document.rootVisualElement;
 
         _customerNameLabel = _root.Q<Label>("customerName");
-        _constraintLabel   = _root.Q<Label>("constraintText");
         _statusLabel       = _root.Q<Label>("statusLabel");
-        _generateButton    = _root.Q<Button>("generateButton");
         _proceedButton     = _root.Q<Button>("proceedButton");
 
         _schoolProse      = _root.Q<VisualElement>("schoolProse");
@@ -154,17 +167,22 @@ public class DossierPanelController : MonoBehaviour
         _personalityProse = _root.Q<VisualElement>("personalityProse");
         _requestProse     = _root.Q<VisualElement>("requestProse");
         _trueGoalProse    = _root.Q<VisualElement>("trueGoalProse");
+        _constraintProse  = _root.Q<VisualElement>("constraintProse");
 
-        _purposeSlot     = _root.Q<Button>("purposeSlot");
-        _personalitySlot = _root.Q<Button>("personalitySlot");
-        _elementSlot     = _root.Q<Button>("elementSlot");
+        _purposeSlot       = _root.Q<VisualElement>("purposeSlot");
+        _personalitySlot   = _root.Q<VisualElement>("personalitySlot");
+        _elementSlot       = _root.Q<VisualElement>("elementSlot");
+        _reinforcementSlot = _root.Q<VisualElement>("reinforcementSlot");
 
-        if (_purposeSlot     != null) _purposeSlot.clicked     += () => OnSlotClicked(PlayerMemoField.Purpose);
-        if (_personalitySlot != null) _personalitySlot.clicked += () => OnSlotClicked(PlayerMemoField.Personality);
-        if (_elementSlot     != null) _elementSlot.clicked     += () => OnSlotClicked(PlayerMemoField.Element);
+        WireSlot(_elementSlot,       PlayerMemoField.Element);
+        WireSlot(_personalitySlot,   PlayerMemoField.Personality);
+        WireSlot(_purposeSlot,       PlayerMemoField.Purpose);
+        WireSlot(_reinforcementSlot, PlayerMemoField.Reinforcement);
 
-        if (_generateButton != null && customerGenerator != null)
-            _generateButton.clicked += () => customerGenerator.GenerateCustomer();
+        // Root-level pointer-move/up so we can do drag-select & drag-drop with
+        // root pointer capture and manual hit-testing across the dossier prose.
+        _root.RegisterCallback<PointerMoveEvent>(OnRootPointerMove);
+        _root.RegisterCallback<PointerUpEvent>(OnRootPointerUp);
 
         if (_proceedButton != null)
         {
@@ -177,7 +195,16 @@ public class DossierPanelController : MonoBehaviour
         _bootstrapped = true;
     }
 
-    // ── Public API (signature mirrors MemoFillUI.Begin) ──────────────
+    private void WireSlot(VisualElement slot, PlayerMemoField field)
+    {
+        if (slot == null) return;
+        // Clickable fires after a press-release on the slot itself with no significant
+        // movement. That's exactly the "click a slot to commit highlight" gesture.
+        slot.AddManipulator(new Clickable(() => OnSlotClicked(field)));
+        UpdateSlotPlaceholder(field);
+    }
+
+    // ── Public API ──────────────────────────────────────────────────
 
     public void Begin(CustomerOrder order, Action onComplete)
     {
@@ -185,27 +212,34 @@ public class DossierPanelController : MonoBehaviour
         if (!_bootstrapped) return;
 
         _onComplete = onComplete;
-        _committed.Clear();
-        ClearArmed();
+        ClearHighlight();
         _sources.Clear();
+
+        // Wipe any previous chips
+        foreach (var kv in _slotEntries) kv.Value.Clear();
+        ClearSlotChildren(_elementSlot);
+        ClearSlotChildren(_personalitySlot);
+        ClearSlotChildren(_purposeSlot);
+        ClearSlotChildren(_reinforcementSlot);
+        UpdateSlotPlaceholder(PlayerMemoField.Element);
+        UpdateSlotPlaceholder(PlayerMemoField.Personality);
+        UpdateSlotPlaceholder(PlayerMemoField.Purpose);
+        UpdateSlotPlaceholder(PlayerMemoField.Reinforcement);
 
         if (order == null) return;
 
-        if (_customerNameLabel != null) _customerNameLabel.text = string.IsNullOrEmpty(order.customerName) ? "—" : order.customerName;
-        if (_constraintLabel   != null) _constraintLabel.text   = string.IsNullOrEmpty(order.constraint) ? "—" : order.constraint;
+        if (_customerNameLabel != null)
+            _customerNameLabel.text = string.IsNullOrEmpty(order.customerName) ? "—" : order.customerName;
 
         BuildSource(SourceKey.School,      _schoolProse,      order.schoolOfMagic);
         BuildSource(SourceKey.Profession,  _professionProse,  order.profession);
         BuildSource(SourceKey.Personality, _personalityProse, order.personality);
         BuildSource(SourceKey.Request,     _requestProse,     order.request);
         BuildSource(SourceKey.TrueGoal,    _trueGoalProse,    order.trueGoal);
-
-        ClearSlot(PlayerMemoField.Purpose);
-        ClearSlot(PlayerMemoField.Personality);
-        ClearSlot(PlayerMemoField.Element);
+        BuildSource(SourceKey.Constraint,  _constraintProse,  order.constraint);
 
         if (_proceedButton != null) _proceedButton.SetEnabled(false);
-        SetStatus("Read the dossier. Click words to fill the memo.");
+        SetStatus("Drag across the dossier to highlight phrases. Then click or drag onto a memo slot.");
     }
 
     public void SetStatus(string msg)
@@ -213,17 +247,18 @@ public class DossierPanelController : MonoBehaviour
         if (_statusLabel != null) _statusLabel.text = msg;
     }
 
-    public void SetGenerateEnabled(bool v)
-    {
-        Bootstrap();
-        if (_generateButton != null) _generateButton.SetEnabled(v);
-    }
+    // ── Tokenization ────────────────────────────────────────────────
 
-    // ── Tokenization (mirror of MemoFillUI; keep in sync) ────────────
+    private static bool IsWordChar(char c) => char.IsLetter(c) || c == '\'' || c == '-';
 
-    private static void Tokenize(string raw, List<Token> outTokens)
+    private void BuildSource(SourceKey key, VisualElement container, string raw)
     {
-        outTokens.Clear();
+        if (container == null) return;
+        container.Clear();
+
+        var field = new SourceField { key = key, container = container };
+        raw ??= "";
+
         int i = 0;
         while (i < raw.Length)
         {
@@ -233,288 +268,501 @@ public class DossierPanelController : MonoBehaviour
                 while (i < raw.Length && IsWordChar(raw[i])) i++;
                 string word = raw.Substring(start, i - start);
                 bool eligible = word.Length >= 3 && !StopWords.Contains(word);
-                outTokens.Add(new Token { text = word, isWord = eligible });
+
+                var wv = new WordView { text = word, isWord = eligible };
+                var lbl = new Label(word);
+                lbl.AddToClassList(eligible ? "word-clickable" : "word-static");
+                lbl.pickingMode = eligible ? PickingMode.Position : PickingMode.Ignore;
+                wv.element = lbl;
+
+                if (eligible)
+                {
+                    int capturedIdx = field.words.Count;
+                    SourceField capturedField = field;
+                    lbl.RegisterCallback<PointerDownEvent>(e => OnWordPointerDown(capturedField, capturedIdx, e));
+                }
+
+                container.Add(lbl);
+                field.words.Add(wv);
             }
             else
             {
                 int start = i;
                 while (i < raw.Length && !IsWordChar(raw[i])) i++;
-                outTokens.Add(new Token { text = raw.Substring(start, i - start), isWord = false });
-            }
-        }
-    }
+                string ws = raw.Substring(start, i - start);
 
-    private static bool IsWordChar(char c) => char.IsLetter(c) || c == '\'' || c == '-';
-
-    // ── Prose construction ───────────────────────────────────────────
-
-    private void BuildSource(SourceKey key, VisualElement container, string raw)
-    {
-        if (container == null) return;
-        container.Clear();
-
-        var field = new SourceField { key = key, container = container };
-        Tokenize(raw ?? "", field.tokens);
-
-        for (int t = 0; t < field.tokens.Count; t++)
-        {
-            var tok = field.tokens[t];
-            if (!tok.isWord)
-            {
-                var lbl = new Label(tok.text);
+                var wv = new WordView { text = ws, isWord = false };
+                var lbl = new Label(ws);
                 lbl.AddToClassList("word-static");
                 lbl.pickingMode = PickingMode.Ignore;
-                container.Add(lbl);
-                field.wordElements.Add(null);
-                continue;
-            }
+                wv.element = lbl;
 
-            int capturedIndex = t;
-            SourceKey capturedKey = key;
-            var btn = new Button(() => OnWordClicked(capturedKey, capturedIndex));
-            btn.text = tok.text;
-            btn.AddToClassList("word-clickable");
-            container.Add(btn);
-            field.wordElements.Add(btn);
+                container.Add(lbl);
+                field.words.Add(wv);
+            }
         }
 
         _sources.Add(field);
     }
 
-    // ── Word click ───────────────────────────────────────────────────
+    // ── Word pointer-down: start drag-select OR begin drag-from-highlight ──
 
-    private void OnWordClicked(SourceKey src, int tokenIdx)
+    private void OnWordPointerDown(SourceField field, int wordIdx, PointerDownEvent e)
     {
-        var field = _sources.Find(s => s.key == src);
-        if (field == null || tokenIdx < 0 || tokenIdx >= field.tokens.Count) return;
+        if (e.button != 0) return;
+        var wv = field.words[wordIdx];
+        if (!wv.isWord || wv.committed) return;
 
-        var tok = field.tokens[tokenIdx];
-        if (tok.used) return;
+        e.StopPropagation();
 
-        // Toggle: clicking the armed word again disarms.
-        if (_hasArmed && _armedSource == src && _armedTokenIndex == tokenIdx)
+        _pointerDownPos    = e.position;
+        _capturedPointerId = e.pointerId;
+        _root.CapturePointer(e.pointerId);
+
+        if (wv.highlighted && _highlightField == field)
         {
-            ClearArmed();
-            RefreshAllWordVisuals();
+            // Tentative drag — if user moves past the threshold we spawn a ghost.
+            _pointerMode = PointerMode.MaybeDragging;
+        }
+        else
+        {
+            // Begin a fresh drag-select run (clears any prior highlight).
+            ClearHighlight();
+            _highlightField = field;
+            _highlightStart = wordIdx;
+            _highlightEnd   = wordIdx;
+            _pointerMode    = PointerMode.Selecting;
+            ApplyHighlightFromRange();
+        }
+    }
+
+    // ── Root pointer-move ───────────────────────────────────────────
+
+    private void OnRootPointerMove(PointerMoveEvent e)
+    {
+        if (_pointerMode == PointerMode.Idle) return;
+
+        if (_pointerMode == PointerMode.Selecting)
+        {
+            int hit = FindWordIndexAt(_highlightField, e.position);
+            if (hit >= 0)
+            {
+                int clamped = ClampToMaxWords(_highlightStart, hit, MAX_HIGHLIGHT_WORDS);
+                if (clamped != _highlightEnd)
+                {
+                    _highlightEnd = clamped;
+                    ApplyHighlightFromRange();
+                }
+            }
             return;
         }
 
-        // Silent reject: every slot this word could fill is already committed.
-        if (!HasEligibleEmptySlot(src)) return;
-
-        _armedSource     = src;
-        _armedTokenIndex = tokenIdx;
-        _armedWord       = tok.text;
-        _hasArmed        = true;
-        RefreshAllWordVisuals();
-    }
-
-    private bool HasEligibleEmptySlot(SourceKey src)
-    {
-        for (int i = 0; i < 3; i++)
+        if (_pointerMode == PointerMode.MaybeDragging)
         {
-            var slot = (PlayerMemoField)i;
-            if (_committed.ContainsKey(slot)) continue;
-            if (SlotAccepts(slot, src)) return true;
+            float dist = ((Vector2)e.position - _pointerDownPos).magnitude;
+            if (dist >= DRAG_THRESHOLD_PX)
+            {
+                SpawnDragGhost();
+                _pointerMode = PointerMode.Dragging;
+            }
         }
-        return false;
+
+        if (_pointerMode == PointerMode.Dragging)
+        {
+            UpdateDragGhostPosition(e.position);
+            UpdateSlotDropHover(e.position);
+        }
     }
 
-    // ── Slot click ───────────────────────────────────────────────────
+    // ── Root pointer-up ─────────────────────────────────────────────
+
+    private void OnRootPointerUp(PointerUpEvent e)
+    {
+        if (_pointerMode == PointerMode.Idle) return;
+
+        if (_pointerMode == PointerMode.Selecting)
+        {
+            _pointerMode = PointerMode.Idle;
+            _root.ReleasePointer(_capturedPointerId);
+            return;
+        }
+
+        if (_pointerMode == PointerMode.Dragging)
+        {
+            var dropSlot = FindSlotUnder(e.position);
+            DestroyDragGhost();
+            ClearSlotDropHover();
+            if (dropSlot.HasValue && HasHighlight())
+                CommitHighlightToSlot(dropSlot.Value);
+        }
+        // MaybeDragging without crossing the threshold is just a click — keep
+        // the highlight as-is.
+
+        _pointerMode = PointerMode.Idle;
+        _root.ReleasePointer(_capturedPointerId);
+    }
+
+    // ── Highlight helpers ───────────────────────────────────────────
+
+    private bool HasHighlight() =>
+        _highlightField != null && _highlightStart >= 0 && _highlightEnd >= 0;
+
+    private void ClearHighlight()
+    {
+        if (_highlightField != null)
+        {
+            foreach (var w in _highlightField.words)
+            {
+                if (w.highlighted)
+                {
+                    w.highlighted = false;
+                    w.element?.RemoveFromClassList("word-highlighted");
+                }
+            }
+        }
+        _highlightField = null;
+        _highlightStart = -1;
+        _highlightEnd   = -1;
+    }
+
+    private void ApplyHighlightFromRange()
+    {
+        if (_highlightField == null) return;
+
+        int lo = Mathf.Min(_highlightStart, _highlightEnd);
+        int hi = Mathf.Max(_highlightStart, _highlightEnd);
+
+        for (int i = 0; i < _highlightField.words.Count; i++)
+        {
+            var w = _highlightField.words[i];
+            bool shouldHighlight = i >= lo && i <= hi && w.isWord && !w.committed;
+            if (shouldHighlight && !w.highlighted)
+            {
+                w.highlighted = true;
+                w.element?.AddToClassList("word-highlighted");
+            }
+            else if (!shouldHighlight && w.highlighted)
+            {
+                w.highlighted = false;
+                w.element?.RemoveFromClassList("word-highlighted");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Walk from <paramref name="anchor"/> toward <paramref name="target"/> through
+    /// <c>_highlightField.words</c> and return the farthest token index reachable
+    /// without exceeding <paramref name="maxWords"/> eligible words in the run.
+    /// </summary>
+    private int ClampToMaxWords(int anchor, int target, int maxWords)
+    {
+        if (_highlightField == null || maxWords <= 0) return anchor;
+        int step = target > anchor ? 1 : (target < anchor ? -1 : 0);
+        if (step == 0) return anchor;
+
+        int wordCount = 0;
+        int lastValid = anchor;
+        var words = _highlightField.words;
+        for (int i = anchor; i >= 0 && i < words.Count; i += step)
+        {
+            if (words[i].isWord) wordCount++;
+            if (wordCount > maxWords) break;
+            lastValid = i;
+            if (i == target) break;
+        }
+        return lastValid;
+    }
+
+    private string GetHighlightedPhrase()
+    {
+        if (!HasHighlight()) return "";
+
+        int lo = Mathf.Min(_highlightStart, _highlightEnd);
+        int hi = Mathf.Max(_highlightStart, _highlightEnd);
+
+        var sb = new System.Text.StringBuilder();
+        for (int i = lo; i <= hi; i++)
+        {
+            sb.Append(_highlightField.words[i].text);
+        }
+        return sb.ToString().Trim();
+    }
+
+    // ── Hit-testing ─────────────────────────────────────────────────
+
+    private int FindWordIndexAt(SourceField field, Vector2 worldPos)
+    {
+        if (field == null) return -1;
+        for (int i = 0; i < field.words.Count; i++)
+        {
+            var w = field.words[i];
+            if (!w.isWord) continue;
+            if (w.element == null) continue;
+            if (w.element.worldBound.Contains(worldPos)) return i;
+        }
+        return -1;
+    }
+
+    private PlayerMemoField? FindSlotUnder(Vector2 worldPos)
+    {
+        if (_elementSlot       != null && _elementSlot.worldBound.Contains(worldPos))       return PlayerMemoField.Element;
+        if (_personalitySlot   != null && _personalitySlot.worldBound.Contains(worldPos))   return PlayerMemoField.Personality;
+        if (_purposeSlot       != null && _purposeSlot.worldBound.Contains(worldPos))       return PlayerMemoField.Purpose;
+        if (_reinforcementSlot != null && _reinforcementSlot.worldBound.Contains(worldPos)) return PlayerMemoField.Reinforcement;
+        return null;
+    }
+
+    // ── Drag-ghost ──────────────────────────────────────────────────
+
+    private void SpawnDragGhost()
+    {
+        DestroyDragGhost();
+        var phrase = GetHighlightedPhrase();
+        if (string.IsNullOrEmpty(phrase)) return;
+
+        var ghost = new Label(phrase.Length > 40 ? phrase.Substring(0, 37) + "…" : phrase);
+        ghost.AddToClassList("drag-ghost");
+        ghost.pickingMode = PickingMode.Ignore;
+        _root.Add(ghost);
+        _dragGhost = ghost;
+    }
+
+    private void UpdateDragGhostPosition(Vector2 worldPos)
+    {
+        if (_dragGhost == null) return;
+        var local = _root.WorldToLocal(worldPos);
+        _dragGhost.style.left = new StyleLength(new Length(local.x + 14f, LengthUnit.Pixel));
+        _dragGhost.style.top  = new StyleLength(new Length(local.y + 14f, LengthUnit.Pixel));
+    }
+
+    private void DestroyDragGhost()
+    {
+        if (_dragGhost != null)
+        {
+            _dragGhost.RemoveFromHierarchy();
+            _dragGhost = null;
+        }
+    }
+
+    private void UpdateSlotDropHover(Vector2 worldPos)
+    {
+        var slot = FindSlotUnder(worldPos);
+        VisualElement target = slot.HasValue ? GetSlotElement(slot.Value) : null;
+        if (target == _slotDropTarget) return;
+        ClearSlotDropHover();
+        if (target != null)
+        {
+            target.AddToClassList("memo-slot--drop-target");
+            _slotDropTarget = target;
+        }
+    }
+
+    private void ClearSlotDropHover()
+    {
+        if (_slotDropTarget != null)
+            _slotDropTarget.RemoveFromClassList("memo-slot--drop-target");
+        _slotDropTarget = null;
+    }
+
+    // ── Slot click → commit current highlight ───────────────────────
 
     private void OnSlotClicked(PlayerMemoField slot)
     {
-        // Clicking a committed slot uncommits the word.
-        if (_committed.TryGetValue(slot, out var existing))
+        // Click only commits if a highlight exists — clicks on an empty slot
+        // with no active highlight are no-ops.
+        if (HasHighlight())
+            CommitHighlightToSlot(slot);
+    }
+
+    // ── Commit / uncommit ───────────────────────────────────────────
+
+    private void CommitHighlightToSlot(PlayerMemoField slot)
+    {
+        if (!HasHighlight()) return;
+
+        int lo = Mathf.Min(_highlightStart, _highlightEnd);
+        int hi = Mathf.Max(_highlightStart, _highlightEnd);
+        var field = _highlightField;
+        string phrase = GetHighlightedPhrase();
+
+        if (string.IsNullOrEmpty(phrase))
         {
-            var src = _sources.Find(s => s.key == existing.source);
-            if (src != null && existing.tokenIndex >= 0 && existing.tokenIndex < src.tokens.Count)
-                src.tokens[existing.tokenIndex].used = false;
-            _committed.Remove(slot);
-            ClearSlot(slot);
-            RefreshAllWordVisuals();
+            ClearHighlight();
             return;
         }
 
-        if (!_hasArmed) return;
-
-        if (!SlotAccepts(slot, _armedSource))
+        // Skip duplicate entries within the same slot.
+        var entries = _slotEntries[slot];
+        if (entries.Exists(c => string.Equals(c.text, phrase, StringComparison.OrdinalIgnoreCase)))
         {
-            ShakeSlot(GetSlotButton(slot));
+            ClearHighlight();
             return;
         }
 
-        var sourceField = _sources.Find(s => s.key == _armedSource);
-        if (sourceField != null && _armedTokenIndex >= 0 && _armedTokenIndex < sourceField.tokens.Count)
-            sourceField.tokens[_armedTokenIndex].used = true;
-
-        _committed[slot] = new Commitment
+        // Mark all words in the run as committed (strikethrough, no longer
+        // selectable). They'll be restored if the chip is later removed.
+        for (int i = lo; i <= hi; i++)
         {
-            source     = _armedSource,
-            tokenIndex = _armedTokenIndex,
-            word       = _armedWord
+            var w = field.words[i];
+            w.highlighted = false;
+            w.element?.RemoveFromClassList("word-highlighted");
+            if (w.isWord)
+            {
+                w.committed = true;
+                w.element?.AddToClassList("word-committed");
+            }
+        }
+
+        var entry = new ChipEntry
+        {
+            text          = phrase,
+            sourceKey     = field.key,
+            firstTokenIdx = lo,
+            lastTokenIdx  = hi,
         };
-        SetSlotText(slot, _armedWord);
-        SpawnInkBlot(slot);
+        entry.chipElement = BuildChip(slot, entry);
+        entries.Add(entry);
 
-        ClearArmed();
-        RefreshAllWordVisuals();
+        var slotEl = GetSlotElement(slot);
+        if (slotEl != null)
+        {
+            RemoveSlotPlaceholder(slotEl);
+            slotEl.Add(entry.chipElement);
+            slotEl.AddToClassList("memo-slot--filled");
+        }
 
-        if (_committed.Count == 3)
+        ClearHighlight();
+        CheckMemoCompletion();
+    }
+
+    private VisualElement BuildChip(PlayerMemoField slot, ChipEntry entry)
+    {
+        var chip = new VisualElement();
+        chip.AddToClassList("memo-chip");
+
+        var txt = new Label(entry.text);
+        txt.AddToClassList("memo-chip__text");
+        txt.pickingMode = PickingMode.Ignore;
+        chip.Add(txt);
+
+        var rm = new Button(() => RemoveChip(slot, entry));
+        rm.AddToClassList("memo-chip__remove");
+        rm.text = "×";
+        chip.Add(rm);
+
+        return chip;
+    }
+
+    private void RemoveChip(PlayerMemoField slot, ChipEntry entry)
+    {
+        var entries = _slotEntries[slot];
+        if (!entries.Remove(entry)) return;
+
+        // Restore the underlying words so the player can re-pick them.
+        var field = _sources.Find(s => s.key == entry.sourceKey);
+        if (field != null)
+        {
+            for (int i = entry.firstTokenIdx; i <= entry.lastTokenIdx && i < field.words.Count; i++)
+            {
+                var w = field.words[i];
+                if (w.isWord && w.committed)
+                {
+                    w.committed = false;
+                    w.element?.RemoveFromClassList("word-committed");
+                }
+            }
+        }
+
+        entry.chipElement?.RemoveFromHierarchy();
+
+        var slotEl = GetSlotElement(slot);
+        if (slotEl != null && entries.Count == 0)
+        {
+            slotEl.RemoveFromClassList("memo-slot--filled");
+            UpdateSlotPlaceholder(slot);
+        }
+
+        CheckMemoCompletion();
+    }
+
+    private VisualElement GetSlotElement(PlayerMemoField slot) => slot switch
+    {
+        PlayerMemoField.Element       => _elementSlot,
+        PlayerMemoField.Personality   => _personalitySlot,
+        PlayerMemoField.Purpose       => _purposeSlot,
+        PlayerMemoField.Reinforcement => _reinforcementSlot,
+        _                             => null
+    };
+
+    private void ClearSlotChildren(VisualElement slot)
+    {
+        if (slot == null) return;
+        slot.Clear();
+        slot.RemoveFromClassList("memo-slot--filled");
+    }
+
+    private void UpdateSlotPlaceholder(PlayerMemoField slot)
+    {
+        var slotEl = GetSlotElement(slot);
+        if (slotEl == null) return;
+        if (_slotEntries[slot].Count > 0) return;
+
+        // Only add a placeholder if one isn't already there.
+        if (slotEl.childCount == 0)
+        {
+            var ph = new Label(slot switch
+            {
+                PlayerMemoField.Element       => "(drop or click to add an element)",
+                PlayerMemoField.Personality   => "(drop or click to add a trait)",
+                PlayerMemoField.Purpose       => "(drop or click to add a purpose)",
+                PlayerMemoField.Reinforcement => "(drop or click — what to reinforce or hide)",
+                _                             => "(empty)"
+            });
+            ph.AddToClassList("memo-slot__placeholder");
+            ph.pickingMode = PickingMode.Ignore;
+            slotEl.Add(ph);
+        }
+    }
+
+    private void RemoveSlotPlaceholder(VisualElement slotEl)
+    {
+        if (slotEl == null) return;
+        var ph = slotEl.Q<Label>(className: "memo-slot__placeholder");
+        ph?.RemoveFromHierarchy();
+    }
+
+    // ── Memo completion ─────────────────────────────────────────────
+
+    private void CheckMemoCompletion()
+    {
+        bool complete = _slotEntries[PlayerMemoField.Element].Count       > 0
+                     && _slotEntries[PlayerMemoField.Personality].Count   > 0
+                     && _slotEntries[PlayerMemoField.Purpose].Count       > 0
+                     && _slotEntries[PlayerMemoField.Reinforcement].Count > 0;
+
+        if (_proceedButton != null) _proceedButton.SetEnabled(complete);
+
+        if (complete)
         {
             var memo = new PlayerMemo
             {
-                purpose     = _committed.TryGetValue(PlayerMemoField.Purpose,     out var p)  ? p.word  : "",
-                personality = _committed.TryGetValue(PlayerMemoField.Personality, out var pe) ? pe.word : "",
-                element     = _committed.TryGetValue(PlayerMemoField.Element,     out var el) ? el.word : ""
+                element       = string.Join(", ", EntryTexts(PlayerMemoField.Element)),
+                personality   = string.Join(", ", EntryTexts(PlayerMemoField.Personality)),
+                purpose       = string.Join(", ", EntryTexts(PlayerMemoField.Purpose)),
+                reinforcement = string.Join(", ", EntryTexts(PlayerMemoField.Reinforcement)),
             };
             if (GameManager.Instance != null) GameManager.Instance.currentMemo = memo;
-            if (_proceedButton != null) _proceedButton.SetEnabled(true);
             SetStatus("Memo complete. Proceed to the market.");
             _onComplete?.Invoke();
         }
-    }
-
-    private static bool SlotAccepts(PlayerMemoField slot, SourceKey src) => slot switch
-    {
-        PlayerMemoField.Purpose     => src == SourceKey.Request     || src == SourceKey.TrueGoal,
-        PlayerMemoField.Personality => src == SourceKey.Personality || src == SourceKey.Profession,
-        PlayerMemoField.Element     => src == SourceKey.School,
-        _ => false
-    };
-
-    // ── Slot helpers ─────────────────────────────────────────────────
-
-    private Button GetSlotButton(PlayerMemoField slot) => slot switch
-    {
-        PlayerMemoField.Purpose     => _purposeSlot,
-        PlayerMemoField.Personality => _personalitySlot,
-        PlayerMemoField.Element     => _elementSlot,
-        _ => null
-    };
-
-    private void SetSlotText(PlayerMemoField slot, string word)
-    {
-        var btn = GetSlotButton(slot);
-        if (btn == null) return;
-        btn.text = word;
-        btn.AddToClassList("memo-slot--filled");
-    }
-
-    private void ClearSlot(PlayerMemoField slot)
-    {
-        var btn = GetSlotButton(slot);
-        if (btn == null) return;
-        btn.text = "";
-        btn.RemoveFromClassList("memo-slot--filled");
-    }
-
-    private void ClearArmed()
-    {
-        _hasArmed        = false;
-        _armedTokenIndex = -1;
-        _armedWord       = null;
-    }
-
-    // ── Word visual state ────────────────────────────────────────────
-
-    private void RefreshAllWordVisuals()
-    {
-        foreach (var field in _sources)
+        else
         {
-            for (int t = 0; t < field.tokens.Count; t++)
-            {
-                var ve = field.wordElements[t];
-                if (ve == null) continue;
-                var btn = ve as Button;
-                if (btn == null) continue;
-                var tok = field.tokens[t];
-
-                btn.RemoveFromClassList("word-armed");
-                btn.RemoveFromClassList("word-committed");
-
-                if (tok.used)
-                {
-                    btn.AddToClassList("word-committed");
-                    btn.text = "<s>" + tok.text + "</s>";
-                    btn.SetEnabled(false);
-                }
-                else
-                {
-                    btn.text = tok.text;
-                    btn.SetEnabled(true);
-                    if (_hasArmed && _armedSource == field.key && _armedTokenIndex == t)
-                        btn.AddToClassList("word-armed");
-                }
-            }
+            SetStatus("Drag across the dossier to highlight phrases. Then click or drag onto a memo slot.");
         }
     }
 
-    // ── Visual feedback ──────────────────────────────────────────────
-
-    private void ShakeSlot(VisualElement el)
+    private IEnumerable<string> EntryTexts(PlayerMemoField slot)
     {
-        if (el == null) return;
-        const int totalMs = 300;
-        const float amp = 6f;
-        long started = DateTime.UtcNow.Ticks;
-
-        el.schedule.Execute(() =>
-        {
-            float elapsed = (DateTime.UtcNow.Ticks - started) / 10000f;
-            if (elapsed >= totalMs)
-            {
-                el.style.translate = new StyleTranslate(new Translate(0, 0));
-                return;
-            }
-            float p = 1f - (elapsed / totalMs);
-            float dx = Mathf.Sin(elapsed / 1000f * 60f) * amp * p;
-            el.style.translate = new StyleTranslate(new Translate(dx, 0));
-        }).Every(16).Until(() =>
-            (DateTime.UtcNow.Ticks - started) / 10000f >= totalMs);
-    }
-
-    private void SpawnInkBlot(PlayerMemoField slot)
-    {
-        var btn = GetSlotButton(slot);
-        if (btn == null) return;
-
-        var blot = new VisualElement();
-        blot.AddToClassList("ink-blot");
-        blot.pickingMode = PickingMode.Ignore;
-        blot.style.scale = new StyleScale(new Scale(new Vector3(0.1f, 0.1f, 1f)));
-        btn.Add(blot);
-
-        long startedTicks = DateTime.UtcNow.Ticks;
-        const float riseMs = 150f, holdMs = 1200f, fadeMs = 500f;
-        const float total = riseMs + holdMs + fadeMs;
-
-        blot.schedule.Execute(() =>
-        {
-            float t = (DateTime.UtcNow.Ticks - startedTicks) / 10000f;
-            if (t >= total)
-            {
-                if (blot.parent != null) blot.RemoveFromHierarchy();
-                return;
-            }
-            if (t < riseMs)
-            {
-                float k = Mathf.Clamp01(t / riseMs);
-                float s = Mathf.Lerp(0.1f, 1f, k);
-                blot.style.scale = new StyleScale(new Scale(new Vector3(s, s, 1f)));
-                blot.style.opacity = 0.85f;
-            }
-            else if (t < riseMs + holdMs)
-            {
-                blot.style.scale = new StyleScale(new Scale(Vector3.one));
-                blot.style.opacity = 0.85f;
-            }
-            else
-            {
-                float k = Mathf.Clamp01((t - riseMs - holdMs) / fadeMs);
-                blot.style.opacity = Mathf.Lerp(0.85f, 0f, k);
-            }
-        }).Every(16).Until(() =>
-            (DateTime.UtcNow.Ticks - startedTicks) / 10000f >= total);
+        foreach (var entry in _slotEntries[slot]) yield return entry.text;
     }
 }

@@ -1,6 +1,6 @@
 # Memo-Gated Dossier Reading — Design Doc
 
-**Status:** Implemented 2026-04-24 (scene wiring pending — see TODO-EDITOR notes).
+**Status:** Live in production (UI Toolkit) since 2026-04-29.
 **Supersedes:** `Docs/DossierSortingFeature.md`
 **Scenes affected:** `CustomerGeneratorTest` (gate), `MaterialGeneratorTest` (consumer), `CraftingScene` (persistent reference).
 
@@ -42,40 +42,35 @@ The player must distil the dossier into a 3-entry **memo** before Proceed enable
 
 Created:
 - `Assets/Scripts/PlayerMemo.cs` — `PlayerMemo` data class + `PlayerMemoField` enum.
-- `Assets/Scripts/MemoFillUI.cs` — click-word → click-slot orchestrator + `MemoLinkClickRelay`.
-- `Assets/Scripts/MemoCardUI.cs` — read-only 3-slot card for market/crafting.
+- `Assets/Scripts/DossierPanelController.cs` — **production** UI Toolkit driver. Renders dossier prose with clickable word links inside `Assets/UI/Dossier/DossierPanel.uxml`, runs the click-word → click-slot orchestration, gates Proceed, animates the ink-blot pop on commit, and shakes the row on rejection. Calls `CustomerGenerator.OnMemoComplete` when all 3 slots commit.
+- `Assets/Scripts/MemoFillUI.cs` — *legacy uGUI* fallback (kept in repo for any non-UIDocument scenes; not used in production today). Same orchestration logic at the Canvas level.
+- `Assets/Scripts/MemoCardUI.cs` — read-only 3-slot card displayed in market/crafting. Used by both UI layers (still uGUI on those screens).
 
 Modified:
 - `Assets/Scripts/GameManager.cs` — added `currentMemo` field; reset in `StartNextRound`, `AdvanceToNextDay`, `ResetForNewPlaythrough`.
-- `Assets/Scripts/CustomerGenerator.cs` — added `memoFillUI` field; gates Proceed on `OnMemoComplete`.
+- `Assets/Scripts/CustomerGenerator.cs` — added both `dossierPanel` (UI Toolkit) and `memoFillUI` (legacy fallback) fields; prefers `dossierPanel` when wired and falls back to `memoFillUI`. Gates Proceed on `OnMemoComplete`.
 - `Assets/Scripts/MaterialGenerator.cs` — added `memoCard` field + `ApplyMemoHints`; blanks legacy dossier when memo card is wired.
 - `Assets/Scripts/MaterialCardUI.cs` — added `SetHintGlyph(bool)` with runtime-created ✦ child.
+- `Assets/Scripts/MaterialMarketUI.cs` — UI Toolkit market exposes `SetHintGlyph(globalIndex, show)` for the `card-hint-glyph` Label and `RefreshMemo(memo)` for the pinned 3-slot card.
 - `Assets/Scripts/CraftingManager.cs` — added `memoCard` field; populates in `Start`.
+- `Assets/Scripts/CraftingWorkbenchUI.cs` — UI Toolkit workbench exposes `SetMemo(memo)` to populate the pinned memo card on the workbench panel.
 
-## TODO-EDITOR (scene wiring)
+## Wiring (today)
 
-**CustomerGeneratorTest scene:**
-- Create `MemoPanel` under Canvas. Add `MemoFillUI` component.
-- Create 3 slot rows, each a child GameObject with:
-  - A question-prompt label `TMP_Text` (static — can be customized in Inspector).
-  - An empty committed-word `TMP_Text`.
-  - A `Button` + transparent `Image` covering the row.
-- On `MemoFillUI`, assign: the 5 existing dossier `TMP_Text` fields (request, trueGoal, personality, profession, school) as sources, plus the 3 slot value texts and 3 slot buttons.
-- Assign `MemoFillUI` to `CustomerGenerator.memoFillUI`.
-- The existing dossier `TMP_Text` fields must have `raycastTarget = true` (usually true by default) so pointer clicks register.
+**CustomerGeneratorTest** — UI Toolkit production wiring:
+- `Assets/UI/Dossier/DossierPanel.uxml` + `DossierPanel.uss` + `DossierPanelSettings.asset` define the layout.
+- A `DossierUIDocument` GameObject in `2.CustomerGeneratorTest.unity` carries a `UIDocument` (with the panel settings + UXML source) and a `DossierPanelController` component.
+- `CustomerGenerator.dossierPanel` references the controller; on memo completion it fires `OnMemoComplete` which enables the Proceed button and stores the result on `GameManager.currentMemo`.
+- The legacy uGUI Canvas children remain in the scene but are disabled. If you ever need to revert, set the Canvas children active and assign the `MemoFillUI` component instead via `CustomerGenerator.memoFillUI`.
 
-**MaterialGeneratorTest scene:**
-- Create `MemoCardPanel` under Canvas. Add `MemoCardUI` component.
-- Create 3 child label + value `TMP_Text` pairs. Wire on `MemoCardUI`.
-- Assign the component to `MaterialGenerator.memoCard`.
-- Delete or disable the 7 legacy dossier `TMP_Text` GameObjects — the memo replaces them.
+**MaterialGeneratorTest** — uGUI today:
+- `MemoCardUI` component sits on a `MemoCardPanel` GameObject under Canvas with three label + value `TMP_Text` children.
+- `MaterialGenerator.memoCard` references it; `MaterialGenerator.ApplyMemoHints` toggles ✦ glyphs on cards whose `elementalAffinity` (cores) or `personalityMatch` (woods) overlaps the memo via `IsHintMatch` substring search.
+- A UXML/USS market layout is authored at `Assets/UI/Market/` but the UIDocument GameObject hasn't been wired yet, so the uGUI driver is still authoritative. When the UI Toolkit version is wired, `MaterialMarketUI.RefreshMemo` and `SetHintGlyph` mirror the same behaviour.
 
-**CraftingScene:**
-- Same memo card setup as MaterialGeneratorTest.
-- Assign the component to `CraftingManager.memoCard`.
-
-### Canvas note
-If the scene Canvas is **Screen Space - Camera** or **World Space**, edit `MemoFillUI.OnSourceClicked` and replace the `null` passed to `TMP_TextUtilities.FindIntersectingLink` with the Canvas's event camera. Screen Space - Overlay (the default) works with `null` as-is.
+**CraftingScene** — uGUI memo card pinned the same way:
+- `MemoCardUI` on a panel under Canvas, wired into `CraftingManager.memoCard`. `CraftingManager.Start()` calls `Populate(GameManager.Instance?.currentMemo)`.
+- The UI Toolkit `CraftingWorkbenchUI.SetMemo(memo)` mirrors this for the new workbench panel.
 
 ## Verification
 

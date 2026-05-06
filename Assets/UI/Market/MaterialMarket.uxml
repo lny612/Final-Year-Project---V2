@@ -3,59 +3,77 @@
 
     <ui:VisualElement name="market-root" class="market-root" picking-mode="Ignore">
 
-        <!-- ── Top bar ───────────────────────────────────────────── -->
+        <!-- Wood plate + grain + edge vignette behind everything. -->
+        <ui:VisualElement class="market-wood-plate"   picking-mode="Ignore" />
+        <ui:VisualElement class="market-wood-grain"   picking-mode="Ignore" />
+        <ui:VisualElement class="market-vignette"     picking-mode="Ignore" />
+
+        <!-- ── Top bar: back · carved title plate · heart-and-coin gold ── -->
         <ui:VisualElement name="market-topbar" class="market-topbar">
             <ui:Button name="market-back" text="◀" class="market-back" />
 
             <ui:VisualElement class="market-title-plate">
-                <ui:Label name="market-title" text="Market" class="market-title" />
+                <ui:Label name="market-title" text="The Apothecary's Market" class="market-title" />
             </ui:VisualElement>
 
             <ui:VisualElement name="market-gold" class="market-gold">
-                <ui:VisualElement class="coin-icon" />
+                <ui:VisualElement class="market-gold-icon" picking-mode="Ignore" />
                 <ui:Label name="gold-amount" text="0" class="gold-amount" />
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- ── Body ──────────────────────────────────────────────── -->
+        <!-- ── Body: left categories + memo · right scrollable card grid ── -->
         <ui:VisualElement class="market-body">
 
-            <!-- Memo column (replaces the category column from the references) -->
-            <ui:VisualElement class="market-memo-panel">
-                <ui:Label text="Your memo" class="memo-heading" />
+            <!-- LEFT column -->
+            <ui:VisualElement name="market-left" class="market-left">
 
-                <ui:VisualElement class="memo-slot">
-                    <ui:Label text="Purpose" class="memo-label" />
-                    <ui:Label name="memo-purpose" text="—" class="memo-value" />
+                <ui:VisualElement name="market-categories" class="market-categories">
+                    <ui:Button name="cat-cores" class="market-cat market-cat--selected" text="Cores" />
+                    <ui:VisualElement class="market-cat-divider" picking-mode="Ignore" />
+                    <ui:Button name="cat-woods" class="market-cat" text="Woods" />
                 </ui:VisualElement>
 
-                <ui:VisualElement class="memo-slot">
-                    <ui:Label text="Personality" class="memo-label" />
-                    <ui:Label name="memo-personality" text="—" class="memo-value" />
-                </ui:VisualElement>
+                <ui:VisualElement name="market-memo-panel" class="market-memo-panel">
+                    <ui:Label class="memo-heading" text="The Customer" />
+                    <ui:VisualElement class="memo-rule" picking-mode="Ignore" />
 
-                <ui:VisualElement class="memo-slot">
-                    <ui:Label text="Element" class="memo-label" />
-                    <ui:Label name="memo-element" text="—" class="memo-value" />
-                </ui:VisualElement>
+                    <ui:VisualElement class="memo-slot">
+                        <ui:Label class="memo-label" text="Element" />
+                        <ui:Label name="memo-element" class="memo-value" text="—" />
+                    </ui:VisualElement>
 
-                <ui:Label text="✦ glyph hints when a material aligns with your memo." class="memo-footnote" />
+                    <ui:VisualElement class="memo-slot">
+                        <ui:Label class="memo-label" text="Personality" />
+                        <ui:Label name="memo-personality" class="memo-value" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="memo-slot">
+                        <ui:Label class="memo-label" text="Purpose" />
+                        <ui:Label name="memo-purpose" class="memo-value" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="memo-slot">
+                        <ui:Label class="memo-label" text="Reinforce / Conceal" />
+                        <ui:Label name="memo-reinforcement" class="memo-value" text="—" />
+                    </ui:VisualElement>
+
+                    <ui:Label class="memo-footnote" text="✦ glyph hints when a material aligns with your memo." />
+                </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Cards area -->
-            <ui:VisualElement class="market-cards">
-                <ui:Label text="— Monster Cores —" class="market-section-label" />
+            <!-- RIGHT scrollable cards -->
+            <ui:ScrollView name="market-cards" class="market-cards">
                 <ui:VisualElement name="core-row" class="market-card-row" />
-
-                <ui:Label text="— Woods —" class="market-section-label" />
-                <ui:VisualElement name="wood-row" class="market-card-row" />
-            </ui:VisualElement>
+                <ui:VisualElement name="wood-row" class="market-card-row hidden" />
+            </ui:ScrollView>
         </ui:VisualElement>
 
-        <!-- ── Footer ────────────────────────────────────────────── -->
+        <!-- ── Footer: status + proceed ────────────────────────────── -->
         <ui:VisualElement class="market-footer">
-            <ui:Label name="market-status" text="Waiting..." class="market-status" />
-            <ui:Button name="market-proceed" text="Begin Crafting →" class="market-proceed" />
+            <ui:Label name="market-status" class="market-status" text="Waiting..." />
+            <ui:Button name="market-proceed" class="market-proceed" text="To the Workbench" />
         </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>

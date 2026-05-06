@@ -1,219 +1,286 @@
-/*
- * MinigamePanel.uss
- *
- * Cozy magical-fantasy chrome for the wand-tracing minigame.
- * Sits BEHIND and AROUND the existing UGUI gameplay layer (path / cursor / gates / trail).
- *
- * Palette (matches Assets/UI references/mini game reference.png):
- *   ink black            #0E0C10  (vignette outer)
- *   midnight mist        #221E2C  (vignette mid)
- *   gold light           #E5C57A  (title text + flourish bars)
- *   gold deep            #B8945C  (frame borders, corner inners)
- *   parchment cream      #F4E5C2  (instruction text)
- *   wax-seal red         #7A2E1F  (round pill base, matches dossier accent)
- *   ember red            #AA3C32  (mist accent, kept available for future use)
- *   rune blue            #78B4FF  (trail accent, kept available for future use)
- *
- * Font: reuses LiberationSans (TMP's underlying TTF) for now.
- * To swap to a serif (EB Garamond / IM Fell English / Cardo) for stronger fantasy feel,
- * drop a TTF into Assets/UI/Minigame/Fonts/ and edit the `-unity-font-definition` line below.
- */
+/* ==========================================================================
+   MinigamePanel.uss
+   Cozy magical-fantasy chrome that frames the procedural rune-tracing
+   gameplay (TracingMinigameUI). All chrome elements use picking-mode="Ignore"
+   so mouse input falls through to the gameplay layer.
+
+   Visual references:
+     • Hogwarts Legacy spell-tracing UI ("REVELIO" / "LEVIOSO" plates)
+     • Potion Craft cozy walnut-and-parchment workspace
+     • Project's own Title / Morning / Dossier panels (gold corners + parchment)
+
+   Palette:
+     ink deep            #0B0814  (radial centre / deepest backdrop)
+     ink mid             #1B1626  (mid wash)
+     walnut dark         #2A1C12  (wood frame)
+     walnut warm         #4A2F1F  (wood frame inner)
+     gold light          #E5C57A  (title text + flourishes)
+     gold deep           #B8945C  (frame edges, brackets)
+     parchment cream     #F4E5C2  (instruction text + key glyph face)
+     wax-seal red        #7A2E1F  (round chip ink)
+     ember red           #AA3C32  (kept for trail accents)
+     rune blue           #78B4FF  (kept for trail accents)
+========================================================================== */
 
 .root {
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/LiberationSans.ttf");
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
     color: rgb(244, 229, 194);
     font-size: 14px;
 }
 
-/* ── Vignette (dark moody backdrop) ───────────────────────────── */
-/* Two stacked layers approximate a radial fade since USS has no radial gradient. */
+/* ── Backdrop layers ───────────────────────────────────────────── */
+/* Three stacked elements approximate a soft radial vignette plus a
+   warm halo behind the gameplay (USS has no radial gradient). */
 
-.vignette-outer {
+.ink-layer {
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-color: rgb(14, 12, 16);
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(11, 8, 20);
 }
 
-.vignette-inner {
+/* Soft warm halo a third of the way down — gives the path some "candle". */
+.halo-layer {
     position: absolute;
-    top: 8%;
-    right: 8%;
-    bottom: 8%;
-    left: 8%;
-    background-color: rgba(34, 30, 44, 0.70);
-    border-radius: 200px;
+    left: 12%;  right: 12%;
+    top:  10%;  bottom: 16%;
+    background-color: rgba(45, 30, 22, 0.55);
+    border-radius: 320px;
 }
 
-/* ── Title bar (top-center, REVELIO with golden flourishes) ──── */
+/* Walnut wood frame (just outside the halo so it reads as a heavy slab). */
+.wood-frame {
+    position: absolute;
+    left:  18px;  right:  18px;
+    top:   18px;  bottom: 18px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(42, 28, 18);
+    border-width: 14px;
+    border-radius: 12px;
+    /* Inner edge tone — fakes a bevel via outline. */
+    box-shadow: 0 0 0 2px rgba(74, 47, 31, 0.85);
+}
+
+/* Outer-edge vignette darkens the corners further. */
+.vignette-edge {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-left-width:   90px;
+    border-right-width:  90px;
+    border-top-width:    70px;
+    border-bottom-width: 80px;
+    border-left-color:   rgba(0, 0, 0, 0.45);
+    border-right-color:  rgba(0, 0, 0, 0.45);
+    border-top-color:    rgba(0, 0, 0, 0.30);
+    border-bottom-color: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Title bar: ✦ SPELL NAME ✦ ─────────────────────────────────── */
 
 .title-frame {
     position: absolute;
-    top: 28px;
+    top: 36px;
     left: 50%;
     translate: -50% 0;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    height: 28px;
+}
+
+.rule {
+    width: 110px;
+    height: 1px;
+    background-color: rgba(184, 148, 92, 0.75);
+}
+
+.rule--left  { margin-right: 12px; }
+.rule--right { margin-left:  12px; }
+
+.title-glyph {
+    color: rgb(229, 197, 122);
+    font-size: 16px;
+    margin: 0 6px;
+    -unity-text-align: middle-center;
+    text-shadow: 0 0 10px rgba(229, 197, 122, 0.45);
 }
 
 .title-label {
-    font-size: 32px;
-    color: rgb(229, 197, 122);
+    color: rgb(244, 229, 194);
+    font-size: 22px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    letter-spacing: 12px;
-    margin: 0 18px 0 18px;
-    text-shadow: 0 0 14px rgba(229, 197, 122, 0.45);
+    letter-spacing: 8px;
+    margin: 0 12px;
+    text-shadow: 0 0 14px rgba(229, 197, 122, 0.55);
 }
 
-/* Flourish: gold horizontal bar + diamond, mirrored on each side. */
+/* ── Round badge (top-right) ───────────────────────────────────── */
 
-.flourish {
+.round-badge {
+    position: absolute;
+    top: 36px;
+    right: 44px;
     flex-direction: row;
     align-items: center;
-    height: 14px;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 6px;
+    padding: 6px 14px 6px 14px;
 }
 
-.flourish__bar {
-    width: 90px;
-    height: 1px;
-    background-color: rgb(184, 148, 92);
-}
-
-.flourish__diamond {
+.round-badge-corner {
+    position: absolute;
     width: 8px;
     height: 8px;
-    background-color: rgb(229, 197, 122);
-    border-color: rgb(184, 148, 92);
+    background-color: rgb(184, 148, 92);
+    border-color: rgb(46, 32, 22);
     border-width: 1px;
-    rotate: 45deg;
-    margin: 0 6px 0 6px;
+    border-radius: 1px;
 }
+.round-badge-corner--tl { left:  4px; top:    4px; }
+.round-badge-corner--tr { right: 4px; top:    4px; }
+.round-badge-corner--bl { left:  4px; bottom: 4px; }
+.round-badge-corner--br { right: 4px; bottom: 4px; }
 
-/* ── Round pill (top right) ──────────────────────────────────── */
-
-.round-pill {
-    position: absolute;
-    top: 28px;
-    right: 36px;
-    background-color: rgba(122, 46, 31, 0.85);
-    border-color: rgb(201, 169, 110);
-    border-width: 1px;
-    border-radius: 14px;
-    padding: 6px 18px 6px 18px;
+.round-prefix {
+    color: rgb(122, 46, 31);
+    font-size: 12px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    margin-right: 8px;
+    -unity-text-align: middle-center;
 }
 
 .round-label {
-    font-size: 14px;
-    color: rgb(244, 229, 194);
+    color: rgb(46, 32, 22);
+    font-size: 18px;
     -unity-font-style: bold;
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
-    letter-spacing: 3px;
 }
 
-/* ── Play-area frame + gold corner ornaments ─────────────────── */
-/* Transparent rectangle that visually frames the gameplay layer.
- * Matches DossierPanel's gold-corner pattern but inset further from the edges. */
+/* ── Play-area inset + gold corner brackets ────────────────────── */
 
 .play-frame {
     position: absolute;
-    top: 88px;
-    right: 36px;
-    bottom: 88px;
-    left: 36px;
+    top: 92px; right: 56px;
+    bottom: 180px; left: 56px;
     background-color: rgba(0, 0, 0, 0);
+}
+
+/* Each bracket = an L-shaped pair of borders (only two sides set). */
+.bracket {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(184, 148, 92, 0.85);
+}
+
+.bracket--tl {
+    top: 0;  left: 0;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-top-left-radius: 6px;
+}
+.bracket--tr {
+    top: 0;  right: 0;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-top-right-radius: 6px;
+}
+.bracket--bl {
+    bottom: 0; left: 0;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-bottom-left-radius: 6px;
+}
+.bracket--br {
+    bottom: 0; right: 0;
+    border-bottom-width: 2px;
+    border-right-width: 2px;
+    border-bottom-right-radius: 6px;
+}
+
+/* ── Instruction card (bottom-left) ────────────────────────────── */
+
+.instruction-card {
+    position: absolute;
+    left:   60px;
+    bottom: 56px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(14, 10, 18, 0.78);
     border-color: rgba(184, 148, 92, 0.55);
     border-width: 1px;
     border-radius: 6px;
+    padding: 14px 22px 14px 16px;
+    max-width: 480px;
+    /* Subtle drop shadow so it lifts off the woodframe. */
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
 }
 
-.corner {
+/* Tiny gold corner studs on the card — echoes the round badge & gold corners
+   used elsewhere in the project. */
+.card-corner {
     position: absolute;
-    width: 32px;
-    height: 32px;
-    background-color: rgb(201, 169, 110);
+    width: 6px;
+    height: 6px;
+    background-color: rgb(184, 148, 92);
+    border-radius: 1px;
+}
+.card-corner--tl { left:  6px;  top:    6px; }
+.card-corner--tr { right: 6px;  top:    6px; }
+.card-corner--bl { left:  6px;  bottom: 6px; }
+.card-corner--br { right: 6px;  bottom: 6px; }
+
+/* Parchment "keycap" inside the card. */
+.key-glyph {
+    width: 44px;
+    height: 44px;
+    background-color: rgb(244, 229, 194);
     border-color: rgb(107, 74, 46);
     border-width: 2px;
+    border-radius: 6px;
     align-items: center;
     justify-content: center;
+    margin-right: 14px;
+    flex-shrink: 0;
+    /* Inner gold ring */
+    box-shadow: inset 0 0 0 1px rgba(184, 148, 92, 0.85);
 }
 
-.corner__inner {
-    width: 14px;
-    height: 14px;
-    background-color: rgb(184, 148, 92);
-    border-color: rgb(107, 74, 46);
-    border-width: 1px;
-    rotate: 45deg;
+.key-glyph-label {
+    color: rgb(46, 32, 22);
+    font-size: 22px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
-.corner--tl {
-    top: -2px;
-    left: -2px;
-    border-top-left-radius: 8px;
-    border-bottom-right-radius: 12px;
-}
-
-.corner--tr {
-    top: -2px;
-    right: -2px;
-    border-top-right-radius: 8px;
-    border-bottom-left-radius: 12px;
-}
-
-.corner--bl {
-    bottom: -2px;
-    left: -2px;
-    border-bottom-left-radius: 8px;
-    border-top-right-radius: 12px;
-}
-
-.corner--br {
-    bottom: -2px;
-    right: -2px;
-    border-bottom-right-radius: 8px;
-    border-top-left-radius: 12px;
-}
-
-/* ── Instruction bar (bottom center) ─────────────────────────── */
-
-.instruction-bar {
-    position: absolute;
-    bottom: 28px;
-    left: 0;
-    right: 0;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-}
-
-.instruction-rule {
-    width: 80px;
-    height: 1px;
-    background-color: rgba(184, 148, 92, 0.65);
-}
-
-.instruction-rule--left {
-    margin-right: 18px;
-}
-
-.instruction-rule--right {
-    margin-left: 18px;
+.instruction-text-col {
+    flex-direction: column;
+    flex-shrink: 1;
 }
 
 .instruction-label {
-    font-size: 16px;
     color: rgb(244, 229, 194);
-    -unity-font-style: italic;
-    -unity-text-align: middle-center;
+    font-size: 15px;
+    -unity-text-align: middle-left;
+    -unity-font-style: normal;
     letter-spacing: 1px;
-    text-shadow: 0 0 8px rgba(0, 0, 0, 0.65);
-    max-width: 60%;
+    white-space: normal;
+    margin-bottom: 2px;
+}
+
+.instruction-sub {
+    color: rgba(244, 229, 194, 0.65);
+    font-size: 12px;
+    -unity-font-style: italic;
+    -unity-text-align: middle-left;
+    letter-spacing: 1px;
     white-space: normal;
 }

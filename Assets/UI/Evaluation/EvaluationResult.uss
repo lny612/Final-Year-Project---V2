@@ -1,0 +1,401 @@
+/* ==========================================================================
+   EvaluationResult.uss
+   Theatrical wand-reveal page. Inspired by:
+   • Reference 1 (Bouncing Ball — glowing star w/ light rays)
+   • Reference 4 (Cuphead "THE RESULTS!" scoreboard + final grade letter)
+   Palette: deep midnight blue stage so the warm gold rays read clearly,
+   parchment + wax-red scoreboard plaque so it sits in the same family
+   as the Title / Morning / Dossier screens.
+   ========================================================================== */
+
+/* ── Palette ────────────────────────────────────────────────────────────── */
+:root {
+    --night-deep:        rgb(14, 18, 36);
+    --night-mid:         rgb(28, 36, 64);
+    --night-cool:        rgb(40, 56, 102);
+    --ray-warm:          rgba(255, 226, 142, 0.85);
+    --ray-glow:          rgba(255, 235, 170, 0.55);
+    --ray-cool:          rgba(170, 220, 255, 0.55);
+    --parchment-base:    rgb(244, 229, 194);
+    --parchment-warm:    rgb(232, 213, 178);
+    --parchment-edge:    rgb(190, 160, 112);
+    --ink-dark:          rgb(46, 32, 22);
+    --ink-soft:          rgb(86, 64, 44);
+    --gold-light:        rgb(201, 169, 110);
+    --gold-deep:         rgb(150, 116, 60);
+    --wax-red:           rgb(122, 46, 31);
+    --wax-red-glow:      rgb(168, 70, 50);
+    --grade-amber:       rgb(255, 204, 102);
+}
+
+/* ── Root ───────────────────────────────────────────────────────────────── */
+.root {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(14, 18, 36);
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
+    color: rgb(46, 32, 22);
+    font-size: 16px;
+    -unity-font-style: normal;
+    overflow: hidden;
+}
+
+/* ── Stage (smoky midnight backdrop) ────────────────────────────────────── */
+.stage {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Light rays ─────────────────────────────────────────────────────────── */
+/* 8 elongated tapered planes pinned to centre of stage and rotated. */
+.ray-wrap {
+    position: absolute;
+    width: 1600px;
+    height: 1600px;
+    align-items: center;
+    justify-content: center;
+}
+
+.ray {
+    position: absolute;
+    width: 1600px;
+    height: 90px;
+    background-color: rgba(255, 226, 142, 0.18);
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+}
+
+.ray--1 { rotate:   0deg; }
+.ray--2 { rotate:  22deg; }
+.ray--3 { rotate:  45deg; }
+.ray--4 { rotate:  67deg; }
+.ray--5 { rotate:  90deg; }
+.ray--6 { rotate: 112deg; }
+.ray--7 { rotate: 135deg; }
+.ray--8 { rotate: 157deg; }
+
+/* Big radial halo behind the rays (warm core glow). */
+.ray-glow {
+    position: absolute;
+    width: 1100px;
+    height: 1100px;
+    border-radius: 50%;
+    background-color: rgba(255, 220, 140, 0.20);
+}
+
+.ray-halo {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background-color: rgba(255, 235, 170, 0.32);
+}
+
+/* ── Wand stage ─────────────────────────────────────────────────────────── */
+.wand-stage {
+    position: absolute;
+    width: 460px;
+    height: 460px;
+    align-items: center;
+    justify-content: center;
+}
+
+.wand-pedestal {
+    position: absolute;
+    bottom: 26px;
+    width: 320px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.45);
+    /* fake soft drop shadow */
+}
+
+.wand-halo-outer {
+    position: absolute;
+    width: 460px;
+    height: 460px;
+    border-radius: 50%;
+    background-color: rgba(255, 240, 200, 0.20);
+}
+
+.wand-halo-inner {
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background-color: rgba(255, 250, 220, 0.45);
+}
+
+.wand-image {
+    width: 360px;
+    height: 360px;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: scale-to-fit;
+    /* image is set at runtime by the controller */
+}
+
+/* ── Top banner ─────────────────────────────────────────────────────────── */
+.top-banner {
+    position: absolute;
+    left: 0; right: 0;
+    top: 36px;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-title {
+    -unity-text-align: middle-center;
+    color: rgb(255, 226, 142);
+    font-size: 72px;
+    -unity-font-style: bold;
+    letter-spacing: 6px;
+    text-shadow: 3px 3px 0 rgba(46, 18, 12, 0.85);
+    margin-bottom: 4px;
+}
+
+.wand-name {
+    -unity-text-align: middle-center;
+    color: rgb(244, 229, 194);
+    font-size: 22px;
+    -unity-font-style: italic;
+    letter-spacing: 2px;
+    margin-top: 0;
+    -unity-font-style: italic;
+    /* Subtle stroke / shadow for legibility on bright rays. */
+    text-shadow: 1px 1px 0 rgba(20, 12, 6, 0.85);
+}
+
+/* ── Scoreboard ─────────────────────────────────────────────────────────── */
+.scoreboard {
+    position: absolute;
+    right: 56px;
+    top: 50%;
+    width: 480px;
+    margin-top: -200px;        /* visually centre vertically */
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 3px;
+    border-radius: 8px;
+    padding: 36px 36px 28px 36px;
+    flex-direction: column;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+.scoreboard-inner-border {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.scoreboard-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background-color: rgb(201, 169, 110);
+    border-color: rgb(46, 32, 22);
+    border-width: 2px;
+    border-radius: 4px;
+    rotate: 45deg;
+}
+.scoreboard-corner--tl { left:  -8px; top:    -8px; }
+.scoreboard-corner--tr { right: -8px; top:    -8px; }
+.scoreboard-corner--bl { left:  -8px; bottom: -8px; }
+.scoreboard-corner--br { right: -8px; bottom: -8px; }
+
+.score-list {
+    flex-direction: column;
+}
+
+.score-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    height: 38px;
+}
+
+.score-label {
+    color: rgb(46, 32, 22);
+    font-size: 24px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    flex-shrink: 0;
+}
+
+.score-dots {
+    color: rgba(46, 32, 22, 0.45);
+    font-size: 24px;
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    overflow: hidden;
+    margin-left: 8px;
+    margin-right: 8px;
+    letter-spacing: 4px;
+}
+
+.score-value {
+    color: rgb(122, 46, 31);
+    font-size: 26px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+    min-width: 92px;
+}
+
+.scoreboard-divider {
+    height: 2px;
+    background-color: rgba(46, 32, 22, 0.45);
+    margin-top: 14px;
+    margin-bottom: 12px;
+}
+
+.final-grade-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+}
+
+.grade-label {
+    color: rgb(46, 32, 22);
+    font-size: 30px;
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    flex-shrink: 0;
+}
+
+.grade-dots {
+    color: rgba(46, 32, 22, 0.45);
+    font-size: 26px;
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    overflow: hidden;
+    margin-left: 8px;
+    margin-right: 8px;
+    letter-spacing: 5px;
+}
+
+.grade-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: rgb(122, 46, 31);
+    border-color: rgb(46, 18, 12);
+    border-width: 3px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.grade-letter {
+    -unity-text-align: middle-center;
+    color: rgb(255, 226, 142);
+    font-size: 36px;
+    -unity-font-style: bold;
+    letter-spacing: 0;
+}
+
+/* Verdict subtitle below the grade row. */
+.verdict-line {
+    color: rgb(86, 64, 44);
+    font-size: 14px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-top: 14px;
+    min-height: 36px;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 36px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hint-label {
+    color: rgba(244, 229, 194, 0.55);
+    font-size: 13px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.continue-button {
+    -unity-text-align: middle-center;
+    color: rgb(244, 229, 194);
+    background-color: rgb(122, 46, 31);
+    background-image: none;
+    border-color: rgb(46, 18, 12);
+    border-width: 2px;
+    border-radius: 4px;
+    padding: 10px 36px 10px 36px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    transition-property: color, background-color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+
+.continue-button:hover {
+    background-color: rgb(168, 70, 50);
+    color: rgb(255, 240, 210);
+    scale: 1.03 1.03;
+}
+
+.continue-button:focus {
+    background-color: rgb(168, 70, 50);
+    color: rgb(255, 240, 210);
+}
+
+.continue-button:active {
+    background-color: rgb(96, 30, 20);
+    translate: 0 2px;
+    scale: 0.98 0.98;
+}
+
+/* Hidden state — controller toggles `is-hidden` for staged reveal. */
+.is-hidden { display: none; }
+
+/* Reveal animation entry classes. */
+.reveal-fade {
+    opacity: 0;
+    transition-property: opacity, scale, translate;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.reveal-fade.visible {
+    opacity: 1;
+}
+
+.reveal-pop {
+    opacity: 0;
+    scale: 0.6 0.6;
+    transition-property: opacity, scale;
+    transition-duration: 320ms;
+    transition-timing-function: ease-out;
+}
+
+.reveal-pop.visible {
+    opacity: 1;
+    scale: 1 1;
+}

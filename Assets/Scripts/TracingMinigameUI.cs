@@ -33,6 +33,14 @@ public class TracingMinigameUI : MonoBehaviour
             "TODO-EDITOR: Drag MinigameUIDocument here (see MinigamePanelController.cs for setup).")]
     public MinigamePanelController chromeController;
 
+    [Header("Round Incantations")]
+    [Tooltip("Spell name shown on the title plaque for round 1 — calling/awakening the soul-shards in the materials.")]
+    public string round1SpellName = "ADVENI";
+    [Tooltip("Spell name shown on the title plaque for round 2 — opening the materials' minds so they blend with the wand.")]
+    public string round2SpellName = "PATEFACIO";
+    [Tooltip("Spell name shown on the title plaque for round 3 — taming and directing the now-open power.")]
+    public string round3SpellName = "MANSUETO";
+
     [Header("Tuning")]
     [Tooltip("Red fill speed in normalized path-units per second.")]
     public float mistSpeed = 0.12f;
@@ -51,6 +59,51 @@ public class TracingMinigameUI : MonoBehaviour
     public Color accentGateColor  = new Color(0.95f, 0.50f, 0.85f, 0.95f);  // rose magenta diamond — Accent
     public Color gateClearedColor = new Color(0.45f, 0.95f, 0.55f, 0.65f);  // bright green cleared
     public Color holdPreviewColor = new Color(0.45f, 0.95f, 0.55f, 0.22f);  // green halo — Hold target zone
+
+    [Header("Sprites (optional — leave null to keep the procedural rectangles)")]
+    [Tooltip("Sprite drawn along each main-path segment (gold filigree). White-core art on pure black tints cleanly via Image.color.")]
+    public Sprite trailStripeSprite;
+    [Tooltip("Pixel padding cropped from the source texture before drawing (left, top, right, bottom). Use this when the stripe art doesn't fill the full sprite — e.g. Trail 2.png has 27 px of horizontal padding and 237 px of vertical padding.")]
+    public Vector4 trailStripeTrim = new Vector4(27f, 237f, 27f, 237f);
+    [Tooltip("Backplate sprite for each gate (TMP key letter is overlaid on top). Tinted by gate type at runtime.")]
+    public Sprite gateMedallionSprite;
+    [Tooltip("Sprite for the player cursor wisp.")]
+    public Sprite cursorWispSprite;
+    [Tooltip("Diamond plaque dropped at the path's last point. If null, no endpoint visual is drawn.")]
+    public Sprite endpointPlaqueSprite;
+    [Tooltip("Pixel size (square) of the endpoint plaque visual.")]
+    public float  endpointPlaqueSize = 64f;
+
+    [Header("Gate look")]
+    [Tooltip("Pixel size (square) of each gate medallion. Default 48.")]
+    public float gateSize = 48f;
+    [Tooltip("Font used for the key-letter glyph inside each gate. Falls back to TMP default if null.")]
+    public TMP_FontAsset gateFont;
+    [Tooltip("Color of the key-letter glyph. Bright cream / gold reads well on the dark medallion.")]
+    public Color gateLabelColor = new Color(1.00f, 0.95f, 0.70f, 1.00f);
+    [Tooltip("Font size of the gate key letter.")]
+    public float gateLabelFontSize = 32f;
+
+    [Header("Cursor look")]
+    [Tooltip("Pixel size (square) of the player cursor wisp.")]
+    public float cursorSize = 36f;
+
+    [Header("Mist VFX (cloudy puffs riding the time-mist head)")]
+    [Tooltip("Sprite used for each mist puff. Use a transparent-background sprite so puffs don't render as black squares.")]
+    public Sprite mistPuffSprite;
+    [Tooltip("Puffs spawned per second while the round is active.")]
+    public float  mistPuffRate    = 38f;
+    [Tooltip("Lifetime of each puff in seconds — fades from full opacity to 0 over this duration.")]
+    public float  mistPuffLife    = 0.7f;
+    [Tooltip("Starting puff radius in pixels.")]
+    public float  mistPuffStart   = 6f;
+    [Tooltip("Final puff radius in pixels (puffs grow as they fade).")]
+    public float  mistPuffEnd     = 22f;
+    [Tooltip("Random scatter radius (px) around the mist's path point — keeps the cloud feeling diffuse.")]
+    public float  mistPuffScatter = 22f;
+    [Tooltip("Starting alpha of each puff (0..1). Lower values feel more diffuse.")]
+    [Range(0f, 1f)]
+    public float  mistPuffAlpha   = 0.55f;
 
     // ── Private state ─────────────────────────────────────────────
 
@@ -77,6 +130,15 @@ public class TracingMinigameUI : MonoBehaviour
     // Dynamically created components per round
     private TracingCursor _cursor;
     private TracingMist   _mist;
+
+    // Snapshot of the active round's path for VFX sampling.
+    private Vector2[] _activePath;
+    private float[]   _activeCumul;
+    private float     _puffAccumulator;
+
+    // Cached trim of trailStripeSprite — built lazily on first access so the
+    // GC hit happens off the round-start frame.
+    private Sprite _cachedTrailSprite;
 
     // Per-gate tuning constants
     private const float HOLD_GATE_DURATION  = 0.9f; // seconds the player must hold the key
@@ -139,6 +201,10 @@ public class TracingMinigameUI : MonoBehaviour
             Vector2[] scaledPath = ScalePath(rawPaths[round], panelSize);
             float[] cumulDist = RunePathData.BuildCumulativeDistances(scaledPath);
 
+            // Swap the title-plaque incantation for this round's ritual step.
+            if (chromeController != null)
+                chromeController.SetSpellName(GetRoundSpellName(round + 1));
+
             // Show round transition
             yield return ShowTransition(round + 1);
 
@@ -186,6 +252,11 @@ public class TracingMinigameUI : MonoBehaviour
         GateType[] types         = GenerateGateTypes(gateCount, roundNumber);
         float[]    holdDurations = GenerateHoldDurations(types);
         Vector2[]  accentDirs    = GenerateAccentDirections(types);
+
+        // Stash the active path so per-frame VFX (mist puffs) can sample it.
+        _activePath  = path;
+        _activeCumul = cumulDist;
+        _puffAccumulator = 0f;
 
         BuildPathVisuals(path);
         BuildFillSegments(path, cumulDist);
@@ -245,6 +316,9 @@ public class TracingMinigameUI : MonoBehaviour
                 }
             }
 
+            // Cloudy puff VFX riding the mist's head along the path.
+            EmitMistPuffs(Time.deltaTime);
+
             // Win: blue reached the end
             if (_cursor.ReachedEnd)
             {
@@ -292,17 +366,26 @@ public class TracingMinigameUI : MonoBehaviour
         if (chromeController != null) chromeController.SetInstructionText(text);
     }
 
+    /// <summary>Return the title-plaque incantation for the given 1-based round number.</summary>
+    private string GetRoundSpellName(int roundNumber) => roundNumber switch
+    {
+        1 => round1SpellName,
+        2 => round2SpellName,
+        3 => round3SpellName,
+        _ => "REVELIO"
+    };
+
     // ── Path visual construction ──────────────────────────────────
 
     private void BuildPathVisuals(Vector2[] path)
     {
-        // Glow pass (wider, lower alpha)
-        BuildSegments(path, 14f, pathGlowColor);
-        // Main path pass
-        BuildSegments(path, 6f, pathColor);
+        // Glow pass (wider, lower alpha) — diffuse halo, plain rect.
+        BuildSegments(path, 14f, pathGlowColor, useTrailSprite: false);
+        // Main path pass — gold filigree texture lives here.
+        BuildSegments(path, 6f, pathColor, useTrailSprite: true);
     }
 
-    private void BuildSegments(Vector2[] path, float thickness, Color color)
+    private void BuildSegments(Vector2[] path, float thickness, Color color, bool useTrailSprite = false)
     {
         for (int i = 0; i < path.Length - 1; i++)
         {
@@ -328,6 +411,17 @@ public class TracingMinigameUI : MonoBehaviour
             var img = go.GetComponent<Image>();
             img.color = color;
             img.raycastTarget = false;
+
+            if (useTrailSprite)
+            {
+                var trail = GetEffectiveTrailSprite();
+                if (trail != null)
+                {
+                    img.sprite         = trail;
+                    img.type           = Image.Type.Simple;
+                    img.preserveAspect = false;
+                }
+            }
         }
     }
 
@@ -362,7 +456,7 @@ public class TracingMinigameUI : MonoBehaviour
             rt.localRotation = Quaternion.Euler(0, 0, angle);
 
             var img = go.GetComponent<Image>();
-            img.color = Color.clear; // start invisible
+            img.color = Color.clear; // start invisible — gets tinted blue / red over time
             img.raycastTarget = false;
 
             float midDist = (cumulDist[i] + cumulDist[i + 1]) * 0.5f;
@@ -400,12 +494,17 @@ public class TracingMinigameUI : MonoBehaviour
             var rt = go.GetComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(36f, 36f);
-            rt.localRotation = Quaternion.Euler(0, 0, 45f);
+            rt.sizeDelta = new Vector2(gateSize, gateSize);
+            // Only rotate to a diamond when we have no sprite — sprites are
+            // designed upright and a circular medallion is rotation-invariant.
+            rt.localRotation = gateMedallionSprite != null
+                ? Quaternion.identity
+                : Quaternion.Euler(0, 0, 45f);
 
             var img = go.GetComponent<Image>();
             img.color = baseColor;
             img.raycastTarget = false;
+            if (gateMedallionSprite != null) img.sprite = gateMedallionSprite;
             _gateMarkers.Add(img);
             _gateBaseColors.Add(baseColor);
 
@@ -439,18 +538,49 @@ public class TracingMinigameUI : MonoBehaviour
             labelRt.anchorMax = Vector2.one;
             labelRt.offsetMin = Vector2.zero;
             labelRt.offsetMax = Vector2.zero;
-            labelRt.localRotation = Quaternion.Euler(0, 0, -45f);
+            // Counter-rotate only if the gate parent itself was rotated.
+            labelRt.localRotation = gateMedallionSprite != null
+                ? Quaternion.identity
+                : Quaternion.Euler(0, 0, -45f);
 
             var label = labelGo.AddComponent<TextMeshProUGUI>();
+            if (gateFont != null) label.font = gateFont;
             string text = keys[i].ToString();
             if (type == GateType.Accent) text += DirectionToArrow(accentDirs[i]);
             label.text = text;
-            label.fontSize = 26f;
+            label.fontSize = gateLabelFontSize;
             label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
-            label.color = Color.black;
+            label.color = gateLabelColor;
             label.raycastTarget = false;
+            // Subtle outline so the bright glyph reads on the medallion.
+            label.outlineColor = new Color32(46, 32, 22, 220);
+            label.outlineWidth = 0.18f;
             _gateLabels.Add(label);
+        }
+
+        // Endpoint plaque — drawn at the path's last point if a sprite is wired.
+        // Sits ON TOP of the path/gates so it reads as the destination marker.
+        if (endpointPlaqueSprite != null && path.Length > 0)
+        {
+            Vector2 endPos = path[path.Length - 1];
+
+            var go = new GameObject("EndpointPlaque", typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(minigamePanel.transform, false);
+            go.transform.SetAsLastSibling(); // on top
+            _pathVisuals.Add(go);
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = endPos;
+            rt.sizeDelta        = new Vector2(endpointPlaqueSize, endpointPlaqueSize);
+            // Sprite art is already a diamond — no rotation needed.
+            rt.localRotation    = Quaternion.identity;
+
+            var img = go.GetComponent<Image>();
+            img.sprite        = endpointPlaqueSprite;
+            img.color         = Color.white;
+            img.raycastTarget = false;
         }
     }
 
@@ -548,11 +678,14 @@ public class TracingMinigameUI : MonoBehaviour
 
         var cursorRt = cursorGo.GetComponent<RectTransform>();
         cursorRt.anchorMin = cursorRt.anchorMax = cursorRt.pivot = new Vector2(0.5f, 0.5f);
-        cursorRt.sizeDelta = new Vector2(18f, 18f);
+        cursorRt.sizeDelta = new Vector2(cursorSize, cursorSize);
 
         var cursorImg = cursorGo.GetComponent<Image>();
         cursorImg.color = cursorColor;
         cursorImg.raycastTarget = false;
+        if (cursorWispSprite != null) cursorImg.sprite = cursorWispSprite;
+        // Always render on top of gates / endpoint so the player can see where they are.
+        cursorGo.transform.SetAsLastSibling();
 
         _cursor = cursorGo.GetComponent<TracingCursor>();
         _cursor.Initialize(path, cumulDist, pathTolerance, waypointTs, keys,
@@ -603,6 +736,126 @@ public class TracingMinigameUI : MonoBehaviour
         _gateBaseColors.Clear();
         _cursor = null;
         _mist   = null;
+        _activePath  = null;
+        _activeCumul = null;
+    }
+
+    // ── Trail-sprite cropping ─────────────────────────────────────
+
+    /// <summary>
+    /// Returns the effective trail sprite, applying <see cref="trailStripeTrim"/>
+    /// (left, top, right, bottom — pixels) by carving a runtime sub-sprite out
+    /// of the source texture. Cached so the GC hit happens only once.
+    /// </summary>
+    private Sprite GetEffectiveTrailSprite()
+    {
+        if (trailStripeSprite == null) return null;
+
+        bool hasTrim = trailStripeTrim.x > 0f || trailStripeTrim.y > 0f
+                    || trailStripeTrim.z > 0f || trailStripeTrim.w > 0f;
+        if (!hasTrim) return trailStripeSprite;
+
+        if (_cachedTrailSprite != null
+            && _cachedTrailSprite.texture == trailStripeSprite.texture)
+            return _cachedTrailSprite;
+
+        var tex   = trailStripeSprite.texture;
+        float left   = trailStripeTrim.x;
+        float top    = trailStripeTrim.y;
+        float right  = trailStripeTrim.z;
+        float bottom = trailStripeTrim.w;
+        var rect = new Rect(
+            left,
+            bottom,
+            tex.width  - left - right,
+            tex.height - top  - bottom);
+
+        if (rect.width <= 0f || rect.height <= 0f) return trailStripeSprite;
+
+        _cachedTrailSprite = Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 100f);
+        _cachedTrailSprite.name = trailStripeSprite.name + "_trimmed";
+        return _cachedTrailSprite;
+    }
+
+    // ── Mist puff VFX ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Emit cloudy puffs at the mist's current path point. Called every frame
+    /// from <see cref="RunSingleRound"/>; uses an accumulator to honour the
+    /// configured rate independent of frame rate.
+    /// </summary>
+    private void EmitMistPuffs(float dt)
+    {
+        if (_mist == null || _activePath == null || _activeCumul == null) return;
+        if (mistPuffRate <= 0f) return;
+
+        _puffAccumulator += dt * mistPuffRate;
+        while (_puffAccumulator >= 1f)
+        {
+            _puffAccumulator -= 1f;
+            float t = Mathf.Clamp01(_mist.MistT);
+            Vector2 pos = RunePathData.SampleAt(_activePath, _activeCumul, t);
+            Vector2 jitter = UnityEngine.Random.insideUnitCircle * mistPuffScatter;
+            SpawnMistPuff(pos + jitter);
+        }
+    }
+
+    private void SpawnMistPuff(Vector2 anchoredPos)
+    {
+        if (minigamePanel == null) return;
+
+        var go = new GameObject("MistPuff", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(minigamePanel.transform, false);
+        go.transform.SetAsLastSibling();
+        _pathVisuals.Add(go);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta = new Vector2(mistPuffStart, mistPuffStart);
+
+        var img = go.GetComponent<Image>();
+        img.raycastTarget = false;
+        Sprite puff = mistPuffSprite != null ? mistPuffSprite : cursorWispSprite;
+        if (puff != null) img.sprite = puff;
+        Color tint = mistColor;
+        tint.a = mistPuffAlpha;
+        img.color = tint;
+
+        StartCoroutine(AnimateMistPuff(go, rt, img));
+    }
+
+    private IEnumerator AnimateMistPuff(GameObject go, RectTransform rt, Image img)
+    {
+        float life = Mathf.Max(0.05f, mistPuffLife);
+        float t    = 0f;
+        Color baseColor = img.color;
+        // Slight upward + outward drift.
+        Vector2 drift = new Vector2(
+            UnityEngine.Random.Range(-12f, 12f),
+            UnityEngine.Random.Range( 12f, 28f));
+        Vector2 startPos = rt.anchoredPosition;
+
+        while (t < life && go != null && img != null)
+        {
+            t += Time.deltaTime;
+            float u = Mathf.Clamp01(t / life);
+            float size = Mathf.Lerp(mistPuffStart, mistPuffEnd, u);
+            rt.sizeDelta = new Vector2(size, size);
+            rt.anchoredPosition = startPos + drift * u;
+
+            var c = baseColor;
+            c.a = baseColor.a * (1f - u);
+            img.color = c;
+
+            yield return null;
+        }
+
+        if (go != null)
+        {
+            _pathVisuals.Remove(go);
+            Destroy(go);
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────

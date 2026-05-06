@@ -55,6 +55,10 @@ public class EvaluationManager : MonoBehaviour
     [Tooltip("Modal shown on days 3 and 6 to collect rent.")]
     public RentPaymentUI  rentPaymentUI;
 
+    [Header("UI Toolkit (theatrical reveal)")]
+    [Tooltip("When assigned, the legacy uGUI score/verdict widgets are bypassed; the UXML panel becomes the player-facing result page.")]
+    public EvaluationResultController resultController;
+
     // ── Private ───────────────────────────────────────────────────
 
     private CustomerOrder _customer;
@@ -181,15 +185,80 @@ public class EvaluationManager : MonoBehaviour
                 GameManager.Instance.peakReputation,
                 GameManager.Instance.playerReputation);
             GameManager.Instance.wandsCrafted++;
+            GameManager.Instance.lastMatchScore = matchScore;
         }
 
         SetStatus("Evaluation complete.");
 
-        // Show result panel then animate
+        if (resultController != null)
+        {
+            DriveResultController(matchScore, verdict, whatWorked, whatMissed,
+                                   customerReaction, goldEarned, reputationChange);
+            yield break;
+        }
+
+        // ── Legacy uGUI fallback ─────────────────────────────────
         if (resultPanel != null) resultPanel.SetActive(true);
         yield return StartCoroutine(RevealResults(
             matchScore, verdict, whatWorked, whatMissed,
             customerReaction, goldEarned, reputationChange));
+    }
+
+    // ── New UI Toolkit reveal path ────────────────────────────────
+
+    private void DriveResultController(int matchScore, string verdict, string worked,
+        string missed, string reaction, int gold, int rep)
+    {
+        var gm = GameManager.Instance;
+        char conjuringGrade = gm?.craftingQualityGrade ?? 'A';
+        int  conjuringWon   = gm?.lastMinigameRoundsWon ?? 3;
+        int  conjuringTotal = 3;
+
+        char finalGrade = ComputeFinalGrade(matchScore, conjuringGrade);
+
+        var data = new EvaluationResultController.ResultData
+        {
+            wandName       = _wand?.wandName ?? "",
+            wandTexture    = _wand?.wandImage,
+            verdict        = string.IsNullOrEmpty(verdict) ? reaction : verdict,
+            conjuringWon   = conjuringWon,
+            conjuringTotal = conjuringTotal,
+            materialsScore = matchScore,
+            customerFitLabel = MatchLabel(matchScore),
+            goldEarned     = gold,
+            repDelta       = rep,
+            finalGrade     = finalGrade,
+        };
+
+        resultController.ApplyResult(data, OnNextCustomer);
+    }
+
+    private static string MatchLabel(int score)
+    {
+        if (score >= 85) return "Loved it";
+        if (score >= 70) return "Liked it";
+        if (score >= 50) return "Acceptable";
+        if (score >= 30) return "Lukewarm";
+        return "Disappointed";
+    }
+
+    private static char ComputeFinalGrade(int matchScore, char conjuringGrade)
+    {
+        // Conjuring quality scales the match score (mirrors the reward formula).
+        float mult = conjuringGrade switch
+        {
+            'A' => 1.00f,
+            'B' => 0.85f,
+            'C' => 0.70f,
+            'D' => 0.55f,
+            _   => 0.40f,
+        };
+        float composite = matchScore * mult;
+        if (composite >= 85f) return 'A';
+        if (composite >= 70f) return 'B';
+        if (composite >= 55f) return 'C';
+        if (composite >= 40f) return 'D';
+        return 'F';
     }
 
     // ── Result reveal animation ───────────────────────────────────

@@ -2,31 +2,31 @@
     <ui:VisualElement class="material-card">
 
         <ui:VisualElement class="card-nameplate">
-            <ui:Label name="card-name" text="Material name" class="card-name" />
+            <ui:Label name="card-name" class="card-name" text="Material name" />
         </ui:VisualElement>
 
-        <ui:Label name="card-subline" text="— Core —" class="card-subline" />
+        <ui:Label name="card-subline" class="card-subline" text="— Core —" />
 
         <ui:VisualElement class="card-art">
-            <ui:VisualElement name="card-placeholder" class="card-placeholder" />
-            <ui:VisualElement name="card-image" class="card-image" />
-            <ui:Label name="card-hint-glyph" text="✦" class="card-hint-glyph" />
+            <ui:VisualElement name="card-placeholder" class="card-placeholder" picking-mode="Ignore" />
+            <ui:VisualElement name="card-image"       class="card-image"       picking-mode="Ignore" />
+            <ui:Label         name="card-hint-glyph"  class="card-hint-glyph"  text="✦" />
+            <ui:Label         name="card-soldout"     class="card-soldout"     text="Bought" />
         </ui:VisualElement>
 
         <ui:VisualElement class="card-attributes">
-            <ui:Label name="card-field1" text="" class="card-field card-field-primary" />
-            <ui:Label name="card-field2" text="" class="card-field" />
-            <ui:Label name="card-field3" text="" class="card-field" />
+            <ui:Label name="card-field1" class="card-field card-field-primary" text="" />
+            <ui:Label name="card-field2" class="card-field" text="" />
+            <ui:Label name="card-field3" class="card-field" text="" />
         </ui:VisualElement>
 
         <ui:VisualElement class="card-footer">
             <ui:VisualElement class="card-price">
-                <ui:VisualElement class="coin-icon coin-icon-small" />
-                <ui:Label name="card-price-amount" text="0" class="card-price-amount" />
+                <ui:VisualElement class="card-coin-icon" picking-mode="Ignore" />
+                <ui:Label name="card-price-amount" class="card-price-amount" text="0" />
             </ui:VisualElement>
 
-            <ui:Button name="card-buy" text="Buy" class="card-buy" />
-            <ui:Label name="card-soldout" text="Bought" class="card-soldout" />
+            <ui:Button name="card-buy" class="card-buy" text="Buy" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

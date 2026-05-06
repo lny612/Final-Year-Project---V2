@@ -3,35 +3,36 @@
 
     <ui:VisualElement name="root" class="root" picking-mode="Ignore">
 
-        <ui:VisualElement name="parchment" class="parchment" picking-mode="Ignore" />
-        <ui:VisualElement name="grain" class="grain" picking-mode="Ignore" />
-        <ui:VisualElement name="vignette" class="vignette" picking-mode="Ignore" />
-
-        <ui:VisualElement name="cornerArtTL" class="corner-art corner-art--tl" picking-mode="Ignore" />
-        <ui:VisualElement name="cornerArtTR" class="corner-art corner-art--tr" picking-mode="Ignore" />
-        <ui:VisualElement name="cornerArtBL" class="corner-art corner-art--bl" picking-mode="Ignore" />
-        <ui:VisualElement name="cornerArtBR" class="corner-art corner-art--br" picking-mode="Ignore" />
+        <ui:VisualElement name="bgImage" class="bg-image" picking-mode="Ignore" />
 
         <ui:VisualElement name="content" class="content" picking-mode="Ignore">
 
             <ui:VisualElement name="titleBlock" class="title-block" picking-mode="Ignore">
-                <ui:VisualElement class="leaf-flourish leaf-flourish--left" picking-mode="Ignore" />
                 <ui:Label name="titleText" class="title-text" text="The Wand&#10;Atelier" />
-                <ui:VisualElement class="leaf-flourish leaf-flourish--right" picking-mode="Ignore" />
+                <ui:VisualElement name="titleUnderline" class="title-underline" picking-mode="Ignore" />
+                <ui:Label name="taglineText" class="tagline-text" text="Seven days to make a name. Or lose one." />
             </ui:VisualElement>
 
-            <ui:VisualElement name="titleUnderline" class="title-underline" picking-mode="Ignore" />
-
-            <ui:Label name="taglineText" class="tagline-text" text="Seven days to make a name. Or lose one." />
-
             <ui:VisualElement name="buttonStack" class="button-stack">
-                <ui:Button name="startButton" class="menu-button" text="Start" />
-                <ui:Button name="quitButton"  class="menu-button" text="Quit" />
+                <ui:Button name="startButton"     class="menu-button" text="Start" />
+                <ui:Button name="developerButton" class="menu-button" text="Developer" />
+                <ui:Button name="quitButton"      class="menu-button" text="Quit" />
             </ui:VisualElement>
 
         </ui:VisualElement>
 
         <ui:Label name="versionText" class="version-text" text="v0.1" />
+
+        <ui:VisualElement name="developerPanel" class="modal hidden">
+            <ui:VisualElement name="developerBackdrop" class="modal-backdrop" />
+            <ui:VisualElement name="developerCard" class="modal-card">
+                <ui:Label name="developerHeading" class="modal-heading" text="Developer" />
+                <ui:VisualElement name="developerCardRule" class="modal-rule" picking-mode="Ignore" />
+                <ui:Label class="modal-line" text="Group Member: Nayoung Lim" />
+                <ui:Label class="modal-line" text="UID: 3036086098" />
+                <ui:Button name="developerCloseButton" class="modal-close-button" text="Close" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>

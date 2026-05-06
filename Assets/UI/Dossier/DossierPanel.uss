@@ -23,9 +23,9 @@
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    -unity-font-definition: url("project://database/Assets/TextMesh%20Pro/Fonts/LiberationSans.ttf");
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
     color: rgb(62, 45, 31);
-    font-size: 14px;
+    font-size: 16px;
 }
 
 /* ── Wood backdrop ───────────────────────────────────────────── */
@@ -45,7 +45,7 @@
     position: absolute;
     top: 36px;
     right: 36px;
-    bottom: 88px;
+    bottom: 100px;
     left: 36px;
     background-color: rgb(244, 229, 194);
     border-color: rgb(107, 74, 46);
@@ -142,51 +142,52 @@
 }
 
 .dossier-heading {
-    font-size: 14px;
+    font-size: 22px;
     color: rgb(140, 100, 60);
     -unity-font-style: italic;
     -unity-text-align: middle-center;
     letter-spacing: 6px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .dossier-name {
-    font-size: 30px;
+    font-size: 50px;
     color: rgb(62, 45, 31);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     letter-spacing: 2px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     white-space: normal;
 }
 
 .dossier-divider {
     height: 1px;
     background-color: rgb(184, 148, 92);
-    margin: 4px 24px 18px 24px;
+    margin: 4px 24px 22px 24px;
 }
 
 .dossier-section {
     flex-direction: column;
-    margin-bottom: 14px;
+    margin-bottom: 22px;
 }
 
+/* Used to be 'quiet' (faded) for CONSTRAINT — now matches the other sections. */
 .dossier-section--quiet {
-    opacity: 0.85;
+    opacity: 1;
 }
 
 .dossier-section-title {
-    font-size: 11px;
+    font-size: 28px;
     color: rgb(122, 46, 31);
     -unity-font-style: bold;
     letter-spacing: 3px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .dossier-static-prose {
-    font-size: 15px;
+    font-size: 24px;
     color: rgb(62, 45, 31);
-    -unity-font-style: italic;
+    -unity-font-style: normal;
     white-space: normal;
     padding-left: 4px;
 }
@@ -202,7 +203,7 @@
 /* ── Word Buttons (clickable content words) ──────────────────── */
 
 .word-static {
-    font-size: 15px;
+    font-size: 24px;
     color: rgb(62, 45, 31);
     margin: 0;
     padding: 0;
@@ -210,26 +211,38 @@
     border-width: 0;
 }
 
+/* Reads as plain prose at rest — the drag-highlight is the affordance,
+   not a visible underline or ink-blue color. Padding/margin are kept for
+   a comfortable hit area. */
 .word-clickable {
-    font-size: 15px;
-    color: rgb(46, 85, 140);
+    font-size: 24px;
+    color: rgb(62, 45, 31);
     margin: 0 1px 0 0;
     padding: 0 2px 0 2px;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(46, 85, 140);
     border-radius: 0;
     -unity-font-style: normal;
-    transition-property: background-color, color;
+    transition-property: background-color;
     transition-duration: 120ms;
 }
 
-.word-clickable:hover {
-    background-color: rgba(197, 138, 31, 0.18);
-    color: rgb(122, 80, 20);
+/* Highlighter-yellow swipe selection (drag-to-highlight). */
+.word-highlighted {
+    background-color: rgba(247, 220, 110, 0.55);
+    color: rgb(62, 45, 31);
 }
 
+.word-highlighted:hover {
+    background-color: rgba(247, 220, 110, 0.75);
+    color: rgb(62, 45, 31);
+}
+
+/* No `.word-clickable:hover` rule — under root pointer-capture, UI Toolkit
+   can leave :hover stuck on the word that was under the cursor at PointerDown,
+   which would override `.word-highlighted` and break the yellow swipe on that
+   one word. The base style already reads as plain prose; we don't need a
+   hover variant. */
 .word-clickable:focus {
     background-color: rgba(0, 0, 0, 0);
 }
@@ -255,72 +268,73 @@
 /* ── Memo card (right column) ────────────────────────────────── */
 
 .memo-card {
-    width: 260px;
+    width: 560px;
     flex-shrink: 0;
     background-color: rgb(248, 235, 205);
     border-color: rgb(184, 148, 92);
     border-width: 1px;
     border-radius: 4px;
-    padding: 18px 16px 18px 16px;
+    padding: 28px 26px 28px 26px;
     flex-direction: column;
 }
 
 .memo-card__seal {
     position: absolute;
-    top: -10px;
-    right: 14px;
-    width: 22px;
-    height: 22px;
+    top: -12px;
+    right: 18px;
+    width: 28px;
+    height: 28px;
     background-color: rgb(122, 46, 31);
     border-color: rgb(70, 22, 14);
     border-width: 2px;
-    border-radius: 11px;
+    border-radius: 14px;
 }
 
 .memo-card__title {
-    font-size: 18px;
+    font-size: 36px;
     color: rgb(62, 45, 31);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     letter-spacing: 2px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .memo-card__hint {
-    font-size: 11px;
+    font-size: 18px;
     color: rgb(140, 110, 80);
     -unity-font-style: italic;
     -unity-text-align: middle-center;
     white-space: normal;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
 }
 
 .memo-row {
     flex-direction: column;
-    margin-bottom: 14px;
+    margin-bottom: 22px;
 }
 
 .memo-row__prompt {
-    font-size: 12px;
+    font-size: 22px;
     color: rgb(122, 46, 31);
     -unity-font-style: italic;
     white-space: normal;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     padding-left: 4px;
 }
 
+/* Memo slot is now a flex-wrap container that holds N chips. */
 .memo-slot {
-    font-size: 17px;
-    color: rgb(62, 45, 31);
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: flex-start;
     background-color: rgb(244, 229, 194);
     border-color: rgb(184, 148, 92);
     border-width: 1px;
     border-bottom-width: 2px;
     border-radius: 3px;
     padding: 8px 8px 8px 8px;
-    min-height: 36px;
+    min-height: 44px;
     transition-property: background-color, border-color, translate;
     transition-duration: 120ms;
 }
@@ -330,9 +344,88 @@
     border-color: rgb(201, 169, 110);
 }
 
+/* Soft drop-target glow when a drag is hovering the slot. */
+.memo-slot--drop-target {
+    background-color: rgb(252, 240, 215);
+    border-color: rgb(197, 138, 31);
+    border-width: 2px;
+    border-bottom-width: 2px;
+}
+
 .memo-slot--filled {
     background-color: rgb(252, 240, 215);
     border-bottom-color: rgb(122, 46, 31);
+}
+
+/* Empty-state hint shown when a slot has no chips yet. */
+.memo-slot__placeholder {
+    font-size: 18px;
+    color: rgba(122, 46, 31, 0.55);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    padding: 6px 4px 6px 4px;
+}
+
+/* One chip = one committed entry (word or phrase). */
+.memo-chip {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 3px;
+    padding: 4px 6px 4px 8px;
+    margin: 3px 4px 3px 0;
+    transition-property: background-color, border-color;
+    transition-duration: 100ms;
+}
+
+.memo-chip:hover {
+    background-color: rgb(252, 240, 215);
+    border-color: rgb(201, 169, 110);
+}
+
+.memo-chip__text {
+    font-size: 22px;
+    color: rgb(62, 45, 31);
+    -unity-font-style: bold;
+    margin-right: 6px;
+}
+
+.memo-chip__remove {
+    font-size: 18px;
+    color: rgb(122, 46, 31);
+    -unity-font-style: bold;
+    background-color: rgba(122, 46, 31, 0.08);
+    border-color: rgba(122, 46, 31, 0.15);
+    border-width: 1px;
+    border-radius: 10px;
+    padding: 0 7px 0 7px;
+    margin-left: 4px;
+    min-width: 22px;
+    -unity-text-align: middle-center;
+}
+
+.memo-chip__remove:hover {
+    background-color: rgba(122, 46, 31, 0.20);
+    color: rgb(255, 240, 210);
+}
+
+/* Drag-ghost element that follows the cursor while dragging a highlighted run. */
+.drag-ghost {
+    position: absolute;
+    background-color: rgba(252, 240, 215, 0.95);
+    border-color: rgb(197, 138, 31);
+    border-width: 1px;
+    border-radius: 3px;
+    padding: 4px 8px 4px 8px;
+    font-size: 16px;
+    color: rgb(62, 45, 31);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    opacity: 0.92;
 }
 
 /* ── Status bar / primary buttons ────────────────────────────── */
@@ -342,18 +435,18 @@
     bottom: 16px;
     left: 36px;
     right: 36px;
-    height: 56px;
+    height: 68px;
     flex-direction: row;
     align-items: center;
     background-color: rgb(78, 56, 38);
     border-color: rgb(201, 169, 110);
     border-width: 1px;
     border-radius: 4px;
-    padding: 0 14px 0 18px;
+    padding: 0 16px 0 22px;
 }
 
 .status-label {
-    font-size: 13px;
+    font-size: 20px;
     color: rgb(244, 229, 194);
     -unity-font-style: italic;
 }
@@ -363,15 +456,15 @@
 }
 
 .primary-button {
-    font-size: 13px;
+    font-size: 20px;
     color: rgb(244, 229, 194);
     -unity-font-style: bold;
     background-color: rgb(122, 46, 31);
     border-color: rgb(201, 169, 110);
     border-width: 1px;
     border-radius: 4px;
-    padding: 8px 16px 8px 16px;
-    margin-left: 10px;
+    padding: 12px 24px 12px 24px;
+    margin-left: 12px;
     letter-spacing: 1px;
     transition-property: background-color, color;
     transition-duration: 120ms;

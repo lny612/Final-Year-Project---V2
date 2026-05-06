@@ -1,0 +1,98 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="EvaluationResult.uss" />
+
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <!-- Dim, smoky deep-blue stage so the wand pops. -->
+        <ui:VisualElement name="stage" class="stage" picking-mode="Ignore">
+
+            <!-- Banked light rays radiating out from behind the wand. -->
+            <ui:VisualElement name="rayWrap" class="ray-wrap" picking-mode="Ignore">
+                <ui:VisualElement class="ray ray--1" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--2" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--3" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--4" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--5" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--6" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--7" picking-mode="Ignore" />
+                <ui:VisualElement class="ray ray--8" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="rayGlow" class="ray-glow" picking-mode="Ignore" />
+            <ui:VisualElement name="rayHalo" class="ray-halo" picking-mode="Ignore" />
+
+            <!-- Wand stage. The image fades in once the ComfyUI texture arrives. -->
+            <ui:VisualElement name="wandStage" class="wand-stage" picking-mode="Ignore">
+                <ui:VisualElement name="wandPedestal" class="wand-pedestal" picking-mode="Ignore" />
+                <ui:VisualElement name="wandHaloOuter" class="wand-halo-outer" picking-mode="Ignore" />
+                <ui:VisualElement name="wandHaloInner" class="wand-halo-inner" picking-mode="Ignore" />
+                <ui:VisualElement name="wandImage"    class="wand-image"    picking-mode="Ignore" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- Top banner ("THE RESULTS!"). -->
+        <ui:VisualElement name="topBanner" class="top-banner" picking-mode="Ignore">
+            <ui:Label name="bannerTitle" class="banner-title" text="THE RESULTS!" />
+            <ui:Label name="wandName"    class="wand-name"    text="" />
+        </ui:VisualElement>
+
+        <!-- Scoreboard plaque. -->
+        <ui:VisualElement name="scoreboard" class="scoreboard">
+            <ui:VisualElement class="scoreboard-inner-border" picking-mode="Ignore" />
+
+            <ui:VisualElement class="scoreboard-corner scoreboard-corner--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="scoreboard-corner scoreboard-corner--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="scoreboard-corner scoreboard-corner--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="scoreboard-corner scoreboard-corner--br" picking-mode="Ignore" />
+
+            <ui:VisualElement name="scoreList" class="score-list">
+
+                <ui:VisualElement class="score-row" name="rowConjuring">
+                    <ui:Label class="score-label" text="CONJURING" />
+                    <ui:Label class="score-dots"  text="............." />
+                    <ui:Label name="conjuringValue" class="score-value" text="0/3" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row" name="rowMaterials">
+                    <ui:Label class="score-label" text="MATERIALS" />
+                    <ui:Label class="score-dots"  text="............." />
+                    <ui:Label name="materialsValue" class="score-value" text="0/100" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row" name="rowCustomerFit">
+                    <ui:Label class="score-label" text="CUSTOMER FIT" />
+                    <ui:Label class="score-dots"  text="............." />
+                    <ui:Label name="customerFitValue" class="score-value" text="—" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="score-row" name="rowGold">
+                    <ui:Label class="score-label" text="REWARD" />
+                    <ui:Label class="score-dots"  text="............." />
+                    <ui:Label name="rewardValue" class="score-value" text="+0g  +0 rep" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <ui:VisualElement class="scoreboard-divider" picking-mode="Ignore" />
+
+            <ui:VisualElement name="finalGradeRow" class="final-grade-row">
+                <ui:Label class="grade-label" text="GRADE" />
+                <ui:Label class="grade-dots"  text="............." />
+                <ui:VisualElement name="gradeBadge" class="grade-badge">
+                    <ui:Label name="gradeLetter" class="grade-letter" text="—" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Label name="verdictLine" class="verdict-line" text="" />
+
+        </ui:VisualElement>
+
+        <!-- Continue button (footer). -->
+        <ui:VisualElement name="footer" class="footer" picking-mode="Ignore">
+            <ui:Label name="hintLabel" class="hint-label" text="Click anywhere to skip the reveal." />
+            <ui:Button name="continueButton" class="continue-button" text="To the Next Day" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

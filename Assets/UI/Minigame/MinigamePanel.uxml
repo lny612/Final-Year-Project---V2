@@ -3,44 +3,58 @@
 
     <ui:VisualElement name="root" class="root" picking-mode="Ignore">
 
-        <ui:VisualElement name="vignetteOuter" class="vignette-outer" picking-mode="Ignore" />
-        <ui:VisualElement name="vignetteInner" class="vignette-inner" picking-mode="Ignore" />
+        <!-- Layered moody backdrop: deep ink + warm walnut frame + radial vignette. -->
+        <ui:VisualElement name="inkLayer"     class="ink-layer"     picking-mode="Ignore" />
+        <ui:VisualElement name="haloLayer"    class="halo-layer"    picking-mode="Ignore" />
+        <ui:VisualElement name="woodFrame"    class="wood-frame"    picking-mode="Ignore" />
+        <ui:VisualElement name="vignetteEdge" class="vignette-edge" picking-mode="Ignore" />
 
+        <!-- Title bar: ✦ SPELL NAME ✦ flanked by hairline gold rules. -->
         <ui:VisualElement name="titleFrame" class="title-frame" picking-mode="Ignore">
-            <ui:VisualElement class="flourish flourish--left" picking-mode="Ignore">
-                <ui:VisualElement class="flourish__bar" picking-mode="Ignore" />
-                <ui:VisualElement class="flourish__diamond" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:Label name="titleLabel" class="title-label" text="REVELIO" picking-mode="Ignore" />
-            <ui:VisualElement class="flourish flourish--right" picking-mode="Ignore">
-                <ui:VisualElement class="flourish__diamond" picking-mode="Ignore" />
-                <ui:VisualElement class="flourish__bar" picking-mode="Ignore" />
-            </ui:VisualElement>
+            <ui:VisualElement class="rule rule--left" picking-mode="Ignore" />
+            <ui:Label class="title-glyph" text="✦" picking-mode="Ignore" />
+            <ui:Label name="titleLabel" class="title-label" text="ADVENI" picking-mode="Ignore" />
+            <ui:Label class="title-glyph" text="✦" picking-mode="Ignore" />
+            <ui:VisualElement class="rule rule--right" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <ui:VisualElement name="roundPill" class="round-pill" picking-mode="Ignore">
-            <ui:Label name="roundLabel" class="round-label" text="Round 1 of 3" picking-mode="Ignore" />
+        <!-- Top-right round-of-three badge. -->
+        <ui:VisualElement name="roundBadge" class="round-badge" picking-mode="Ignore">
+            <ui:VisualElement class="round-badge-corner round-badge-corner--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="round-badge-corner round-badge-corner--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="round-badge-corner round-badge-corner--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="round-badge-corner round-badge-corner--br" picking-mode="Ignore" />
+            <ui:Label class="round-prefix" text="ROUND" picking-mode="Ignore" />
+            <ui:Label name="roundLabel" class="round-label" text="1 / 3" picking-mode="Ignore" />
         </ui:VisualElement>
 
+        <!-- Subtle play-area inset with gold corner brackets. -->
         <ui:VisualElement name="playFrame" class="play-frame" picking-mode="Ignore">
-            <ui:VisualElement class="corner corner--tl" picking-mode="Ignore">
-                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:VisualElement class="corner corner--tr" picking-mode="Ignore">
-                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:VisualElement class="corner corner--bl" picking-mode="Ignore">
-                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:VisualElement class="corner corner--br" picking-mode="Ignore">
-                <ui:VisualElement class="corner__inner" picking-mode="Ignore" />
-            </ui:VisualElement>
+            <ui:VisualElement class="bracket bracket--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="bracket bracket--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="bracket bracket--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="bracket bracket--br" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <ui:VisualElement name="instructionBar" class="instruction-bar" picking-mode="Ignore">
-            <ui:VisualElement class="instruction-rule instruction-rule--left" picking-mode="Ignore" />
-            <ui:Label name="instructionLabel" class="instruction-label" text="Trace the rune to its end..." picking-mode="Ignore" />
-            <ui:VisualElement class="instruction-rule instruction-rule--right" picking-mode="Ignore" />
+        <!-- Instruction console (bottom-left, Hogwarts-style hint card). -->
+        <ui:VisualElement name="instructionCard" class="instruction-card" picking-mode="Ignore">
+            <ui:VisualElement class="card-corner card-corner--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="card-corner card-corner--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="card-corner card-corner--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="card-corner card-corner--br" picking-mode="Ignore" />
+
+            <ui:VisualElement name="keyGlyph" class="key-glyph" picking-mode="Ignore">
+                <ui:Label name="keyGlyphLabel" class="key-glyph-label" text="L" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="instruction-text-col" picking-mode="Ignore">
+                <ui:Label name="instructionLabel" class="instruction-label"
+                          text="Steady your wand and guide it along the symbol's path."
+                          picking-mode="Ignore" />
+                <ui:Label name="instructionSub"   class="instruction-sub"
+                          text="Press the prompted key when a gate appears."
+                          picking-mode="Ignore" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

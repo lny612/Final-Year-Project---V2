@@ -8,23 +8,28 @@ Fantasy wand-crafting game built in **Unity 6** (6000.0.58f2) using **URP**. Pla
 
 ## Architecture
 
-### Game Loop (7-day session, 7 scenes cycled via GameManager)
+### Game Loop (7-day session, 8 production scenes cycled via GameManager)
 
 ```
 TitleScene (Start) → MorningScene (letter) → CustomerGeneratorTest →
-  MaterialGeneratorTest → CraftingScene → EvaluationScene → [rent if day 3/6] →
-  (day<7: MorningScene next day) | (day=7 or bankrupt: EndingScene → TitleScene/restart)
+  MaterialGeneratorTest → CraftingScene (selection only) →
+  MinigameTest (tracing + parallel wand-gen) → EvaluationScene (theatrical result) →
+  [rent if day 3/6] → (day<7: MorningScene next day) |
+  (day=7 or bankrupt: EndingScene → TitleScene/restart)
 ```
 
-0. **TitleScene** — `TitleScreenController` (UI Toolkit, parchment-style menu via `Assets/UI/Title/TitleScreen.uxml`+`.uss`). Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene` (day 1 opens with the aunt's intro letter). Quit exits the app / stops play mode. Legacy `TitleScreenUI.cs` (uGUI) still in repo but its Canvas widgets are disabled — kept for fallback/reference only.
-1. **MorningScene** — `MorningLetterUI` pulls a reputation-tiered letter from `LetterLibrary` and types it out over a parchment panel. On rent-due mornings (days 3 and 6) a landlord rent-reminder is shown after the main letter. Continue button → customer scene.
-2. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint
-3. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood
-4. **CraftingScene** — Player assigns materials to 3 slots (2 core + 1 wood), GPT-4o generates wand description, ComfyUI generates wand image; tracing minigame runs concurrently with API calls
-5. **EvaluationScene** — GPT-4o scores the wand match (0–100), awards gold + reputation. Day-progress dots at top, rent-payment modal pops on days 3/6 before advance. Day 7 or bankruptcy routes to EndingScene.
-6. **EndingScene** — `EndingManager` picks one of 5 variants (Royal / Rival / Slum / BankruptEarly / BankruptLate), fades in a pre-generated illustration from `Resources/EndingArt/`, plays a dialogue typewriter, and offers restart.
+Scene files live at `Assets/Scenes/{0..7}.{Name}.unity` — the `N.` prefix orders them in the Project window. `SceneManager.LoadScene` matches by suffix, so `GameManager.SCENE_*` constants stay un-prefixed (`"TitleScene"`, `"MinigameTest"`, etc.). Build settings ordered: 0 Title · 1 Morning · 2 Customer · 3 Material · 4 Crafting · **5 MinigameTest (production)** · 6 Evaluation · 7 Ending.
 
-Additional scenes: `ComfyUITest` (standalone image generation test), `MinigameTest` (standalone tracing minigame test via `MinigameTestRunner`), `SampleScene` (unused).
+0. **TitleScene** — `TitleScreenController` (UI Toolkit, parchment-style menu via `Assets/UI/Title/TitleScreen.uxml`+`.uss`). Start button calls `GameManager.ResetForNewPlaythrough()` and loads `MorningScene` (day 1 opens with the aunt's intro letter). Quit exits the app / stops play mode. Legacy `TitleScreenUI.cs` (uGUI) still in repo but its Canvas widgets are disabled — kept for fallback/reference only.
+1. **MorningScene** — `MorningScreenController` (UI Toolkit, `Assets/UI/Morning/MorningScene.{uxml,uss}`). Background uses `Assets/Texture/Morning Scene.png` (cozy fantasy shop interior). HUD: parchment day plaque (top-left), gold purse (top-right), centered parchment letter panel with wax seal + ScrollView body, "Read the Dossier" continue button. Pulls a reputation-tiered letter from `LetterLibrary` and types it out via the typewriter. On rent-due mornings (days 3 and 6) the landlord rent-reminder is queued after the main letter. Legacy `MorningLetterUI` Canvas children disabled.
+2. **CustomerGeneratorTest** — GPT-4o generates a fantasy customer with request/trueGoal/constraint. UI Toolkit dossier panel (`DossierPanelController`) gates Proceed on a 3-entry memo.
+3. **MaterialGeneratorTest** — GPT-4o generates 6 materials (3 cores + 3 woods), ComfyUI generates pixel art images; player buys ≥1 core + ≥1 wood. UXML/USS authored but UIDocument GO not yet wired (still uGUI driver).
+4. **CraftingScene** — Player assigns materials to 3 slots (2 core + 1 wood). `CraftingManager` is *selection only* now — on confirm it stashes picks on `GameManager.chosenCore1/Core2/Wood`, removes them from inventory, and calls `LoadScene(SCENE_MINIGAME)`. UI Toolkit workbench via `CraftingWorkbenchUI`.
+5. **MinigameTest** — production scene that hosts the tracing ritual and the wand-generation pipeline in parallel (see "MinigameScene handoff" below). `MinigameSceneRunner` orchestrates both; on completion it loads `EvaluationScene`.
+6. **EvaluationScene** — GPT-4o scores the wand match (0–100). `EvaluationResultController` (UI Toolkit) drives a theatrical reveal: banner → wand → scoreboard (Conjuring/Materials/Customer Fit/Reward) → final letter Grade. Companion VFX: `WandSparkles` ParticleSystem + `PostFX Volume` (URP Bloom). Day-progress dots are still computed but not part of the new reveal; rent-payment modal pops on days 3/6 before advance. Day 7 or bankruptcy routes to EndingScene.
+7. **EndingScene** — `EndingManager` picks one of 5 variants (Royal / Rival / Slum / BankruptEarly / BankruptLate), fades in a pre-generated illustration from `Resources/EndingArt/`, plays a dialogue typewriter, and offers restart.
+
+Additional scenes: `ComfyUITest` (standalone image-generation test), `SampleScene` (unused).
 
 ### Day Advance vs Round Reset (`GameManager`)
 
@@ -67,7 +72,13 @@ The crafting ritual spans 4 tightly coupled scripts:
 
 **Visual mechanic:** The trail fills red from the start (time-based, via TracingMist speed) and blue from the start (player-traced, via TracingCursor progress). Blue overrides red where the player has traced. Each round is a single attempt — no retries. 5 gates per round at the rune's ictus points.
 
-All visuals are procedural UI (`Image` + `TextMeshProUGUI` components on dynamically created `GameObject`s) — no prefabs, no scene references beyond the minigame panel. `MinigameTestRunner` is a lightweight harness that auto-starts the minigame on scene load for isolated testing.
+All visuals are procedural UI (`Image` + `TextMeshProUGUI` components on dynamically created `GameObject`s) — no prefabs, no scene references beyond the minigame panel. `MinigameSceneRunner` (the production controller in `5.MinigameTest.unity`) auto-starts the minigame on scene load AND launches the wand-generation pipeline in parallel.
+
+**Z-Image Turbo sprite injection (2026-04-29).** Each visual now optionally accepts a Sprite (Inspector field on `TracingMinigameUI`): `trailStripeSprite` (with `trailStripeTrim` Vector4 cropping the source band — defaults to `(27, 237, 27, 237)` for `Trail 2.png`), `gateMedallionSprite`, `cursorWispSprite`, `endpointPlaqueSprite`, `mistPuffSprite`. When a sprite is null, the procedural rectangle fallback runs as before. Trail sprite is applied to the *main* path pass in `BuildSegments` (`Image.Type.Simple`), not the fill overlay. Cursor + endpoint plaque are forced to `SetAsLastSibling` so they render above gates. Endpoint position is `path[path.Length - 1]`, not the last gate. Source PNGs in `Assets/Texture/MinigameSprites/` (each has a `-removebg-preview` alpha-cut variant for clean compositing).
+
+**Mist VFX.** `EmitMistPuffs(dt)` runs once per frame inside the round loop; spawns UI puffs at `RunePathData.SampleAt(_activePath, _activeCumul, _mist.MistT)` with random scatter; each puff drifts upward + outward, grows, and fades over `mistPuffLife`. Tunables: `mistPuffRate` (38/s), `mistPuffStart`/`mistPuffEnd` (6→22 px), `mistPuffScatter` (22 px), `mistPuffAlpha` (0.55).
+
+**Gate look.** `gateFont` (TMP_FontAsset, wired to `Assets/Fonts/Fantasia SDF.asset`), `gateLabelColor` (cream/gold with thin dark outline), `gateLabelFontSize`, `gateSize` (56). When a sprite is set the 45° diamond rotation is dropped — sprites are designed upright/round.
 
 ### 7-Day Progression & Multi-Ending Subsystem
 
@@ -85,15 +96,17 @@ Five tightly-coupled scripts + one static content file drive the day/letter/rent
 
 **Ending art:** Pre-generated PNGs in `Assets/Resources/EndingArt/` (Royal.png, Rival.png, Slum.png, Bankrupt.png). Generate once via the `ComfyUITest` scene and drop them in — not runtime-generated so the climactic moment is reliable.
 
-### Parallel Execution in CraftingScene
+### CraftingScene → MinigameScene handoff (parallel execution lives here now)
 
-`CraftingManager.OnConfirm()` launches two concurrent operations:
-1. `CraftingPipeline` coroutine (OpenAI wand generation → ComfyUI image generation)
-2. `TracingMinigameUI.Begin()` (3-round tracing minigame)
+`CraftingManager.OnConfirm()` removes the chosen materials from inventory, stashes them on `GameManager.chosenCore1 / chosenCore2 / chosenWood`, and calls `LoadScene(SCENE_MINIGAME)`. CraftingScene no longer owns the wand-generation pipeline — that moved with the minigame.
 
-Both set completion flags (`_pipelineDone`, `_minigameDone`); `TryShowResult()` waits for both before revealing the result panel. This means the player plays the minigame while the API calls run in the background.
+`MinigameSceneRunner` (on the `Test Runner` GO in `5.MinigameTest.unity`) launches two concurrent operations on `Start`:
+1. `WandPipeline` coroutine (OpenAI wand generation → ComfyUI image generation, identical helpers to the old CraftingManager)
+2. `tracingMinigame.Begin(grade => …)` (3-round tracing minigame)
 
-If the minigame reference is null (not yet wired in Editor), the minigame is skipped and `_minigameDone` is set immediately with grade `'A'`.
+Both set completion flags (`_pipelineDone`, `_minigameDone`); `TryAdvance()` waits for both, then calls `LoadScene(SCENE_EVALUATION)`. `GameManager.craftingQualityGrade` and `lastMinigameRoundsWon` carry forward to the evaluation reveal.
+
+If `tracingMinigame` is null (e.g. broken Inspector wiring), the minigame is skipped and `_minigameDone` is set immediately with grade `'A'`. The legacy `MinigameTestRunner.cs` test harness was deleted — `MinigameSceneRunner` replaced it.
 
 ### Data Classes
 
@@ -103,7 +116,7 @@ If the minigame reference is null (not yet wired in Editor), the minigame is ski
 
 ## Scripts Location
 
-All C# scripts are in `Assets/Scripts/`. Flat structure, no subdirectories.
+All C# scripts are in `Assets/Scripts/`. Flat structure, no subdirectories. Notable scripts added during the UI Toolkit / scene-split push: `MorningScreenController`, `CraftingWorkbenchUI`, `MinigameSceneRunner`, `EvaluationResultController`. The legacy `MinigameTestRunner.cs` test harness was deleted — `MinigameSceneRunner` is the production replacement.
 
 ## Build & Run
 
@@ -152,7 +165,7 @@ See `.claude/agents/` for full agent definitions and file ownership maps, and `.
 
 ## GDD vs Current Implementation
 
-The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round path-tracing with red/blue fill race, 5 keyboard-key gates per round at conductor-ictus points, quality grading A/B/C/F based on round wins, reward multiplier) is fully coded but **needs manual Editor setup** — see `TODO-EDITOR` comment at `CraftingManager.cs:59` for MinigamePanel wiring instructions.
+The GDD (`Docs/GDD.md`) describes the full design vision. **Not yet implemented:** 2 customers per day (currently 1), commission system (1.75x price orders), reputation tier effects on customer generation. The tracing minigame (3-round path-tracing with red/blue fill race, 5 keyboard-key gates per round at conductor-ictus points, quality grading A/B/C/F based on round wins, reward multiplier) is fully coded and now lives in its own production scene `5.MinigameTest.unity` between Crafting and Evaluation. Sprite Inspector fields on `TracingMinigameUI` (trail / gate / cursor / endpoint / mistPuff) are wired to PNGs in `Assets/Texture/MinigameSprites/` for the Hogwarts-style polished look.
 
 The **7-day progression subsystem** (morning letters, rent days, multi-ending) is fully coded and scene-wired via Unity MCP (2026-04-24). `TitleScene` (Build index 0), `MorningScene` (5), and `EndingScene` (6) all built with placeholder tints; `EvaluationScene` has `DayProgressHeader` (7 dots + 💰 icons above day 3/6) and `RentPaymentPanel` (inactive by default) attached and wired. Remaining manual work:
 - Drop 4 PNGs into `Assets/Resources/EndingArt/` (Royal / Rival / Slum / Bankrupt) — the Ending scene loads these via `Resources.Load`; if missing, falls back to a tinted placeholder (warns in console). Generate via ComfyUITest once, drop in.
@@ -165,14 +178,17 @@ The **memo-gated dossier reading subsystem** (2026-04-24) is fully coded but nee
 
 The project is migrating from uGUI (Canvas + RectTransform + Image/TMP) to **UI Toolkit** (UIDocument + UXML + USS). Per-scene wiring uses one `*UIDocument` GameObject per scene with a UXML source and a controller MonoBehaviour. Legacy uGUI Canvas children stay in scene hierarchies but are disabled (not deleted) so they can be reverted if needed.
 
-**Folder layout:** `Assets/UI/<feature>/<feature>Panel.uxml`, `<feature>Panel.uss`, `<feature>PanelSettings.asset`. Folders so far: `Title/`, `Dossier/`, `Market/`, `Minigame/`.
+**Folder layout:** `Assets/UI/<feature>/<feature>Panel.uxml`, `<feature>Panel.uss`, `<feature>PanelSettings.asset`. Folders so far: `Title/`, `Dossier/`, `Market/`, `Minigame/`, `Morning/`, `Crafting/`, `Evaluation/`.
 
-**Scene status (2026-04-25):**
-- ✅ `TitleScene` — wired. `TitleUIDocument` GameObject hosts `UIDocument` + `TitleScreenController` (new script). Pulls UXML `Assets/UI/Title/TitleScreen.uxml`, USS `TitleScreen.uss`, panel `TitlePanelSettings.asset` (ScaleWithScreenSize 1920×1080, match 0.5). Visual style: Potion-Craft-style parchment with leaf flourishes flanking a stacked serif title; only Start + Quit buttons. Old `TitleScreenUI` still attached to Canvas but Canvas children all disabled.
-- ✅ `CustomerGeneratorTest` — wired. `DossierUIDocument` hosts `UIDocument` + `DossierPanelController`. UXML `DossierPanel.uxml` + USS `DossierPanel.uss` + `DossierPanelSettings.asset` (ConstantPixelSize, refDpi 96). `CustomerGenerator.dossierPanel` field points at the controller; the controller mirrors `MemoFillUI` gameplay (click word → click slot, three slots = memo complete = Proceed enabled). Old uGUI dossier text fields disabled under Canvas.
-- 🟡 `MaterialGeneratorTest` (Market) — UXML/USS/PanelSettings authored in `Assets/UI/Market/` and `MaterialMarketUI.cs` exists, but no `*UIDocument` GameObject wired in scene yet.
-- 🟡 `CraftingScene` (Minigame panel) — UXML/USS/PanelSettings authored in `Assets/UI/Minigame/` and `MinigamePanelController.cs` exists, but no `*UIDocument` GameObject wired in scene yet.
-- ❌ `MorningScene`, `EvaluationScene`, `EndingScene` — still uGUI only.
+**Scene status (2026-04-29):**
+- ✅ `TitleScene` — `TitleUIDocument` + `TitleScreenController.cs`. Parchment menu with Start + Quit. Old `TitleScreenUI` Canvas children disabled.
+- ✅ `CustomerGeneratorTest` — `DossierUIDocument` + `DossierPanelController.cs`. Memo gameplay (click word → click slot).
+- ✅ `MorningScene` — `MorningUIDocument` + `MorningScreenController.cs`. Background `Assets/Texture/Morning Scene.png`. HUD: parchment day plaque + gold purse + centered letter panel with wax seal & ScrollView body. PanelSettings: ScaleWithScreenSize 1920×1080.
+- ✅ `EvaluationScene` — `EvaluationUIDocument` + `EvaluationResultController.cs`. Theatrical reveal (banner → wand → scoreboard → grade letter), `WandSparkles` ParticleSystem + `PostFX Volume` (URP Bloom). Legacy uGUI panels disabled.
+- ✅ `CraftingScene` workbench — `CraftingWorkbenchUIDocument` + `CraftingWorkbenchUI.cs`. Result modal removed (handoff to MinigameScene).
+- ✅ `MinigameTest` chrome — `MinigameUIDocument` + `MinigamePanelController.cs`. Wood-frame UXML/USS rebuilt; PanelSettings `sortingOrder = -10` so Canvas-hosted procedural gameplay renders on top.
+- 🟡 `MaterialGeneratorTest` — UXML/USS/PanelSettings authored, no `*UIDocument` GO yet.
+- ❌ `EndingScene` — still uGUI only.
 
 **Pattern** (used in both wired scenes):
 1. `Assets/UI/<feature>/<feature>PanelSettings.asset` — created via `execute_code` with `PanelSettings` + `AssetDatabase.CreateAsset`.

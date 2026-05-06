@@ -6,25 +6,28 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/TitleScene.unity
+    path: Assets/Scenes/0.TitleScene.unity
     guid: 4dba4858045b6924fa4d57963edcc1cb
   - enabled: 1
-    path: Assets/Scenes/CustomerGeneratorTest.unity
+    path: Assets/Scenes/2.CustomerGeneratorTest.unity
     guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9
   - enabled: 1
-    path: Assets/Scenes/MaterialGeneratorTest.unity
+    path: Assets/Scenes/3.MaterialGeneratorTest.unity
     guid: 12f5b84ef101aaa4f9fd149a039f76bd
   - enabled: 1
-    path: Assets/Scenes/CraftingScene.unity
+    path: Assets/Scenes/4.CraftingScene.unity
     guid: a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7
   - enabled: 1
-    path: Assets/Scenes/EvaluationScene.unity
+    path: Assets/Scenes/5.MinigameTest.unity
+    guid: 25f463f883979bb4ea61658acb6e7413
+  - enabled: 1
+    path: Assets/Scenes/6.EvaluationScene.unity
     guid: b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8
   - enabled: 1
-    path: Assets/Scenes/MorningScene.unity
+    path: Assets/Scenes/1.MorningScene.unity
     guid: 97e5686546d205d4cb80cd25e09af517
   - enabled: 1
-    path: Assets/Scenes/EndingScene.unity
+    path: Assets/Scenes/7.EndingScene.unity
     guid: 0b450ab40b8b5b1419cb98af07cd30db
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

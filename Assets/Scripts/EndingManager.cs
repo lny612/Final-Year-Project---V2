@@ -3,6 +3,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+// TODO-EDITOR: Font swap to The Garden of Lights
+//   The other UI scenes were migrated to UI Toolkit and pull
+//   `Assets/Fonts/The Garden of Lights.ttf` via the .uss `-unity-font-definition`
+//   rule. This scene is still uGUI, so the font lives on each TMP_Text's Font
+//   Asset field. Open EndingScene.unity, select each TMP_Text under Canvas
+//   (EndingTitle, DialogueText, StatsText, RestartButton/QuitButton labels)
+//   and set their Font Asset to `Assets/Fonts/The Garden of Lights SDF.asset`.
+//
 // TODO-EDITOR: Create a new scene "EndingScene" and add it to Build Settings
 //   AFTER MorningScene. Scene hierarchy:
 //     - GameManager (same DontDestroyOnLoad pattern)

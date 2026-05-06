@@ -1,5 +1,28 @@
 # 7-Day Progression, Letters, Rent & Multi-Ending
 
+> **Implementation Status (2026-05-06)**
+>
+> This doc was the original implementation plan. Most of it shipped as written. The annotations below reconcile the plan with what's actually in the repo today; the rest of the doc is preserved for design context.
+>
+> **✅ Shipped:**
+> - `GameManager` state additions (`currentDay`, `peakReputation`, `wandsCrafted`, `lettersReceived`, `bankruptedOnDay3`, rent constants, `ROYAL_REP_MIN`/`RIVAL_REP_MIN`)
+> - `AdvanceToNextDay`, `IsRentDueToday`, `GetRentDueToday`, `DetermineEnding`
+> - `LetterLibrary` (21 letters across 8 senders — `Neighbor`, `Customer`, `Aristocrat`, `Royal`, `Brigand`, `Landlord`, **+ `Aunt`** for the day-1 intro, **+ `Rival`** for days 5/7)
+> - `TypewriterText` (with `OnComplete` event + `PlayFromStart` fire-and-forget)
+> - `DayProgressUI` (7 dots + rent icons on indices [2] and [5])
+> - `RentPaymentUI` (`payButton` / `pleadButton` / `acceptFateButton`, `RentResult.Paid`/`Bankrupt`)
+> - `EndingManager` (5 variants — `Royal`/`Rival`/`Slum`/`BankruptEarly`/`BankruptLate`)
+> - Editor-only `[ContextMenu]` shortcuts on `GameManager` for fast iteration (jump to day 3/6/7, force rep tiers, empty wallet)
+>
+> **🔄 Diverged from plan:**
+> - **Production morning controller is `MorningScreenController.cs` (UI Toolkit)**, not `MorningLetterUI.cs`. The legacy uGUI `MorningLetterUI.cs` is still in the repo but its Canvas children are disabled.
+> - **Build Settings list grew to 8 scenes** (Title and MinigameTest were added post-plan). Actual order in §"Scene Setup" below.
+> - **`OnNextCustomer()` sets `bankruptedOnDay3` inside `RentPaymentUI`** rather than at the `EvaluationManager` call site (cleaner separation; the call site just calls `GoToEnding()` with no parameter).
+> - **`LetterSender` enum is now**: `{ Neighbor, Customer, Aristocrat, Royal, Brigand, Landlord, Aunt, Rival }`.
+>
+> **❌ Not yet shipped:**
+> - **Ending illustrations.** `Assets/Resources/EndingArt/` does NOT exist. `EndingManager` has a graceful fallback to a tinted placeholder canvas, but the four PNGs (`Royal.png`, `Rival.png`, `Slum.png`, `Bankrupt.png`) still need to be generated via ComfyUITest and dropped into the folder.
+
 ## Context
 
 The game currently loops a single round (Customer → Market → Craft → Evaluate → back to Customer) with no termination and no narrative arc. Reputation and gold persist but never matter — nothing happens when either rises or falls. This plan turns the loop into a **7-day story** with two rent checkpoints, a daily morning-letter narrative beat, and four ending branches tied to player performance. The goal: give the existing mechanics stakes and give the session a shape that ends.
@@ -164,7 +187,10 @@ Content table:
 
 ~20 letters total. Written directly in the source file as verbatim strings — cheap to edit, git-diffable.
 
-### `Assets/Scripts/MorningLetterUI.cs`
+### `Assets/Scripts/MorningLetterUI.cs` *(legacy uGUI — superseded)*
+
+> **Production note:** The actual production controller is `Assets/Scripts/MorningScreenController.cs` (UI Toolkit, `Assets/UI/Morning/MorningScene.{uxml,uss}`), not `MorningLetterUI.cs`. The legacy uGUI version below remains in the repo as a fallback but its Canvas children are disabled in the scene. The behaviour described is the same; only the rendering layer changed.
+
 Scene controller for `MorningScene`. Mirrors `EvaluationManager` patterns (public Inspector fields, `Start()` wires button, coroutine drives reveal).
 
 ```csharp
@@ -203,7 +229,8 @@ public class RentPaymentUI : MonoBehaviour {
     public GameObject panel;                // inactive at Start()
     public TMP_Text landlordDialogue;       // 1-2 short lines, typewritten
     public TMP_Text goldStatusText;         // "You have 467g. Rent is 250g. After rent: 217g."
-    public Button payButton, plead Button;  // plead is flavor-only, same outcome
+    public Button payButton, pleadButton, acceptFateButton;  // plead is flavor-only;
+                                                              // acceptFate appears only when can't afford
     public TypewriterText dialogueTypewriter;
     // Public method: Show(int rentAmount, Action onResolved)
     //   if gold >= rent: enable payButton, deduct on click, callback
@@ -278,7 +305,22 @@ Three additions, all at well-defined hook points:
 
 ## Scene Setup (TODO-EDITOR comments I'll add in the code)
 
-Two new scenes must be created by the user in the Unity Editor. I will add `TODO-EDITOR:` comments to `MorningLetterUI.cs` and `EndingManager.cs` with explicit hierarchy + wiring instructions, matching the style of the existing comment at `CraftingManager.cs:59`. Both scenes must be added to Build Settings in this order:
+Two new scenes must be created by the user in the Unity Editor. I will add `TODO-EDITOR:` comments to `MorningLetterUI.cs` and `EndingManager.cs` with explicit hierarchy + wiring instructions, matching the style of the existing comment at `CraftingManager.cs:59`.
+
+> **Actual Build Settings (post-plan, 2026-05-06):** the project grew to 8 scenes — Title and MinigameTest were added after this plan was written:
+> ```
+> 0. 0.TitleScene.unity                 ← NEW (added post-plan)
+> 1. 2.CustomerGeneratorTest.unity
+> 2. 3.MaterialGeneratorTest.unity
+> 3. 4.CraftingScene.unity
+> 4. 5.MinigameTest.unity               ← NEW (added post-plan)
+> 5. 6.EvaluationScene.unity
+> 6. 1.MorningScene.unity
+> 7. 7.EndingScene.unity
+> ```
+> The `N.` filename prefixes order them in the Project window; build indices match the order above. The original 6-scene proposal (below) is kept for design context.
+
+Original proposed Build Settings order:
 
 ```
 0. CustomerGeneratorTest

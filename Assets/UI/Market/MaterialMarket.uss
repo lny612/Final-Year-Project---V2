@@ -1,469 +1,714 @@
-/* =====================================================================
+/* ==========================================================================
    MaterialMarket.uss
-   Cozy parchment / wood styling for the buying & purchasing screen.
-   Visual targets: Assets/UI references/buying & purchase 1.jpg & 2.jpg
-   ===================================================================== */
+   Cozy storybook market: warm walnut bench framing parchment cards. The
+   topbar is a wood plank with a carved title nameplate and a heart-and-coin
+   gold badge. The body is split into a left categories+memo column and a
+   right scrolling grid of material cards. Selected categories light up in
+   coral, and bought cards get a coral "Bought" stamp across the artwork.
+   ========================================================================== */
 
-/* ------------ tokens ------------------------------------------------- */
+/* ── Palette tokens ─────────────────────────────────────────────────────── */
 :root {
-    --col-parchment:       rgb(245, 233, 210);
-    --col-parchment-dark:  rgb(232, 216, 181);
-    --col-parchment-edge:  rgb(214, 196, 158);
-    --col-wood:            rgb(142, 106, 65);
-    --col-wood-dark:       rgb(93,  68,  39);
-    --col-wood-light:      rgb(180, 145, 100);
-    --col-nameplate:       rgb(232, 185, 107);
-    --col-nameplate-dark:  rgb(184, 137, 64);
-    --col-card-bg:         rgb(250, 241, 220);
-    --col-ink:             rgb(76,  54,  33);
-    --col-ink-soft:        rgb(122, 92,  61);
-    --col-coin:            rgb(212, 162, 59);
-    --col-coin-rim:        rgb(150, 105, 30);
-    --col-flash-red:       rgb(194, 75,  58);
-    --col-glyph:           rgb(199, 125, 255);
-    --col-buy:             rgb(196, 99,  72);
-    --col-buy-hover:       rgb(214, 116, 89);
-    --col-buy-press:       rgb(165, 78,  56);
+    --wood-base:        rgb(72, 46, 28);
+    --wood-deep:        rgb(54, 32, 18);
+    --wood-warm:        rgb(110, 72, 40);
+    --wood-shadow:      rgb(36, 22, 12);
+
+    --parchment-base:   rgb(232, 213, 178);
+    --parchment-warm:   rgb(217, 192, 150);
+    --parchment-deep:   rgb(190, 160, 112);
+    --parchment-edge:   rgba(110, 78, 36, 0.55);
+    --parchment-rule:   rgba(46, 32, 22, 0.45);
+
+    --ink-dark:         rgb(46, 32, 22);
+    --ink-soft:         rgb(86, 64, 44);
+    --ink-faded:        rgba(46, 32, 22, 0.55);
+    --ink-cream:        rgb(245, 230, 200);
+
+    --brass:            rgb(190, 148, 70);
+    --gold-leaf:        rgb(214, 178, 112);
+    --gold-warm:        rgb(232, 188, 96);
+
+    --coral:            rgb(198, 84, 52);
+    --coral-soft:       rgb(212, 110, 78);
+    --coral-deep:       rgb(160, 60, 32);
+    --heart-red:        rgb(214, 76, 60);
 }
 
-/* ------------ root --------------------------------------------------- */
+/* ── Root: full-screen wood plate ───────────────────────────────────────── */
 .market-root {
-    flex-grow: 1;
-    flex-direction: column;
-    background-color: var(--col-parchment);
-    color: var(--col-ink);
-    font-size: 16px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgb(54, 32, 18);
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
     -unity-font-style: normal;
-    /* TODO-EDITOR: drop a TTF (e.g. PatrickHand-Regular) into Assets/Fonts/
-       and uncomment the next line, pointing at it, for the cozy hand-drawn feel:
-       --unity-font-definition: url("project://database/Assets/Fonts/PatrickHand-Regular.ttf");
-    */
-    padding: 12px;
 }
 
-/* ------------ top bar ----------------------------------------------- */
+.market-wood-plate {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(72, 46, 28);
+}
+
+.market-wood-grain {
+    position: absolute;
+    left: 4%; right: 4%; top: 3%; bottom: 3%;
+    background-color: rgba(36, 22, 12, 0.18);
+    border-left-width:   1px;
+    border-right-width:  1px;
+    border-top-width:    1px;
+    border-bottom-width: 1px;
+    border-left-color:   rgba(36, 22, 12, 0.35);
+    border-right-color:  rgba(36, 22, 12, 0.35);
+    border-top-color:    rgba(36, 22, 12, 0.45);
+    border-bottom-color: rgba(36, 22, 12, 0.45);
+    border-radius: 6px;
+}
+
+.market-vignette {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-left-width:   38px;
+    border-right-width:  38px;
+    border-top-width:    32px;
+    border-bottom-width: 32px;
+    border-left-color:   rgba(36, 22, 12, 0.65);
+    border-right-color:  rgba(36, 22, 12, 0.65);
+    border-top-color:    rgba(36, 22, 12, 0.55);
+    border-bottom-color: rgba(36, 22, 12, 0.75);
+}
+
+/* ── Top bar ────────────────────────────────────────────────────────────── */
 .market-topbar {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    height: 78px;
-    padding: 8px 16px;
-    background-color: var(--col-wood);
-    border-radius: 18px;
-    border-width: 3px;
-    border-color: var(--col-wood-dark);
-    margin-bottom: 12px;
+    height: 92px;
+    margin-left: 56px;
+    margin-right: 56px;
+    margin-top: 18px;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: rgb(110, 72, 40);
+    border-left-width:   3px;
+    border-right-width:  3px;
+    border-top-width:    3px;
+    border-bottom-width: 3px;
+    border-left-color:   rgba(36, 22, 12, 0.85);
+    border-right-color:  rgba(36, 22, 12, 0.85);
+    border-top-color:    rgba(36, 22, 12, 0.65);
+    border-bottom-color: rgba(36, 22, 12, 0.95);
+    border-radius: 14px;
 }
 
 .market-back {
     width: 56px;
     height: 56px;
-    background-color: var(--col-parchment);
-    color: var(--col-ink);
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: var(--col-wood-dark);
+    background-color: rgb(232, 213, 178);
+    background-image: none;
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(36, 22, 12, 0.85);
+    border-right-color:  rgba(36, 22, 12, 0.85);
+    border-top-color:    rgba(36, 22, 12, 0.65);
+    border-bottom-color: rgba(36, 22, 12, 0.95);
+    border-radius: 10px;
     font-size: 22px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    padding: 0;
-    margin: 0;
+    color: rgb(46, 32, 22);
+    transition-property: scale, translate, background-color;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
 }
-
-.market-back:hover {
-    background-color: rgb(255, 245, 222);
-    translate: 0 -2px;
-}
-
-.market-back:active {
-    background-color: var(--col-parchment-dark);
-    translate: 0 0;
-}
+.market-back:hover  { background-color: rgb(245, 230, 200); scale: 1.04 1.04; }
+.market-back:active { background-color: rgb(190, 160, 112); translate: 0 1px; scale: 0.98 0.98; }
 
 .market-title-plate {
     flex-grow: 1;
-    flex-direction: row;
+    height: 60px;
+    margin-left: 14px;
+    margin-right: 14px;
     align-items: center;
     justify-content: center;
-    height: 56px;
-    margin: 0 16px;
-    background-color: var(--col-wood-light);
-    border-radius: 14px;
-    border-width: 2px;
-    border-color: var(--col-wood-dark);
+    background-color: rgb(54, 32, 18);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(214, 178, 112, 0.65);
+    border-right-color:  rgba(214, 178, 112, 0.65);
+    border-top-color:    rgba(214, 178, 112, 0.65);
+    border-bottom-color: rgba(214, 178, 112, 0.65);
+    border-radius: 10px;
 }
 
 .market-title {
+    color: rgb(245, 230, 200);
     font-size: 26px;
     -unity-font-style: bold;
-    color: rgb(245, 235, 215);
     letter-spacing: 4px;
     -unity-text-align: middle-center;
+    text-shadow: 1px 2px 4px rgba(20, 12, 4, 0.85);
 }
 
 .market-gold {
     flex-direction: row;
     align-items: center;
-    justify-content: flex-end;
-    background-color: var(--col-parchment);
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: var(--col-wood-dark);
-    padding: 6px 14px 6px 8px;
-    min-width: 110px;
-    height: 56px;
-    transition-property: background-color, color;
-    transition-duration: 200ms;
+    justify-content: center;
+    height: 60px;
+    padding-left: 12px;
+    padding-right: 18px;
+    background-color: rgb(232, 213, 178);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(36, 22, 12, 0.85);
+    border-right-color:  rgba(36, 22, 12, 0.85);
+    border-top-color:    rgba(36, 22, 12, 0.65);
+    border-bottom-color: rgba(36, 22, 12, 0.95);
+    border-radius: 10px;
 }
 
-.market-gold.gold-flash {
-    background-color: var(--col-flash-red);
-}
-
-.market-gold.gold-flash .gold-amount {
-    color: rgb(255, 245, 222);
-}
-
-.coin-icon {
-    width: 22px;
-    height: 22px;
-    background-color: var(--col-coin);
-    border-radius: 11px;
-    border-width: 2px;
-    border-color: var(--col-coin-rim);
-    margin-right: 8px;
-}
-
-.coin-icon-small {
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    margin-right: 6px;
+/* Brass coin disc with a darker rim. */
+.market-gold-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+    background-color: rgb(232, 188, 96);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgb(150, 100, 28);
+    border-right-color:  rgb(150, 100, 28);
+    border-top-color:    rgb(150, 100, 28);
+    border-bottom-color: rgb(150, 100, 28);
+    border-radius: 50%;
 }
 
 .gold-amount {
+    color: rgb(46, 32, 22);
     font-size: 22px;
     -unity-font-style: bold;
-    color: var(--col-ink);
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
 }
 
-/* ------------ body --------------------------------------------------- */
+.market-gold.gold-flash {
+    background-color: rgb(214, 76, 60);
+}
+
+/* ── Body: left column + scrollable card grid ───────────────────────────── */
 .market-body {
     flex-grow: 1;
     flex-direction: row;
     align-items: stretch;
+    justify-content: flex-start;
+    margin-left: 56px;
+    margin-right: 56px;
+    margin-top: 14px;
+    margin-bottom: 8px;
 }
 
-.market-memo-panel {
-    width: 280px;
+/* ── LEFT column: categories + memo ─────────────────────────────────────── */
+.market-left {
+    width: 300px;
     flex-shrink: 0;
     flex-direction: column;
-    background-color: var(--col-parchment-dark);
-    border-radius: 14px;
-    border-width: 2px;
-    border-color: var(--col-parchment-edge);
-    padding: 18px 16px;
-    margin-right: 14px;
+    align-items: stretch;
+    margin-right: 16px;
+}
+
+.market-categories {
+    background-color: rgb(232, 213, 178);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(110, 78, 36, 0.55);
+    border-right-color:  rgba(110, 78, 36, 0.55);
+    border-top-color:    rgba(110, 78, 36, 0.55);
+    border-bottom-color: rgba(110, 78, 36, 0.55);
+    border-radius: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-bottom: 14px;
+}
+
+.market-cat {
+    color: rgb(46, 32, 22);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    border-left-width:   0;
+    border-right-width:  0;
+    border-top-width:    0;
+    border-bottom-width: 0;
+    border-radius: 6px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    -unity-text-align: middle-left;
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    transition-property: background-color, color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+.market-cat:hover {
+    color: rgb(160, 60, 32);
+    background-color: rgba(198, 84, 52, 0.12);
+    translate: 2px 0;
+}
+.market-cat:active {
+    background-color: rgba(160, 60, 32, 0.20);
+    translate: 0 1px;
+}
+
+.market-cat--selected {
+    color: rgb(245, 230, 200);
+    background-color: rgb(198, 84, 52);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgb(160, 60, 32);
+    border-right-color:  rgb(160, 60, 32);
+    border-top-color:    rgb(160, 60, 32);
+    border-bottom-color: rgb(160, 60, 32);
+    text-shadow: 1px 1px 3px rgba(20, 12, 4, 0.65);
+}
+.market-cat--selected:hover {
+    color: rgb(245, 230, 200);
+    background-color: rgb(212, 110, 78);
+    translate: 2px 0;
+}
+
+.market-cat-divider {
+    height: 1px;
+    margin-left: 22px;
+    margin-right: 22px;
+    background-color: rgba(110, 78, 36, 0.45);
+    border-radius: 1px;
+}
+
+/* Memo card under the categories. */
+.market-memo-panel {
+    background-color: rgb(232, 213, 178);
+    padding-left: 18px;
+    padding-right: 18px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(110, 78, 36, 0.55);
+    border-right-color:  rgba(110, 78, 36, 0.55);
+    border-top-color:    rgba(110, 78, 36, 0.55);
+    border-bottom-color: rgba(110, 78, 36, 0.55);
+    border-radius: 8px;
 }
 
 .memo-heading {
-    font-size: 20px;
+    color: rgb(46, 32, 22);
+    font-size: 22px;
     -unity-font-style: bold;
-    color: var(--col-ink);
+    letter-spacing: 2px;
     -unity-text-align: middle-center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom-width: 2px;
-    border-bottom-color: var(--col-parchment-edge);
+}
+
+.memo-rule {
+    width: 80%;
+    height: 1px;
+    background-color: rgba(46, 32, 22, 0.45);
+    align-self: center;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    border-radius: 1px;
 }
 
 .memo-slot {
     flex-direction: column;
-    background-color: var(--col-card-bg);
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: var(--col-parchment-edge);
-    padding: 10px 12px;
-    margin-bottom: 10px;
+    margin-top: 6px;
+    margin-bottom: 6px;
 }
 
 .memo-label {
-    font-size: 12px;
-    color: var(--col-ink-soft);
-    letter-spacing: 1px;
-    -unity-font-style: bold;
-    margin-bottom: 4px;
+    color: rgba(86, 64, 44, 0.85);
+    font-size: 13px;
+    letter-spacing: 2px;
+    -unity-font-style: italic;
+    margin-bottom: 2px;
 }
 
 .memo-value {
-    font-size: 18px;
-    color: var(--col-ink);
+    color: rgb(46, 32, 22);
+    font-size: 16px;
     -unity-font-style: bold;
     white-space: normal;
 }
 
 .memo-footnote {
-    margin-top: auto;
+    color: rgba(86, 64, 44, 0.75);
     font-size: 12px;
-    color: var(--col-ink-soft);
     -unity-font-style: italic;
+    letter-spacing: 1px;
+    margin-top: 12px;
+    -unity-text-align: middle-center;
     white-space: normal;
-    padding-top: 8px;
 }
 
-/* ------------ cards area -------------------------------------------- */
+/* ── RIGHT: scrollable card grid ────────────────────────────────────────── */
 .market-cards {
     flex-grow: 1;
-    flex-direction: column;
+    background-color: rgba(232, 213, 178, 0.0);
 }
 
-.market-section-label {
-    font-size: 14px;
-    color: var(--col-ink-soft);
-    -unity-font-style: bold;
-    letter-spacing: 3px;
-    -unity-text-align: middle-center;
-    margin: 4px 0 8px 0;
+.market-cards > .unity-scroll-view__content-container {
+    flex-direction: column;
 }
 
 .market-card-row {
     flex-direction: row;
-    flex-grow: 1;
-    margin-bottom: 8px;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
-/* ------------ card --------------------------------------------------- */
+.market-card-row.hidden {
+    display: none;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
 .material-card {
-    flex-grow: 1;
-    flex-basis: 0;
-    flex-direction: column;
-    background-color: var(--col-card-bg);
-    border-radius: 14px;
-    border-width: 2px;
-    border-color: var(--col-wood-dark);
-    margin: 0 6px;
-    padding: 0 0 12px 0;
+    /* The card's parent is a TemplateContainer that MaterialMarketUI.AddCard
+       gives `flexGrow=1, flexBasis=0` inline, so the three TemplateContainers
+       split the row width evenly. The card itself just fills its container
+       horizontally. We must NOT set flex-basis: 0 here — the TemplateContainer
+       defaults to flex-direction: column, so flex-basis affects HEIGHT, and
+       collapsing the card's height to 0 hides the whole panel. */
+    width: 100%;
+    min-width: 240px;
+    flex-grow: 0;
+    flex-shrink: 1;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    background-color: rgb(232, 213, 178);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(110, 78, 36, 0.55);
+    border-right-color:  rgba(110, 78, 36, 0.55);
+    border-top-color:    rgba(110, 78, 36, 0.55);
+    border-bottom-color: rgba(110, 78, 36, 0.55);
+    border-radius: 10px;
+    align-items: stretch;
     overflow: hidden;
-    transition-property: translate, border-color, opacity;
-    transition-duration: 150ms;
+    transition-property: translate, scale;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
 }
-
 .material-card:hover {
     translate: 0 -3px;
-    border-color: var(--col-wood);
 }
 
-.material-card.sold-out {
-    opacity: 0.55;
-    border-color: var(--col-parchment-edge);
-}
-
+/* Wood-tone nameplate header. */
 .card-nameplate {
-    background-color: var(--col-nameplate);
-    border-bottom-width: 2px;
-    border-bottom-color: var(--col-nameplate-dark);
-    padding: 8px 12px;
     align-items: center;
     justify-content: center;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: rgb(110, 72, 40);
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(36, 22, 12, 0.65);
 }
 
 .card-name {
-    font-size: 17px;
+    color: rgb(245, 230, 200);
+    font-size: 16px;
     -unity-font-style: bold;
-    color: var(--col-ink);
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
     white-space: normal;
+    text-shadow: 1px 1px 3px rgba(20, 12, 4, 0.85);
 }
 
 .card-subline {
+    color: rgb(198, 84, 52);
     font-size: 12px;
-    color: var(--col-ink-soft);
-    -unity-text-align: middle-center;
     -unity-font-style: italic;
-    margin: 6px 8px 4px 8px;
     letter-spacing: 2px;
+    -unity-text-align: middle-center;
+    margin-top: 6px;
+    margin-bottom: 4px;
 }
 
+/* Art well — parchment background, the painted material illustration sits
+   centred inside it. The placeholder shows while ComfyUI is generating. */
 .card-art {
-    width: 100%;
-    height: 130px;
+    height: 140px;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    background-color: rgb(245, 230, 200);
+    border-left-width:   1px;
+    border-right-width:  1px;
+    border-top-width:    1px;
+    border-bottom-width: 1px;
+    border-left-color:   rgba(110, 78, 36, 0.45);
+    border-right-color:  rgba(110, 78, 36, 0.45);
+    border-top-color:    rgba(110, 78, 36, 0.45);
+    border-bottom-color: rgba(110, 78, 36, 0.45);
+    border-radius: 6px;
     align-items: center;
     justify-content: center;
-    background-color: rgb(255, 250, 235);
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-color: var(--col-parchment-edge);
-    margin-bottom: 8px;
-    overflow: hidden;
 }
 
 .card-placeholder {
     position: absolute;
-    width: 60%;
-    height: 60%;
-    background-color: var(--col-parchment-dark);
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: var(--col-parchment-edge);
-    opacity: 0.7;
+    width: 70%;
+    height: 70%;
+    background-color: rgba(190, 160, 112, 0.45);
+    border-radius: 6px;
 }
 
 .card-image {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: none;
+    left: 4px; right: 4px; top: 4px; bottom: 4px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .card-hint-glyph {
     position: absolute;
+    right: 6px;
     top: 6px;
-    right: 8px;
+    color: rgb(214, 178, 112);
+    font-size: 18px;
+    -unity-font-style: bold;
+    text-shadow: 1px 1px 3px rgba(20, 12, 4, 0.65);
+}
+
+/* "Bought" diagonal stamp — coral, rotated, shown only when sold-out. */
+.card-soldout {
+    position: absolute;
+    width: 80%;
+    align-self: center;
+    color: rgb(245, 230, 200);
+    background-color: rgb(160, 60, 32);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(20, 12, 4, 0.65);
+    border-right-color:  rgba(20, 12, 4, 0.65);
+    border-top-color:    rgba(20, 12, 4, 0.65);
+    border-bottom-color: rgba(20, 12, 4, 0.65);
+    border-radius: 4px;
     font-size: 22px;
     -unity-font-style: bold;
-    color: var(--col-glyph);
+    letter-spacing: 4px;
+    -unity-text-align: middle-center;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    rotate: -10deg;
     display: none;
+    text-shadow: 1px 1px 3px rgba(20, 12, 4, 0.85);
 }
 
 .card-attributes {
     flex-direction: column;
-    padding: 0 12px;
-    flex-grow: 1;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 4px;
 }
 
 .card-field {
-    font-size: 12px;
-    color: var(--col-ink-soft);
+    color: rgb(46, 32, 22);
+    font-size: 11px;
+    -unity-text-align: middle-left;
+    margin-top: 1px;
+    margin-bottom: 1px;
     white-space: normal;
-    margin-bottom: 4px;
-    -unity-text-align: upper-left;
 }
 
 .card-field-primary {
-    color: var(--col-ink);
     -unity-font-style: bold;
 }
 
-.card-field.hidden {
-    display: none;
-}
-
+/* Footer: heart-style coin + price · brass Buy button. */
 .card-footer {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px 0 12px;
-    margin-top: auto;
+    background-color: rgba(255, 255, 255, 0.0);
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    padding-top: 6px;
+    padding-bottom: 0;
+    border-top-width: 1px;
+    border-top-color: rgba(110, 78, 36, 0.35);
 }
 
 .card-price {
     flex-direction: row;
     align-items: center;
-    background-color: var(--col-parchment);
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: var(--col-parchment-edge);
-    padding: 4px 10px 4px 6px;
-    min-width: 64px;
+}
+
+.card-coin-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    background-color: rgb(232, 188, 96);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgb(150, 100, 28);
+    border-right-color:  rgb(150, 100, 28);
+    border-top-color:    rgb(150, 100, 28);
+    border-bottom-color: rgb(150, 100, 28);
+    border-radius: 50%;
 }
 
 .card-price-amount {
-    font-size: 14px;
+    color: rgb(46, 32, 22);
+    font-size: 16px;
     -unity-font-style: bold;
-    color: var(--col-ink);
+    letter-spacing: 1px;
 }
 
 .card-buy {
-    background-color: var(--col-buy);
-    color: rgb(255, 248, 232);
-    -unity-font-style: bold;
-    font-size: 14px;
-    border-radius: 10px;
-    border-width: 2px;
-    border-color: var(--col-wood-dark);
-    padding: 6px 18px;
-    margin: 0;
-    transition-property: background-color, translate;
-    transition-duration: 120ms;
-}
-
-.card-buy:hover {
-    background-color: var(--col-buy-hover);
-    translate: 0 -2px;
-}
-
-.card-buy:active {
-    background-color: var(--col-buy-press);
-    translate: 0 0;
-}
-
-.card-soldout {
+    color: rgb(46, 32, 22);
+    background-color: rgb(214, 178, 112);
+    background-image: none;
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(110, 78, 36, 0.65);
+    border-right-color:  rgba(110, 78, 36, 0.65);
+    border-top-color:    rgba(110, 78, 36, 0.65);
+    border-bottom-color: rgba(110, 78, 36, 0.65);
+    border-radius: 6px;
     font-size: 14px;
     -unity-font-style: bold;
-    color: var(--col-buy-press);
-    background-color: var(--col-parchment);
-    border-radius: 8px;
-    border-width: 2px;
-    border-color: var(--col-buy-press);
-    padding: 4px 14px;
     letter-spacing: 2px;
-    display: none;
-    rotate: -8deg;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    transition-property: background-color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+.card-buy:hover  { background-color: rgb(232, 196, 130); scale: 1.04 1.04; }
+.card-buy:active { background-color: rgb(190, 148, 70); translate: 0 1px; scale: 0.97 0.97; }
+.card-buy:disabled {
+    color: rgba(46, 32, 22, 0.35);
+    background-color: rgba(190, 148, 70, 0.35);
+    border-left-color:   rgba(110, 78, 36, 0.25);
+    border-right-color:  rgba(110, 78, 36, 0.25);
+    border-top-color:    rgba(110, 78, 36, 0.25);
+    border-bottom-color: rgba(110, 78, 36, 0.25);
 }
 
-.material-card.sold-out .card-buy {
-    display: none;
-}
+/* Sold-out: dim the art well, hide the buy button, reveal the stamp. */
+.material-card.sold-out .card-art    { opacity: 0.55; }
+.material-card.sold-out .card-buy    { display: none; }
+.material-card.sold-out .card-soldout { display: flex; }
 
-.material-card.sold-out .card-soldout {
-    display: flex;
-}
-
-/* ------------ footer ------------------------------------------------- */
+/* ── Footer (bottom bar) ────────────────────────────────────────────────── */
 .market-footer {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    height: 64px;
-    padding: 8px 16px;
-    background-color: var(--col-parchment-dark);
-    border-radius: 14px;
-    border-width: 2px;
-    border-color: var(--col-parchment-edge);
-    margin-top: 12px;
+    margin-left: 56px;
+    margin-right: 56px;
+    margin-bottom: 18px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: rgba(54, 32, 18, 0.65);
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(214, 178, 112, 0.45);
+    border-right-color:  rgba(214, 178, 112, 0.45);
+    border-top-color:    rgba(214, 178, 112, 0.45);
+    border-bottom-color: rgba(214, 178, 112, 0.45);
+    border-radius: 8px;
 }
 
 .market-status {
+    color: rgba(245, 230, 200, 0.85);
     font-size: 14px;
-    color: var(--col-ink-soft);
     -unity-font-style: italic;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 3px rgba(20, 12, 4, 0.85);
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    padding-left: 8px;
+    white-space: normal;
 }
 
 .market-proceed {
-    background-color: var(--col-buy);
-    color: rgb(255, 248, 232);
+    color: rgb(46, 32, 22);
+    background-color: rgb(214, 178, 112);
+    background-image: none;
+    border-left-width:   2px;
+    border-right-width:  2px;
+    border-top-width:    2px;
+    border-bottom-width: 2px;
+    border-left-color:   rgba(110, 78, 36, 0.65);
+    border-right-color:  rgba(110, 78, 36, 0.65);
+    border-top-color:    rgba(110, 78, 36, 0.65);
+    border-bottom-color: rgba(110, 78, 36, 0.65);
+    border-radius: 6px;
+    font-size: 18px;
     -unity-font-style: bold;
-    font-size: 16px;
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: var(--col-wood-dark);
-    padding: 10px 24px;
-    margin: 0;
-    letter-spacing: 1px;
-    transition-property: background-color, translate, opacity;
+    letter-spacing: 2px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    transition-property: background-color, scale, translate;
     transition-duration: 120ms;
+    transition-timing-function: ease-out;
 }
-
-.market-proceed:hover {
-    background-color: var(--col-buy-hover);
-    translate: 0 -2px;
-}
-
+.market-proceed:hover  { background-color: rgb(232, 196, 130); scale: 1.03 1.03; }
+.market-proceed:active { background-color: rgb(190, 148, 70); translate: 0 1px; scale: 0.98 0.98; }
 .market-proceed:disabled {
-    background-color: rgb(180, 160, 130);
-    color: rgb(230, 220, 200);
-    border-color: rgb(150, 130, 100);
-    opacity: 0.6;
+    color: rgba(46, 32, 22, 0.45);
+    background-color: rgba(190, 148, 70, 0.40);
+    border-left-color:   rgba(110, 78, 36, 0.30);
+    border-right-color:  rgba(110, 78, 36, 0.30);
+    border-top-color:    rgba(110, 78, 36, 0.30);
+    border-bottom-color: rgba(110, 78, 36, 0.30);
 }

@@ -1,0 +1,359 @@
+/* ==========================================================================
+   MorningScene.uss
+   Cozy magical-fantasy shop title-of-day screen.
+   Uses Assets/Texture/Morning Scene.png as the full-bleed background.
+   Foreground "leather + parchment + gold" HUD coheres with the warm
+   wood/amber tones of the painting.
+   Palette tokens are mirrored from DossierPanel/TitleScreen so the whole
+   game reads as one bound book.
+   ========================================================================== */
+
+/* ── Palette ────────────────────────────────────────────────────────────── */
+:root {
+    --parchment-base:    rgb(244, 229, 194);
+    --parchment-warm:    rgb(232, 213, 178);
+    --parchment-shadow:  rgb(217, 192, 150);
+    --parchment-edge:    rgb(190, 160, 112);
+    --ink-dark:          rgb(46, 32, 22);
+    --ink-soft:          rgb(86, 64, 44);
+    --ink-faded:         rgba(46, 32, 22, 0.55);
+    --gold-light:        rgb(201, 169, 110);
+    --gold-deep:         rgb(150, 116, 60);
+    --wood-deep:         rgb(62, 45, 31);
+    --wax-red:           rgb(122, 46, 31);
+    --wax-red-glow:      rgb(168, 70, 50);
+}
+
+/* ── Root ───────────────────────────────────────────────────────────────── */
+.root {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(28, 20, 14);
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
+    -unity-font-style: normal;
+    color: rgb(46, 32, 22);
+    font-size: 16px;
+}
+
+/* ── Background ─────────────────────────────────────────────────────────── */
+.background {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    -unity-background-scale-mode: scale-and-crop;
+    background-image: url("project://database/Assets/Texture/Morning%20Scene.png");
+}
+
+/* Soft amber vignette baked with thick borders, hugging the painted edges. */
+.vignette {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-left-width:   72px;
+    border-right-width:  72px;
+    border-top-width:    52px;
+    border-bottom-width: 60px;
+    border-left-color:   rgba(20, 12, 6, 0.32);
+    border-right-color:  rgba(20, 12, 6, 0.32);
+    border-top-color:    rgba(20, 12, 6, 0.20);
+    border-bottom-color: rgba(20, 12, 6, 0.45);
+}
+
+/* Almost-invisible warm scrim across the whole frame so parchment pops. */
+.scrim {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgba(36, 22, 12, 0.18);
+}
+
+/* ── Top-bar HUD ────────────────────────────────────────────────────────── */
+.top-bar {
+    position: absolute;
+    left: 36px;
+    right: 36px;
+    top: 28px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* ── Day badge (parchment plaque w/ gold corners) ──────────────────────── */
+.day-badge {
+    width: 132px;
+    height: 132px;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 6px;
+    padding: 8px 10px 10px 10px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.day-label {
+    -unity-text-align: middle-center;
+    color: rgb(122, 46, 31);
+    font-size: 18px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    margin-bottom: 2px;
+}
+
+.day-number {
+    -unity-text-align: middle-center;
+    color: rgb(46, 32, 22);
+    font-size: 64px;
+    -unity-font-style: bold;
+    letter-spacing: 0;
+    margin-top: -4px;
+    margin-bottom: -4px;
+    text-shadow: 1px 1px 0 rgba(110, 78, 36, 0.35);
+}
+
+.day-subtle {
+    -unity-text-align: middle-center;
+    color: rgba(46, 32, 22, 0.6);
+    font-size: 14px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+}
+
+/* Tiny gold corner flourishes on the day plaque. */
+.badge-corner {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(150, 116, 60);
+    border-color: rgb(46, 32, 22);
+    border-width: 1px;
+    border-radius: 2px;
+}
+.badge-corner--tl { left: 6px;  top: 6px; }
+.badge-corner--tr { right: 6px; top: 6px; }
+.badge-corner--bl { left: 6px;  bottom: 6px; }
+.badge-corner--br { right: 6px; bottom: 6px; }
+
+/* ── Gold purse (right side) ───────────────────────────────────────────── */
+.gold-badge {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 30px;
+    padding: 8px 22px 8px 14px;
+    min-height: 52px;
+}
+
+.coin-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: rgb(201, 169, 110);
+    border-color: rgb(122, 90, 42);
+    border-width: 2px;
+    margin-right: 10px;
+}
+
+.gold-number {
+    color: rgb(46, 32, 22);
+    font-size: 28px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.gold-unit {
+    color: rgb(150, 116, 60);
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-left: 3px;
+    margin-top: 6px;
+}
+
+/* ── Letter parchment ──────────────────────────────────────────────────── */
+.letter-stage {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.letter-panel {
+    width: 820px;
+    max-width: 84%;
+    height: 760px;
+    max-height: 86%;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 3px;
+    border-radius: 6px;
+    padding: 40px 44px 36px 44px;
+    flex-direction: column;
+    overflow: hidden;
+    /* Dropped paper feel — soft warm glow around the panel. */
+    box-shadow: 0 12px 32px rgba(10, 6, 2, 0.55);
+}
+
+.parchment-inner-border {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+/* Gold corner ornaments on the parchment. */
+.gold-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: rgb(201, 169, 110);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 4px;
+    rotate: 45deg;
+}
+.gold-corner--tl { left: -6px;   top: -6px; }
+.gold-corner--tr { right: -6px;  top: -6px; }
+.gold-corner--bl { left: -6px;   bottom: -6px; }
+.gold-corner--br { right: -6px;  bottom: -6px; }
+
+/* ── Letter header ─────────────────────────────────────────────────────── */
+.letter-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.wax-seal {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: rgb(122, 46, 31);
+    border-color: rgb(46, 18, 12);
+    border-width: 3px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 18px;
+    /* Subtle inner gold ring via shadow */
+    box-shadow: 0 2px 4px rgba(10, 6, 2, 0.45);
+}
+
+.wax-seal-glyph {
+    -unity-text-align: middle-center;
+    color: rgb(232, 200, 140);
+    font-size: 26px;
+    -unity-font-style: bold;
+}
+
+.letter-header-text {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.subject-text {
+    color: rgb(46, 32, 22);
+    font-size: 28px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    white-space: normal;
+    margin-bottom: 2px;
+}
+
+.from-text {
+    color: rgba(86, 64, 44, 0.85);
+    font-size: 15px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    white-space: normal;
+}
+
+/* Decorative ink rule under the header. */
+.header-rule {
+    height: 1px;
+    background-color: rgba(46, 32, 22, 0.35);
+    margin-top: 10px;
+    margin-bottom: 14px;
+}
+
+/* ── Body ───────────────────────────────────────────────────────────────── */
+.body-scroll {
+    flex-grow: 1;
+}
+
+/* Hide ScrollView's default chrome — we just want the paged content. */
+.body-scroll #unity-content-and-vertical-scroll-container { background-color: rgba(0,0,0,0); }
+.body-scroll .unity-scroller--vertical                    { background-color: rgba(0,0,0,0); width: 6px; }
+.body-scroll .unity-base-slider__tracker                  { background-color: rgba(46, 32, 22, 0.10); border-radius: 3px; }
+.body-scroll .unity-base-slider__dragger                  { background-color: rgba(150, 116, 60, 0.55); border-radius: 3px; border-width: 0; }
+
+.body-text {
+    color: rgb(62, 45, 31);
+    font-size: 24px;
+    -unity-font-style: normal;
+    white-space: normal;
+    -unity-paragraph-spacing: 10px;
+    letter-spacing: 0.5px;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 36px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hint-label {
+    color: rgba(244, 229, 194, 0.55);
+    font-size: 13px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.continue-button {
+    -unity-text-align: middle-center;
+    color: rgb(244, 229, 194);
+    background-color: rgb(122, 46, 31);
+    background-image: none;
+    border-color: rgb(46, 18, 12);
+    border-width: 2px;
+    border-radius: 4px;
+    padding: 10px 36px 10px 36px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    transition-property: color, background-color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+
+.continue-button:hover {
+    background-color: rgb(168, 70, 50);
+    color: rgb(255, 240, 210);
+    scale: 1.03 1.03;
+}
+
+.continue-button:focus {
+    background-color: rgb(168, 70, 50);
+    color: rgb(255, 240, 210);
+}
+
+.continue-button:active {
+    background-color: rgb(96, 30, 20);
+    translate: 0 2px;
+    scale: 0.98 0.98;
+}
+
+/* Hidden state — controller toggles `is-hidden` on continue while typing. */
+.is-hidden {
+    display: none;
+}

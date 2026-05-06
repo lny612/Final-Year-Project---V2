@@ -12,33 +12,46 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class MemoCardUI : MonoBehaviour
 {
+    // TODO-EDITOR: 4th memo row (Reinforcement)
+    //   The dossier scene now writes a 4th memo entry: "What must it
+    //   reinforce — what must it conceal?". Add a 4th TMP_Text label/value
+    //   pair under this card's Canvas hierarchy and drop them into the
+    //   `reinforcementLabel` / `reinforcementText` fields. (The UI Toolkit
+    //   memo card in MaterialMarket.uxml is already updated with the 4th
+    //   slot — this Inspector wiring is only needed for the legacy uGUI
+    //   fallback in MaterialGeneratorTest scene.)
     [Header("Slot Values (player's committed words)")]
-    public TMP_Text purposeText;
-    public TMP_Text personalityText;
     public TMP_Text elementText;
+    public TMP_Text personalityText;
+    public TMP_Text purposeText;
+    public TMP_Text reinforcementText;
 
     [Header("Slot Labels (question prompts)")]
     [Tooltip("Editable so the question wording can be tuned in-scene without a code change.")]
-    public TMP_Text purposeLabel;
-    public TMP_Text personalityLabel;
     public TMP_Text elementLabel;
+    public TMP_Text personalityLabel;
+    public TMP_Text purposeLabel;
+    public TMP_Text reinforcementLabel;
 
     private const string PLACEHOLDER = "—";
-    private const string DEFAULT_PURPOSE_LABEL     = "What do they really want?";
-    private const string DEFAULT_PERSONALITY_LABEL = "What temperament hides beneath?";
-    private const string DEFAULT_ELEMENT_LABEL     = "What element calls to them?";
+    private const string DEFAULT_ELEMENT_LABEL       = "What element calls to them?";
+    private const string DEFAULT_PERSONALITY_LABEL   = "What temperament hides beneath?";
+    private const string DEFAULT_PURPOSE_LABEL       = "What purpose does the wand carry?";
+    private const string DEFAULT_REINFORCEMENT_LABEL = "What must it reinforce — what must it conceal?";
 
     private void Awake()
     {
-        if (purposeLabel     != null && string.IsNullOrEmpty(purposeLabel.text))     purposeLabel.text     = DEFAULT_PURPOSE_LABEL;
-        if (personalityLabel != null && string.IsNullOrEmpty(personalityLabel.text)) personalityLabel.text = DEFAULT_PERSONALITY_LABEL;
-        if (elementLabel     != null && string.IsNullOrEmpty(elementLabel.text))     elementLabel.text     = DEFAULT_ELEMENT_LABEL;
+        if (elementLabel       != null && string.IsNullOrEmpty(elementLabel.text))       elementLabel.text       = DEFAULT_ELEMENT_LABEL;
+        if (personalityLabel   != null && string.IsNullOrEmpty(personalityLabel.text))   personalityLabel.text   = DEFAULT_PERSONALITY_LABEL;
+        if (purposeLabel       != null && string.IsNullOrEmpty(purposeLabel.text))       purposeLabel.text       = DEFAULT_PURPOSE_LABEL;
+        if (reinforcementLabel != null && string.IsNullOrEmpty(reinforcementLabel.text)) reinforcementLabel.text = DEFAULT_REINFORCEMENT_LABEL;
     }
 
     public void Populate(PlayerMemo memo)
     {
-        if (purposeText     != null) purposeText.text     = memo != null && !string.IsNullOrEmpty(memo.purpose)     ? memo.purpose     : PLACEHOLDER;
-        if (personalityText != null) personalityText.text = memo != null && !string.IsNullOrEmpty(memo.personality) ? memo.personality : PLACEHOLDER;
-        if (elementText     != null) elementText.text     = memo != null && !string.IsNullOrEmpty(memo.element)     ? memo.element     : PLACEHOLDER;
+        if (elementText       != null) elementText.text       = memo != null && !string.IsNullOrEmpty(memo.element)       ? memo.element       : PLACEHOLDER;
+        if (personalityText   != null) personalityText.text   = memo != null && !string.IsNullOrEmpty(memo.personality)   ? memo.personality   : PLACEHOLDER;
+        if (purposeText       != null) purposeText.text       = memo != null && !string.IsNullOrEmpty(memo.purpose)       ? memo.purpose       : PLACEHOLDER;
+        if (reinforcementText != null) reinforcementText.text = memo != null && !string.IsNullOrEmpty(memo.reinforcement) ? memo.reinforcement : PLACEHOLDER;
     }
 }

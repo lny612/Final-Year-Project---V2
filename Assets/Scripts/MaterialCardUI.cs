@@ -112,15 +112,30 @@ public class MaterialCardUI : MonoBehaviour
 
     public void SetImage(Texture2D tex)
     {
-        if (materialImage != null)
+        if (materialImage == null) return;
+
+        materialImage.texture = tex;
+        materialImage.gameObject.SetActive(true);
+
+        // Our own GameObject must be active to host the fade coroutine. Cards
+        // are sometimes constructed inactive then activated by the layout pass.
+        if (!gameObject.activeSelf) gameObject.SetActive(true);
+
+        var c = materialImage.color;
+        if (gameObject.activeInHierarchy)
         {
-            materialImage.texture = tex;
-            materialImage.gameObject.SetActive(true);
-            // Start transparent, fade in over placeholder
-            var c = materialImage.color;
             c.a = 0f;
             materialImage.color = c;
             StartCoroutine(CrossfadeImage());
+        }
+        else
+        {
+            // Parent inactive (legacy uGUI canvas disabled, or off-screen list).
+            // Skip the fade — snap to opaque so the texture is visible the moment
+            // the parent activates.
+            c.a = 1f;
+            materialImage.color = c;
+            if (placeholder != null) placeholder.gameObject.SetActive(false);
         }
     }
 

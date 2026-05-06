@@ -550,6 +550,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   document: {fileID: 695895384}
+  backgroundImage: {fileID: 2800000, guid: dfec2145014ec0647a5ce2d557f9d76f, type: 3}
+  titleFont: {fileID: 12800000, guid: 77a0e6cb5ed4ae14792e71f6b91c7c0a, type: 3}
+  buttonFont: {fileID: 12800000, guid: 5c76cf80eff3bdc499bde58391db7c75, type: 3}
   gameTitle: 'The Wand
 
     Atelier'
@@ -1032,7 +1035,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!223 &1045599816
 Canvas:
   m_ObjectHideFlags: 0
@@ -1379,6 +1382,15 @@ MonoBehaviour:
     purpose: 
     personality: 
     element: 
+  pendingCustomer:
+    customerName: 
+    schoolOfMagic: 
+    profession: 
+    personality: 
+    request: 
+    trueGoal: 
+    constraint: 
+  pendingCustomerInProgress: 0
   availableMaterials: []
   inventory: []
   playerGold: 500
@@ -1390,6 +1402,35 @@ MonoBehaviour:
     imagePrompt: 
     wandImage: {fileID: 0}
   craftingQualityGrade: 65
+  chosenCore1:
+    materialType: 
+    name: 
+    price: 0
+    imagePrompt: 
+    attributes: 
+    personalityMatch: 
+    elementalAffinity: 
+    special: 
+  chosenCore2:
+    materialType: 
+    name: 
+    price: 0
+    imagePrompt: 
+    attributes: 
+    personalityMatch: 
+    elementalAffinity: 
+    special: 
+  chosenWood:
+    materialType: 
+    name: 
+    price: 0
+    imagePrompt: 
+    attributes: 
+    personalityMatch: 
+    elementalAffinity: 
+    special: 
+  lastMinigameRoundsWon: 0
+  lastMatchScore: 0
   currentDay: 1
   peakReputation: 0
   wandsCrafted: 0
