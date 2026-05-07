@@ -64,8 +64,12 @@
 
             <!-- RIGHT scrollable cards. Woods are visible at scene load; cores
                  stay hidden until the player buys a wood (then MaterialMarketUI
-                 toggles the `hidden` class on `cat-cores` + `core-row`). -->
-            <ui:ScrollView name="market-cards" class="market-cards">
+                 toggles the `hidden` class on `cat-cores` + `core-row`).
+                 Horizontal scrolling is disabled — the three cards fit the
+                 row width without overflow. -->
+            <ui:ScrollView name="market-cards" class="market-cards"
+                           horizontal-scroller-visibility="Hidden"
+                           vertical-scroller-visibility="Auto">
                 <ui:VisualElement name="wood-row" class="market-card-row" />
                 <ui:VisualElement name="core-row" class="market-card-row hidden" />
             </ui:ScrollView>

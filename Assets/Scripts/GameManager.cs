@@ -81,6 +81,16 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public int  lettersReceived    = 0;
     [HideInInspector] public bool bankruptedOnDay3   = false;
 
+    // Snapshot of playerGold at the moment the prior day's evaluation began
+    // (after market spending, before the wand reward is applied). The morning
+    // scene uses this as the starting value for the gold-counter animation.
+    // Day 1 leaves it at 0 so the opening 0 → 500 anim plays.
+    [HideInInspector] public int  goldAtMorningStart = 0;
+
+    // Per-day reputation delta from the prior evaluation. Drives the heart-
+    // burst particle count on the next morning's letter (day 2+).
+    [HideInInspector] public int  lastDayRepEarned   = 0;
+
     // ── Unity lifecycle ────────────────────────────────────────────
 
     private void Awake()
@@ -202,6 +212,8 @@ public class GameManager : MonoBehaviour
         wandsCrafted         = 0;
         lettersReceived      = 0;
         bankruptedOnDay3     = false;
+        goldAtMorningStart   = 0;
+        lastDayRepEarned     = 0;
     }
 
     // ── Editor-only dev shortcuts (speed up testing without 7 playthroughs) ─

@@ -106,10 +106,19 @@ public class EvaluationManager : MonoBehaviour
         // Rewards (quality grade from tracing minigame scales rewards)
         float qualityMult    = GetQualityMultiplier(
             GameManager.Instance?.craftingQualityGrade ?? 'A');
-        int goldEarned       = Mathf.RoundToInt(150 * (matchScore / 100f) * qualityMult);
+        int goldEarned       = Mathf.RoundToInt(500 * (matchScore / 100f) * qualityMult);
         int reputationChange = matchScore >= 40
                                ? Mathf.RoundToInt(20 * (matchScore / 100f) * qualityMult)
                                : -10;
+
+        // Snapshot pre-reward gold and the rep delta so the next morning scene
+        // can animate the gold counter from this value to playerGold and burst
+        // hearts proportional to today's reputation gain.
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.goldAtMorningStart = GameManager.Instance.playerGold;
+            GameManager.Instance.lastDayRepEarned   = reputationChange;
+        }
 
         GameManager.Instance?.AddGold(goldEarned);
         if (GameManager.Instance != null)

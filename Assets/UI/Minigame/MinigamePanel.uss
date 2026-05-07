@@ -26,7 +26,7 @@
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights%20SDF%201.asset");
     color: rgb(244, 229, 194);
     font-size: 14px;
 }

@@ -29,7 +29,7 @@
     position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
     background-color: rgb(28, 20, 14);
-    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights%20SDF%201.asset");
     -unity-font-style: normal;
     color: rgb(46, 32, 22);
     font-size: 16px;

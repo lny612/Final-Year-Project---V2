@@ -279,6 +279,7 @@ public class MaterialGenerator : MonoBehaviour
         GameManager.Instance.AddToInventory(mat);
         _orderedSoldOut[idx] = true;
         marketUI.MarkSoldOut(idx);
+        AudioManager.Instance?.PlayPurchase();
 
         if (!isCore)
         {

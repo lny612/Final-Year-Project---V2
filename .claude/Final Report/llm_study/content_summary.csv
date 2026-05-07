@@ -1,0 +1,2 @@
+n,unique_schools,school_distribution,school_chi2_uniform,school_chi2_dof,unique_professions,unique_profession_pct,request_ttr_mean,request_ttr_stdev,dossier_chars_mean,dossier_chars_stdev,material_parse_pct,material_well_formed_pct
+50,7,Aeromancy=1; Aetherial magic=1; Chronomancy=1; Cryomancy=1; Geomancy=17; Necromancy=2; Pyromancy=27,93.64,6,50,100.0,0.936,0.044,426.6,32.2,94.0,83.0

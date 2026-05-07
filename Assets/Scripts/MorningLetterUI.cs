@@ -64,7 +64,7 @@ public class MorningLetterUI : MonoBehaviour
         int day = gm != null ? gm.currentDay : 1;
         int rep = gm != null ? gm.playerReputation : 0;
 
-        _main = LetterLibrary.GetMorningLetter(day, LetterLibrary.GetRepTier(rep));
+        _main = LetterLibrary.GetMorningLetter(day, LetterLibrary.GetRepTier(rep, day));
 
         // Rent-due mornings queue a second landlord letter after the main one.
         if (gm != null && System.Array.IndexOf(GameManager.RENT_DUE_DAYS, day) >= 0)

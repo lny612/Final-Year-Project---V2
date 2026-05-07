@@ -140,6 +140,11 @@ public class TracingMinigameUI : MonoBehaviour
     // GC hit happens off the round-start frame.
     private Sprite _cachedTrailSprite;
 
+    // Procedurally-generated soft circle used as the Hold-gate fill so the
+    // green overlay grows as a circle instead of a square. Built once on
+    // first hold-gate creation and reused for the rest of the run.
+    private Sprite _cachedCircleSprite;
+
     // Per-gate tuning constants
     private const float HOLD_GATE_DURATION  = 0.9f; // seconds the player must hold the key
     private const float HOLD_FILL_MAX_SIZE  = 32f;  // px at HoldProgress = 1
@@ -279,6 +284,7 @@ public class TracingMinigameUI : MonoBehaviour
 
         _cursor.SetActive(true);
         _mist.SetActive(true);
+        AudioManager.Instance?.StartTracingLoop();
 
         int lastClearedGate = -1;
 
@@ -296,6 +302,7 @@ public class TracingMinigameUI : MonoBehaviour
                 lastClearedGate++;
                 if (lastClearedGate < _gateMarkers.Count)
                     _gateMarkers[lastClearedGate].color = gateClearedColor;
+                AudioManager.Instance?.PlayGateClear();
             }
 
             // Active-gate visual feedback — pulse for Tap/Accent, fill ring for Hold.
@@ -338,6 +345,7 @@ public class TracingMinigameUI : MonoBehaviour
 
         _cursor.SetActive(false);
         _mist.SetActive(false);
+        AudioManager.Instance?.StopTracingLoop();
 
         if (won)
         {
@@ -508,7 +516,7 @@ public class TracingMinigameUI : MonoBehaviour
             _gateMarkers.Add(img);
             _gateBaseColors.Add(baseColor);
 
-            // 3. Hold-fill overlay (inner green square, grows as Hold progresses).
+            // 3. Hold-fill overlay (inner green CIRCLE, grows as Hold progresses).
             Image holdFill = null;
             if (type == GateType.Hold)
             {
@@ -524,6 +532,9 @@ public class TracingMinigameUI : MonoBehaviour
                 holdFill = fillGo.GetComponent<Image>();
                 holdFill.color = new Color(0.3f, 1f, 0.3f, 0.85f);
                 holdFill.raycastTarget = false;
+                holdFill.sprite = GetCircleSprite();
+                holdFill.type   = Image.Type.Simple;
+                holdFill.preserveAspect = true;
             }
             _holdFills.Add(holdFill);
 
@@ -545,9 +556,10 @@ public class TracingMinigameUI : MonoBehaviour
 
             var label = labelGo.AddComponent<TextMeshProUGUI>();
             if (gateFont != null) label.font = gateFont;
-            string text = keys[i].ToString();
-            if (type == GateType.Accent) text += DirectionToArrow(accentDirs[i]);
-            label.text = text;
+            // Accent gates get the chevron sprite + magenta line *on the gate
+            // medallion* — the keyboard letter alone is shown in the label,
+            // no Unicode arrow suffix.
+            label.text = keys[i].ToString();
             label.fontSize = gateLabelFontSize;
             label.fontStyle = FontStyles.Bold;
             label.alignment = TextAlignmentOptions.Center;
@@ -559,11 +571,22 @@ public class TracingMinigameUI : MonoBehaviour
             _gateLabels.Add(label);
         }
 
-        // Endpoint plaque — drawn at the path's last point if a sprite is wired.
+        // Endpoint plaque — drawn near the path's last point if a sprite is wired.
         // Sits ON TOP of the path/gates so it reads as the destination marker.
+        // Pulled BACK along the trail tangent so the plaque overlaps the trail
+        // end by ~50% of its size — without this the plaque sits in empty space
+        // a noticeable distance past where the trail visually ends.
         if (endpointPlaqueSprite != null && path.Length > 0)
         {
             Vector2 endPos = path[path.Length - 1];
+            if (path.Length >= 2)
+            {
+                Vector2 tangent = (endPos - path[path.Length - 2]);
+                if (tangent.sqrMagnitude > 0.0001f)
+                {
+                    endPos -= tangent.normalized * (endpointPlaqueSize * 0.5f);
+                }
+            }
 
             var go = new GameObject("EndpointPlaque", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(minigamePanel.transform, false);
@@ -959,23 +982,54 @@ public class TracingMinigameUI : MonoBehaviour
         return dirs;
     }
 
-    /// <summary>Convert a unit direction vector to the matching Unicode arrow character (with leading space).</summary>
-    private static string DirectionToArrow(Vector2 dir)
+    /// <summary>
+    /// Build (and cache) a soft circular sprite used by the Hold-gate fill so
+    /// it grows as a circle rather than a square. The radial alpha falloff
+    /// gives the fill a subtle glow at its edge.
+    /// </summary>
+    private Sprite GetCircleSprite()
     {
-        if (dir.sqrMagnitude < 0.0001f) return string.Empty;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        int octant = Mathf.RoundToInt(((angle + 360f) % 360f) / 45f) % 8;
-        return octant switch
+        if (_cachedCircleSprite != null) return _cachedCircleSprite;
+
+        const int size = 64;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
         {
-            0 => " →",  // →  E
-            1 => " ↗",  // ↗  NE
-            2 => " ↑",  // ↑  N
-            3 => " ↖",  // ↖  NW
-            4 => " ←",  // ←  W
-            5 => " ↙",  // ↙  SW
-            6 => " ↓",  // ↓  S
-            7 => " ↘",  // ↘  SE
-            _ => " →"
+            filterMode = FilterMode.Bilinear,
+            wrapMode   = TextureWrapMode.Clamp,
+            hideFlags  = HideFlags.DontSave,
         };
+        var pixels = new Color32[size * size];
+        float radius = size * 0.5f;
+        float radiusSqr = radius * radius;
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            float dx = x - radius + 0.5f;
+            float dy = y - radius + 0.5f;
+            float dSqr = dx * dx + dy * dy;
+            byte a;
+            if (dSqr >= radiusSqr) { a = 0; }
+            else
+            {
+                // 1.0 at center, smooth falloff at the rim for a slight glow.
+                float t = Mathf.Sqrt(dSqr) / radius;          // 0..1
+                float alpha = Mathf.Clamp01(1f - Mathf.SmoothStep(0.85f, 1f, t));
+                a = (byte)Mathf.RoundToInt(alpha * 255f);
+            }
+            pixels[y * size + x] = new Color32(255, 255, 255, a);
+        }
+        tex.SetPixels32(pixels);
+        tex.Apply(false, true);
+
+        _cachedCircleSprite = Sprite.Create(
+            tex,
+            new Rect(0, 0, size, size),
+            new Vector2(0.5f, 0.5f),
+            100f,
+            0,
+            SpriteMeshType.FullRect);
+        _cachedCircleSprite.hideFlags = HideFlags.DontSave;
+        return _cachedCircleSprite;
     }
+
 }

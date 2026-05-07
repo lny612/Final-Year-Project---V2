@@ -1,0 +1,3 @@
+cost_per_call_usd,latency_mean_ms,latency_p50_ms,latency_p95_ms,latency_stdev_ms,n,operation,peak_vram_mib
+0.004,2781.6,2561.3,3998.5,1126.6,30,openai_customer,5445
+0.0,2589.7,2047.7,2082.2,2976.4,30,comfyui_image,7838

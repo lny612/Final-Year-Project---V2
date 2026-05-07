@@ -20,8 +20,11 @@
 > - **`OnNextCustomer()` sets `bankruptedOnDay3` inside `RentPaymentUI`** rather than at the `EvaluationManager` call site (cleaner separation; the call site just calls `GoToEnding()` with no parameter).
 > - **`LetterSender` enum is now**: `{ Neighbor, Customer, Aristocrat, Royal, Brigand, Landlord, Aunt, Rival }`.
 >
+> **🔁 Diverged from plan (illustration loading):**
+> - **Ending illustrations are now Inspector-wired**, not loaded by `Resources.Load`. The 5 PNGs (`Royal Ending.png`, `Rival Ending.png`, `Slum Ending.png`, `Bankrupt Early Ending.png`, `Bankrupt Late Ending.png`) live in `Assets/Texture/Ending Illustrations/` (1024×640, ink-and-watercolour storybook style). `EndingManager` exposes 5 `Texture2D` slots (`royalArt`/`rivalArt`/`slumArt`/`bankruptEarlyArt`/`bankruptLateArt`) under an "Ending Illustrations" header. The original `Resources/EndingArt/` lookup is kept as a fallback only.
+>
 > **❌ Not yet shipped:**
-> - **Ending illustrations.** `Assets/Resources/EndingArt/` does NOT exist. `EndingManager` has a graceful fallback to a tinted placeholder canvas, but the four PNGs (`Royal.png`, `Rival.png`, `Slum.png`, `Bankrupt.png`) still need to be generated via ComfyUITest and dropped into the folder.
+> - **Inspector wiring on `EndingScene.unity`.** The 5 PNGs are imported but the slots on `EndingManager` are still empty — drag each file from `Assets/Texture/Ending Illustrations/` into its matching slot, then save the scene. Until wired, each ending falls through to the tinted-placeholder canvas with a console warning.
 
 ## Context
 
@@ -40,7 +43,7 @@ Day 1 (intro letter) → 2 → 3 [RENT 250g] → 4 → 5 → 6 [RENT 400g] → 7
 
 **Design decisions already confirmed:**
 1. Letters are **pre-authored static** (hardcoded in `LetterLibrary.cs`), picked by reputation tier and day
-2. Ending illustrations are **pre-generated once via ComfyUI** and shipped as PNGs in `Assets/Resources/EndingArt/`
+2. Ending illustrations are **pre-generated once** and shipped as PNGs in `Assets/Texture/Ending Illustrations/`, wired to `EndingManager` via Inspector Texture2D slots (legacy `Resources/EndingArt/` path retained as a fallback)
 3. Day progress shows as **calendar dots** (● ● ● ○ ○ ○ ○) at top of evaluation screen, with 💰 icons above days 3 and 6
 
 ---
@@ -159,7 +162,7 @@ Pure static class — no MonoBehaviour, no assets (avoids `.asset` file-safety b
 
 ```csharp
 public enum LetterSender { Neighbor, Customer, Aristocrat, Royal, Brigand, Landlord }
-public enum RepTier { Low, Mid, High }  // <30 / 30-89 / ≥90
+public enum RepTier { Low, Mid, High }  // day-scaled — see GetRepTier table below
 
 public struct LetterContent {
     public LetterSender sender;
@@ -171,8 +174,22 @@ public struct LetterContent {
 public static class LetterLibrary {
     public static LetterContent GetMorningLetter(int day, RepTier tier);
     public static LetterContent GetRentReminder(int day, int amount);
+    public static RepTier GetRepTier(int reputation, int day); // day-scaled (2026-05-06)
 }
 ```
+
+**Day-scaled tier thresholds** (since 2026-05-06): the original flat `<30 / 30-89 / ≥90` cutoff matched the endgame Rival/Royal bar but left day 2 stuck on Low even after a perfect day 1 (per-day rep gain caps at ~+20). `GetRepTier(rep, day)` now uses a per-day curve:
+
+| Day | High ≥ | Mid ≥ |
+|-----|--------|-------|
+| 2   | 15     | 5     |
+| 3   | 32     | 12    |
+| 4   | 50     | 20    |
+| 5   | 65     | 28    |
+| 6   | 80     | 36    |
+| 7   | 90     | 45    |
+
+Day 7's High bar = `ROYAL_REP_MIN` (90) so the final-morning letter stays consistent with the Royal ending verdict. Endgame thresholds (`ROYAL_REP_MIN`/`RIVAL_REP_MIN`) are separate and unchanged — those read `peakReputation` over the whole run; letter tiers classify trajectory *at that point*.
 
 Content table:
 | Day | Low tier | Mid tier | High tier |
@@ -245,22 +262,30 @@ Scene controller for `EndingScene`. Reads `GameManager.DetermineEnding()` and `G
 public enum EndingType { Royal, Rival, Slum, BankruptEarly, BankruptLate }
 
 public class EndingManager : MonoBehaviour {
-    public RawImage illustration;         // populated from Resources
+    public RawImage illustration;         // assigned the chosen Texture2D at runtime
     public TMP_Text endingTitle;
     public TypewriterText dialogueTypewriter;
     public TMP_Text statsText;            // "Days survived: 7 · Letters: 8 · Peak rep: 112"
     public Button restartButton;
     public CanvasGroup fader;             // for 1.5s fade-in
-    // Start(): determine ending, load Resources.Load<Texture2D>($"EndingArt/{type}"),
-    //          fade canvas from black, play dialogue typewriter, show stats, enable restart.
+
+    // Inspector-wired ending illustrations (one per ending).
+    public Texture2D royalArt, rivalArt, slumArt, bankruptEarlyArt, bankruptLateArt;
+
+    // Start(): determine ending, pick the matching Texture2D from the 5 slots
+    //          (fallback: Resources.Load<Texture2D>($"EndingArt/{name}") if slot empty,
+    //          then a tinted placeholder), fade canvas from black, play dialogue
+    //          typewriter, show stats, enable restart.
     // Restart button: reset GameManager state to day 1, load SCENE_MORNING.
 }
 ```
 
 Ending dialogue lines are static strings inside `EndingManager.cs` (4 endings × ~6 lines each = trivial).
 
-### `Assets/Resources/EndingArt/` — **NEW folder**
-Four PNGs: `Royal.png`, `Rival.png`, `Slum.png`, `Bankrupt.png`. Generated once via `ComfyUITest` scene with prompts baked into a dev-time helper (or generated externally). Shipped with the project. Loaded via `Resources.Load<Texture2D>("EndingArt/Royal")`.
+### `Assets/Texture/Ending Illustrations/` — **art folder (shipped 2026-05-07)**
+Five PNGs: `Royal Ending.png`, `Rival Ending.png`, `Slum Ending.png`, `Bankrupt Early Ending.png`, `Bankrupt Late Ending.png`. Generated externally at 1024×640 (8:5) in an ink-and-watercolour storybook style to match `Assets/UI references/Image Style/Portrait style reference 2.png`. Each PNG is wired into `EndingManager` via a dedicated Inspector `Texture2D` slot (`royalArt` / `rivalArt` / `slumArt` / `bankruptEarlyArt` / `bankruptLateArt`).
+
+The original `Assets/Resources/EndingArt/{Royal,Rival,Slum,Bankrupt}.png` path is retained as a runtime fallback in case a slot is empty, but it is no longer the primary source.
 
 ---
 
@@ -346,7 +371,7 @@ Exact TODO-EDITOR text will be in the source files.
 3. **Evaluation-scene changes** — `DayProgressUI`, `RentPaymentUI`, `EvaluationManager` hook edits
 4. **Morning scene** — `MorningLetterUI` + scene setup TODO
 5. **Ending scene** — `EndingManager` + scene setup TODO
-6. **Art prep** — generate 4 ending PNGs via ComfyUITest scene, save to `Assets/Resources/EndingArt/`
+6. **Art prep** — generate 5 ending PNGs at 1024×640 in an ink-and-watercolour storybook style, save to `Assets/Texture/Ending Illustrations/`, then drag each into the matching Inspector slot on `EndingManager` in `7.EndingScene.unity`
 
 Each step compiles and runs standalone — no big-bang merge.
 
@@ -361,7 +386,7 @@ Each step compiles and runs standalone — no big-bang merge.
 - `Assets/Scripts/DayProgressUI.cs`
 - `Assets/Scripts/RentPaymentUI.cs`
 - `Assets/Scripts/EndingManager.cs`
-- `Assets/Resources/EndingArt/{Royal,Rival,Slum,Bankrupt}.png` (image assets, user-generated via ComfyUITest)
+- `Assets/Texture/Ending Illustrations/{Royal,Rival,Slum,Bankrupt Early,Bankrupt Late} Ending.png` (image assets, externally generated at 1024×640, wired via `EndingManager` Inspector slots)
 
 **Modify:**
 - `Assets/Scripts/GameManager.cs` — add fields + methods listed above (no existing-behavior changes)

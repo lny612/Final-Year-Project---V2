@@ -57,6 +57,25 @@ public class MorningScreenController : MonoBehaviour
     [Tooltip("KSampler node ID in image_z_image_turbo.json.")]
     public string ksamplerNodeId = MaterialService.DefaultKSamplerNodeId;
 
+    [Header("Polish FX")]
+    [Tooltip("Seconds the gold-counter takes to count from goldAtMorningStart to playerGold.")]
+    public float goldCountDuration = 1.2f;
+
+    [Tooltip("Easing curve applied to the gold-counter t parameter (0..1).")]
+    public AnimationCurve goldCountEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
+    [Tooltip("Tint of the placeholder heart particles bursting from the letter on day 2+.")]
+    public Color heartColor = new Color(0.93f, 0.31f, 0.45f, 1f);
+
+    [Tooltip("Lifetime of each heart particle (lerps position + fades out + scales up over this duration).")]
+    public float heartBurstDuration = 0.9f;
+
+    [Tooltip("Pixel size of the placeholder heart label.")]
+    public float heartFontSize = 36f;
+
+    [Tooltip("Maximum stagger applied across the spawned hearts so they read as a burst, not a single frame.")]
+    public float heartBurstStagger = 0.25f;
+
     [Header("Seal colors per sender type")]
     public Color sealNeighbor   = new Color(0.95f, 0.88f, 0.72f);
     public Color sealCustomer   = new Color(0.82f, 0.55f, 0.35f);
@@ -86,6 +105,9 @@ public class MorningScreenController : MonoBehaviour
     private bool          _typing;
     private bool          _skipRequested;
     private Coroutine     _typeRoutine;
+    private Coroutine     _goldRoutine;
+    private VisualElement _heartLayer;
+    private VisualElement _letterPanel;
 
     private void OnEnable() => Bootstrap();
 
@@ -111,6 +133,7 @@ public class MorningScreenController : MonoBehaviour
         _hintLabel      = _root.Q<Label>("hintLabel");
         _waxSeal        = _root.Q<VisualElement>("waxSeal");
         _continueButton = _root.Q<Button>("continueButton");
+        _letterPanel    = _root.Q<VisualElement>("letterPanel");
 
         if (_continueButton != null)
         {
@@ -125,9 +148,20 @@ public class MorningScreenController : MonoBehaviour
 
         if (_dayNumber  != null) _dayNumber.text  = day.ToString();
         if (_daySubtle  != null) _daySubtle.text  = $"of {GameManager.TOTAL_DAYS}";
-        if (_goldNumber != null) _goldNumber.text = gold.ToString();
 
-        _main = LetterLibrary.GetMorningLetter(day, LetterLibrary.GetRepTier(rep));
+        // Animate the gold counter from the snapshot taken in EvaluationManager
+        // (right before the wand reward was applied) up to the current balance.
+        // Day 1 has no prior snapshot so goldAtMorningStart = 0 and this plays
+        // the opening 0 → 500 anim. Runs in parallel with the letter typewriter.
+        int goldStart = gm != null ? gm.goldAtMorningStart : 0;
+        if (_goldNumber != null)
+        {
+            _goldNumber.text = goldStart.ToString();
+            if (_goldRoutine != null) StopCoroutine(_goldRoutine);
+            _goldRoutine = StartCoroutine(AnimateGoldCounter(goldStart, gold));
+        }
+
+        _main = LetterLibrary.GetMorningLetter(day, LetterLibrary.GetRepTier(rep, day));
 
         if (gm != null && Array.IndexOf(GameManager.RENT_DUE_DAYS, day) >= 0)
         {
@@ -137,8 +171,22 @@ public class MorningScreenController : MonoBehaviour
 
         _bootstrapped = true;
 
+        // Build the heart overlay layer eagerly so its layout is resolved by
+        // the time BurstHearts wants to read worldBound — adding it lazily
+        // means the first frame's worldBound is zero.
+        EnsureHeartLayer();
+
         ShowLetter(_main);
         if (gm != null) gm.lettersReceived++;
+
+        // Heart-burst on day 2+ — quantity scales with the prior day's
+        // reputation gain so the player "feels" yesterday's customer reaction
+        // before they read today's letter. Day 1 has no prior round so we skip.
+        if (gm != null && gm.currentDay > 1)
+        {
+            int heartCount = HeartCountForRep(gm.lastDayRepEarned);
+            if (heartCount > 0) StartCoroutine(BurstHearts(heartCount));
+        }
 
         // Kick off the customer API request in parallel with the typewriter so
         // CustomerGenerator scene can pick up the result without its own wait.
@@ -179,6 +227,16 @@ public class MorningScreenController : MonoBehaviour
 
     private void ShowLetter(LetterContent letter)
     {
+        // Defer the "letter receive" cue by one frame so the new scene's
+        // audio pipeline has fully come up. Firing PlayOneShot synchronously
+        // from OnEnable can land in the brief gap between the unloading
+        // scene's AudioListener being destroyed and the next one going live,
+        // which produces silence the very first time the player sees the
+        // letter — exactly when the cue matters most.
+        // Only the *initial* letter triggers the cue; the optional rent
+        // reminder is queued in the same scene and shouldn't ping again.
+        if (!_showingFollowup) StartCoroutine(PlayLetterReceiveDeferred());
+
         if (_subjectText != null) _subjectText.text = letter.subject;
         if (_fromText    != null) _fromText.text    = "— " + letter.from;
         if (_waxSeal     != null) _waxSeal.style.backgroundColor = GetSealColor(letter.sender);
@@ -192,6 +250,14 @@ public class MorningScreenController : MonoBehaviour
 
         if (_typeRoutine != null) StopCoroutine(_typeRoutine);
         _typeRoutine = StartCoroutine(TypeBody(letter.body));
+    }
+
+    private IEnumerator PlayLetterReceiveDeferred()
+    {
+        // One frame is enough for AudioManager.OnSceneLoaded to disable
+        // the scene's stale AudioListener and bring its own back online.
+        yield return null;
+        AudioManager.Instance?.PlayLetterReceive();
     }
 
     private IEnumerator TypeBody(string text)
@@ -271,6 +337,159 @@ public class MorningScreenController : MonoBehaviour
         }
 
         GameManager.Instance?.LoadScene(GameManager.SCENE_CUSTOMER);
+    }
+
+    // ── Polish FX: gold counter ──────────────────────────────────
+
+    private IEnumerator AnimateGoldCounter(int from, int to)
+    {
+        if (_goldNumber == null) yield break;
+
+        // Snap on degenerate inputs.
+        if (goldCountDuration <= 0f || from == to)
+        {
+            _goldNumber.text = to.ToString();
+            yield break;
+        }
+
+        float elapsed = 0f;
+        int   last    = from;
+        _goldNumber.text = from.ToString();
+
+        while (elapsed < goldCountDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / goldCountDuration);
+            float eased = goldCountEase != null ? goldCountEase.Evaluate(t) : t;
+            int current = Mathf.RoundToInt(Mathf.Lerp(from, to, eased));
+            if (current != last)
+            {
+                _goldNumber.text = current.ToString();
+                last = current;
+            }
+            yield return null;
+        }
+
+        _goldNumber.text = to.ToString();
+    }
+
+    // ── Polish FX: reputation heart burst ───────────────────────
+
+    private static int HeartCountForRep(int rep)
+    {
+        if (rep <= 0)  return 0;
+        if (rep <= 5)  return 6;
+        if (rep <= 10) return 12;
+        if (rep <= 15) return 20;
+        return 30;
+    }
+
+    private void EnsureHeartLayer()
+    {
+        if (_heartLayer != null || _root == null) return;
+
+        _heartLayer = new VisualElement { name = "heartLayer" };
+        _heartLayer.pickingMode = PickingMode.Ignore;
+        var s = _heartLayer.style;
+        s.position = Position.Absolute;
+        s.left   = 0; s.top    = 0;
+        s.right  = 0; s.bottom = 0;
+        _root.Add(_heartLayer);
+        _heartLayer.BringToFront();
+    }
+
+    private IEnumerator BurstHearts(int count)
+    {
+        // Wait one frame so the UI Toolkit layout pass resolves worldBound on
+        // letterPanel — querying it during Bootstrap returns NaN/zero rects.
+        yield return null;
+
+        EnsureHeartLayer();
+        if (_heartLayer == null) yield break;
+
+        Vector2 origin;
+        if (_letterPanel != null && _letterPanel.worldBound.width > 0f)
+        {
+            var wb = _letterPanel.worldBound;
+            origin = new Vector2(wb.center.x, wb.center.y);
+        }
+        else
+        {
+            // Fallback: use root's center.
+            var rb = _root.worldBound;
+            origin = new Vector2(rb.center.x, rb.center.y);
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            float angleDeg = UnityEngine.Random.Range(0f, 360f);
+            float distance = UnityEngine.Random.Range(220f, 360f);
+            float upBias   = UnityEngine.Random.Range(20f, 60f);
+            float stagger  = (count > 1)
+                ? UnityEngine.Random.Range(0f, heartBurstStagger)
+                : 0f;
+
+            float rad = angleDeg * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+            Vector2 target = origin + dir * distance + new Vector2(0f, -upBias);
+
+            StartCoroutine(AnimateOneHeart(origin, target, stagger));
+        }
+    }
+
+    private IEnumerator AnimateOneHeart(Vector2 origin, Vector2 target, float startDelay)
+    {
+        if (startDelay > 0f) yield return new WaitForSecondsRealtime(startDelay);
+        if (_heartLayer == null) yield break;
+
+        var heart = new Label("♥");
+        heart.pickingMode = PickingMode.Ignore;
+        var hs = heart.style;
+        hs.position = Position.Absolute;
+        hs.color = heartColor;
+        hs.fontSize = heartFontSize;
+        hs.unityFontStyleAndWeight = FontStyle.Bold;
+        // Center the glyph on its position rather than top-left anchor.
+        hs.translate = new Translate(new Length(-50f, LengthUnit.Percent),
+                                     new Length(-50f, LengthUnit.Percent), 0f);
+
+        // worldBound origin is in screen space; convert to heartLayer-local
+        // (heartLayer fills the root, so subtract the root's worldBound origin).
+        Vector2 layerOrigin = _heartLayer.worldBound.position;
+        Vector2 startLocal  = origin - layerOrigin;
+        Vector2 endLocal    = target - layerOrigin;
+
+        hs.left = startLocal.x;
+        hs.top  = startLocal.y;
+        hs.opacity = 0f;
+        hs.scale = new Scale(new Vector3(0.6f, 0.6f, 1f));
+
+        _heartLayer.Add(heart);
+
+        float elapsed  = 0f;
+        float duration = Mathf.Max(0.05f, heartBurstDuration);
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            // Eased outward drift, scale up, fade in then out.
+            float eased = 1f - Mathf.Pow(1f - t, 2f); // ease-out quad
+            Vector2 cur = Vector2.Lerp(startLocal, endLocal, eased);
+            hs.left = cur.x;
+            hs.top  = cur.y;
+            hs.scale = new Scale(new Vector3(Mathf.Lerp(0.6f, 1.4f, eased),
+                                             Mathf.Lerp(0.6f, 1.4f, eased), 1f));
+            // Fade in 0..0.2, hold 0.2..0.6, fade out 0.6..1.0.
+            float a = t < 0.2f ? Mathf.InverseLerp(0f, 0.2f, t)
+                    : t < 0.6f ? 1f
+                    :            1f - Mathf.InverseLerp(0.6f, 1f, t);
+            hs.opacity = a;
+
+            yield return null;
+        }
+
+        if (heart.parent != null) heart.parent.Remove(heart);
     }
 
     private Color GetSealColor(LetterSender sender)

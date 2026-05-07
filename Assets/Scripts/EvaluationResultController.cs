@@ -144,6 +144,7 @@ public class EvaluationResultController : MonoBehaviour
         // Phase 1 — banner + wand reveal.
         yield return WaitOrSkip(0.1f);
         SetVisible(_bannerTitle, true);
+        AudioManager.Instance?.PlayEvaluationReveal();
 
         yield return WaitOrSkip(0.25f);
         SetVisible(_wandHaloOuter, true);

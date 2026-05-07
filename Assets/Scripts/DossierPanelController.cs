@@ -370,6 +370,8 @@ public class DossierPanelController : MonoBehaviour
         else
         {
             // Begin a fresh drag-select run (clears any prior highlight).
+            // The highlighter SFX fires on PointerUp instead of here so the
+            // sound lands when the swipe is *finished*, not when it starts.
             ClearHighlight();
             _highlightField = field;
             _highlightStart = wordIdx;
@@ -425,6 +427,11 @@ public class DossierPanelController : MonoBehaviour
 
         if (_pointerMode == PointerMode.Selecting)
         {
+            // Drag-select finished — play the highlighter "swipe done" sfx
+            // for any non-empty selection, including a single-word click
+            // (e.g. tapping just "pyromancy" should still ping).
+            if (HasHighlight())
+                AudioManager.Instance?.PlayHighlighter();
             _pointerMode = PointerMode.Idle;
             _root.ReleasePointer(_capturedPointerId);
             return;

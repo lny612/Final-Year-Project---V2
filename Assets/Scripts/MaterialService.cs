@@ -72,11 +72,11 @@ to identify the best combination. Never make it obvious.
 
 DESIGN RULE 5 - IMAGE PROMPTS
 For each material, generate an imagePrompt field.
-This will be sent to a pixel art image generator.
+This will be sent to a stylized image generator (painterly storybook style, transparent background).
 The prompt must describe ONLY the material object itself -
 no background, no characters, no hands holding it.
 Always end every imagePrompt with:
-""pixel art, 128x128, transparent background, centered, highly detailed, item icon style""
+""painterly storybook illustration, hand-painted watercolour texture, warm cream-and-sepia palette with candle-gold highlights, fine ink-line detail, soft volumetric lighting, 128x128, transparent background, centered, fantasy item icon""
 
 Return ONLY valid JSON. No markdown. No explanation.
 Use exactly this structure:

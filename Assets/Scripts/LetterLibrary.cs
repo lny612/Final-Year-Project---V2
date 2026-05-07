@@ -25,10 +25,19 @@ public struct LetterContent
 /// </summary>
 public static class LetterLibrary
 {
-    public static RepTier GetRepTier(int reputation)
+    // Day-scaled tier thresholds. Cumulative rep grows ~+8..+20/day, so a flat
+    // 30/90 cutoff (the endgame Rival/Royal bar) leaves day 2 stuck on Low.
+    // These step up alongside the realistic accumulation curve; day 7's High
+    // bar matches GameManager.ROYAL_REP_MIN so the final letter stays in sync
+    // with the Royal ending verdict.
+    private static readonly int[] HighThresholdByDay = { 0, 0, 15, 32, 50, 65, 80, 90 };
+    private static readonly int[] MidThresholdByDay  = { 0, 0,  5, 12, 20, 28, 36, 45 };
+
+    public static RepTier GetRepTier(int reputation, int day)
     {
-        if (reputation >= GameManager.ROYAL_REP_MIN) return RepTier.High;
-        if (reputation >= GameManager.RIVAL_REP_MIN) return RepTier.Mid;
+        int d = day < 2 ? 2 : (day > 7 ? 7 : day);
+        if (reputation >= HighThresholdByDay[d]) return RepTier.High;
+        if (reputation >= MidThresholdByDay[d])  return RepTier.Mid;
         return RepTier.Low;
     }
 

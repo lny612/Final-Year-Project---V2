@@ -518,7 +518,7 @@ void   StartNextRound()          // legacy path — no longer the forward flow
 - Sound design — *still out*
 - Animations beyond score count-up, fade-ins, and minigame visuals — *partial* (added: typewriter, ParticleSystem sparkles, URP Bloom on evaluation reveal, ending fade-in)
 
-**Art:** Placeholder UI except AI-generated pixel art (materials + wands) and Z-Image Turbo PNGs in `Assets/Texture/MinigameSprites/` for the tracing minigame's trail / gates / cursor / endpoint / mist puffs. Pre-generated ending illustrations live in `Assets/Resources/EndingArt/` (still TBD — see SevenDayProgression status).
+**Art:** Placeholder UI except AI-generated pixel art (materials + wands) and Z-Image Turbo PNGs in `Assets/Texture/MinigameSprites/` for the tracing minigame's trail / gates / cursor / endpoint / mist puffs. Pre-generated ending illustrations live in `Assets/Texture/Ending Illustrations/` (5 PNGs at 1024×640 in an ink-and-watercolour storybook style; wired into `EndingManager` via Inspector Texture2D slots — see SevenDayProgression status).
 
 ---
 

@@ -41,7 +41,7 @@
     top: 0;
     bottom: 0;
     background-color: rgb(54, 32, 18);
-    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights%20SDF%201.asset");
     -unity-font-style: normal;
 }
 
@@ -87,7 +87,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 18px;
+    margin-top: 60px;
     margin-bottom: 6px;
 }
 
@@ -109,14 +109,6 @@
     border-radius: 1px;
 }
 
-.header-sub {
-    color: rgba(232, 213, 178, 0.75);
-    font-size: 15px;
-    -unity-font-style: italic;
-    letter-spacing: 1px;
-    -unity-text-align: middle-center;
-}
-
 /* ── Workspace 3-column grid ────────────────────────────────────────────── */
 .workspace {
     flex-grow: 1;
@@ -131,7 +123,7 @@
 
 /* ── LEFT: customer memo card ───────────────────────────────────────────── */
 .memo-column {
-    width: 340px;
+    width: 320px;
     flex-shrink: 0;
     align-items: center;
     justify-content: flex-start;
@@ -224,9 +216,13 @@
     padding-right: 24px;
 }
 
+/* Stage scaled by 1.8: outer ring 460→828px (radius x1.8). Stage container
+   grows proportionally so all child rings stay correctly nested.
+   Stage center = (1044/2, 936/2) = (522, 468). Ring centers verified to
+   land on stage center: e.g. .circle-outer left:108 + 828/2 = 522 ✓ */
 .circle-stage {
-    width: 580px;
-    height: 520px;
+    width: 1044px;
+    height: 936px;
     align-items: center;
     justify-content: center;
 }
@@ -234,10 +230,10 @@
 /* Outer warm aura behind the circle — soft halo. */
 .circle-glow {
     position: absolute;
-    width: 540px;
-    height: 540px;
-    left: 20px;
-    top: -10px;
+    width: 972px;
+    height: 972px;
+    left: 36px;
+    top: -18px;
     background-color: rgba(255, 198, 110, 0.18);
     border-radius: 50%;
 }
@@ -245,10 +241,10 @@
 /* Outer ring: thick brass border, hollow centre. */
 .circle-outer {
     position: absolute;
-    width: 460px;
-    height: 460px;
-    left: 60px;
-    top: 30px;
+    width: 828px;
+    height: 828px;
+    left: 108px;
+    top: 54px;
     background-color: rgba(36, 22, 12, 0.0);
     border-left-width:   3px;
     border-right-width:  3px;
@@ -265,10 +261,10 @@
    — we layer two more circles at differing opacities. */
 .circle-runes {
     position: absolute;
-    width: 432px;
-    height: 432px;
-    left: 74px;
-    top: 44px;
+    width: 778px;
+    height: 778px;
+    left: 133px;
+    top: 79px;
     background-color: rgba(255, 198, 110, 0.06);
     border-left-width:   1px;
     border-right-width:  1px;
@@ -284,10 +280,10 @@
 /* Middle ring */
 .circle-middle {
     position: absolute;
-    width: 360px;
-    height: 360px;
-    left: 110px;
-    top: 80px;
+    width: 648px;
+    height: 648px;
+    left: 198px;
+    top: 144px;
     background-color: rgba(120, 70, 24, 0.18);
     border-left-width:   2px;
     border-right-width:  2px;
@@ -303,10 +299,10 @@
 /* Inner ring */
 .circle-inner {
     position: absolute;
-    width: 300px;
-    height: 300px;
-    left: 140px;
-    top: 110px;
+    width: 540px;
+    height: 540px;
+    left: 252px;
+    top: 198px;
     background-color: rgba(120, 70, 24, 0.10);
     border-left-width:   1px;
     border-right-width:  1px;
@@ -323,10 +319,10 @@
    for an alchemy sigil. Layered behind the heart. */
 .circle-star {
     position: absolute;
-    width: 180px;
-    height: 180px;
-    left: 200px;
-    top: 170px;
+    width: 324px;
+    height: 324px;
+    left: 360px;
+    top: 306px;
     background-color: rgba(120, 70, 24, 0.16);
     rotate: 45deg;
     border-left-width:   2px;
@@ -342,10 +338,10 @@
 /* Bright cream centre disc — the "mouth" of the circle. */
 .circle-heart {
     position: absolute;
-    width: 80px;
-    height: 80px;
-    left: 250px;
-    top: 220px;
+    width: 144px;
+    height: 144px;
+    left: 450px;
+    top: 396px;
     background-color: rgba(255, 232, 170, 0.55);
     border-left-width:   2px;
     border-right-width:  2px;
@@ -363,14 +359,14 @@
 .spoke {
     position: absolute;
     width: 2px;
-    height: 180px;
+    height: 324px;
     background-color: rgba(214, 178, 112, 0.55);
-    left: 289px;
-    top: 80px;
+    left: 521px;
+    top: 144px;
 }
 .spoke-top { rotate:    0deg; }
-.spoke-bl  { rotate:  120deg; top: 220px; left: 289px; }
-.spoke-br  { rotate: -120deg; top: 220px; left: 289px; }
+.spoke-bl  { rotate:  120deg; top: 396px; left: 521px; }
+.spoke-br  { rotate: -120deg; top: 396px; left: 521px; }
 
 /* ── Slots: triangular vertices around the circle ───────────────────────── */
 .slot {
@@ -378,14 +374,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    width: 152px;
+    width: 228px;
 }
 
-/* Triangle vertices inside the 580×520 stage. Each slot is anchored by its
-   centre — translate compensates for the slot's own width/height. */
-.slot-top { top:    8px; left: 50%; translate: -50%   0; }
-.slot-bl  { bottom:  6px; left: 14%; translate:   0%   0; }
-.slot-br  { bottom:  6px; right: 14%; translate:  0%   0; }
+/* Triangle vertices inside the 1044×936 stage. Each slot is anchored by its
+   centre — translate compensates for the slot's own width/height. Top/bottom
+   offsets scaled with the stage; left/right percentages auto-scale. */
+.slot-top { top:    14px; left: 50%; translate: -50%   0; }
+.slot-bl  { bottom:  11px; left: 14%; translate:   0%   0; }
+.slot-br  { bottom:  11px; right: 14%; translate:  0%   0; }
 
 .slot-tag {
     color: rgb(232, 213, 178);
@@ -397,18 +394,20 @@
     text-shadow: 1px 1px 3px rgba(20, 12, 4, 0.85);
 }
 
-/* The slot-well is the round inset where the material image lives. */
+/* The slot-well is the round inset where the material image lives.
+   Scaled by 1.5: 116→174, 100→150, 92→138. Offsets recomputed so children
+   stay centered: rim-inner (174-150)/2 = 12; slot-image (174-138)/2 = 18. */
 .slot-well {
-    width: 116px;
-    height: 116px;
+    width: 174px;
+    height: 174px;
     align-items: center;
     justify-content: center;
 }
 
 .slot-rim-outer {
     position: absolute;
-    width: 116px;
-    height: 116px;
+    width: 174px;
+    height: 174px;
     left: 0;
     top: 0;
     background-color: rgb(54, 32, 18);
@@ -425,10 +424,10 @@
 
 .slot-rim-inner {
     position: absolute;
-    width: 100px;
-    height: 100px;
-    left: 8px;
-    top: 8px;
+    width: 150px;
+    height: 150px;
+    left: 12px;
+    top: 12px;
     background-color: rgba(36, 22, 12, 0.85);
     border-left-width:   1px;
     border-right-width:  1px;
@@ -444,10 +443,10 @@
 /* Material thumbnail — image assigned at runtime. */
 .slot-image {
     position: absolute;
-    width: 92px;
-    height: 92px;
-    left: 12px;
-    top: 12px;
+    width: 138px;
+    height: 138px;
+    left: 18px;
+    top: 18px;
     border-radius: 50%;
     -unity-background-scale-mode: scale-and-crop;
 }

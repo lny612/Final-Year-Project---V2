@@ -154,8 +154,10 @@ public class MaterialMarketUI : MonoBehaviour
 
     /// <summary>
     /// Mark every wood card EXCEPT <paramref name="chosenGlobalIdx"/> as
-    /// SOLD OUT (existing stamp + greyed art + disabled buy button). Called
-    /// after the player buys their one wood — only one wood may be owned.
+    /// LOCKED (grey "Sold Out" stamp + dimmed art + disabled buy button).
+    /// Called after the player buys their one wood — only one wood may be
+    /// owned, but the others read as "Sold Out" rather than "Bought" so the
+    /// player can tell which one they actually purchased.
     /// </summary>
     public void LockOtherWoods(int chosenGlobalIdx)
     {
@@ -163,7 +165,7 @@ public class MaterialMarketUI : MonoBehaviour
         for (int i = CORE_COUNT; i < CORE_COUNT + WOOD_COUNT; i++)
         {
             if (i == chosenGlobalIdx) continue;
-            MarkSoldOut(i);
+            MarkLocked(i);
         }
     }
 
@@ -424,6 +426,24 @@ public class MaterialMarketUI : MonoBehaviour
         var slot = _cards[globalIndex];
         if (slot.card != null) slot.card.AddToClassList("sold-out");
         if (slot.buyButton != null) slot.buyButton.SetEnabled(false);
+    }
+
+    /// <summary>
+    /// Mark a card as LOCKED — visually distinct from sold-out (the player's
+    /// own purchase). Used for the un-bought woods after the wood-of-choice
+    /// is locked in: grey "Sold Out" stamp instead of the red "Bought" one.
+    /// </summary>
+    public void MarkLocked(int globalIndex)
+    {
+        if (!ValidIndex(globalIndex)) return;
+        var slot = _cards[globalIndex];
+        if (slot.card != null) slot.card.AddToClassList("locked");
+        if (slot.buyButton != null) slot.buyButton.SetEnabled(false);
+
+        // Repurpose the existing soldout stamp Label — a Label sibling lookup
+        // saves us from having to add a second element to the UXML/CSS path.
+        var stamp = slot.card?.Q<Label>("card-soldout");
+        if (stamp != null) stamp.text = "Sold Out";
     }
 
     public void SetHintGlyph(int globalIndex, bool show)

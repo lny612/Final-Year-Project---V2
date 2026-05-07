@@ -193,6 +193,7 @@ public class CraftingWorkbenchUI : MonoBehaviour
             if (name  != null) name.text = $"{mat.name}\n<size=11>{mat.price}g</size>";
             SetClearButtonVisible(idx, true);
             _slotClearActions[idx] = onClear;
+            AudioManager.Instance?.PlayMaterialSelection();
         }
     }
 

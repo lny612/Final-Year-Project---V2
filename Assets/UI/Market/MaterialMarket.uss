@@ -43,7 +43,7 @@
     top: 0;
     bottom: 0;
     background-color: rgb(54, 32, 18);
-    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights.ttf");
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights%20SDF%201.asset");
     -unity-font-style: normal;
 }
 
@@ -344,6 +344,10 @@
     flex-direction: column;
     margin-top: 6px;
     margin-bottom: 6px;
+    /* Children stretch to the panel's full width and shrink as needed so the
+       memo value Label actually wraps inside the 300px-wide left column. */
+    align-items: stretch;
+    min-width: 0;
 }
 
 .memo-label {
@@ -358,7 +362,13 @@
     color: rgb(46, 32, 22);
     font-size: 16px;
     -unity-font-style: bold;
+    /* Force the multi-entry memo string to wrap inside the left column
+       instead of overflowing the panel when the player has dropped several
+       chips into a single slot. */
     white-space: normal;
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .memo-footnote {
@@ -401,19 +411,24 @@
     /* The card's parent is a TemplateContainer that MaterialMarketUI.AddCard
        gives `flexGrow=1, flexBasis=0` inline, so the three TemplateContainers
        split the row width evenly. The card itself just fills its container
-       horizontally. We must NOT set flex-basis: 0 here — the TemplateContainer
-       defaults to flex-direction: column, so flex-basis affects HEIGHT, and
-       collapsing the card's height to 0 hides the whole panel. */
+       horizontally AND vertically (height: 100% locks every card in a row to
+       the row's stretched height — set by `align-items: stretch` on the row —
+       so all three sit at the same vertical length regardless of how long the
+       Attributes / Affinity description text runs). We must NOT set flex-basis: 0
+       here — the TemplateContainer defaults to flex-direction: column, so
+       flex-basis affects HEIGHT, and collapsing the card's height to 0 hides
+       the whole panel. */
     width: 100%;
-    min-width: 240px;
-    flex-grow: 0;
+    height: 100%;
+    min-width: 200px;
+    flex-grow: 1;
     flex-shrink: 1;
-    /* 5px on every side so adjacent cards leave ~10px between them in any
+    /* 10px on every side so adjacent cards leave ~20px between them in any
        direction (row-flow horizontal AND wrapped-row vertical). */
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     background-color: rgb(232, 213, 178);
     border-left-width:   2px;
     border-right-width:  2px;
@@ -545,6 +560,11 @@
     margin-left: 12px;
     margin-right: 12px;
     margin-bottom: 4px;
+    /* Absorb the leftover vertical space when the card is taller than its
+       own content (we lock all cards in a row to the same height — see
+       `.material-card { height: 100%; }`). This keeps the footer pinned at
+       the bottom edge instead of stranding it mid-card on shorter entries. */
+    flex-grow: 1;
 }
 
 .card-field {
@@ -643,6 +663,21 @@
 .material-card.sold-out .card-art    { opacity: 0.55; }
 .material-card.sold-out .card-buy    { display: none; }
 .material-card.sold-out .card-soldout { display: flex; }
+
+/* Locked variant: a wood that wasn't bought once another wood was selected.
+   Same dimmed/hidden-buy treatment, but the stamp is grey + reads "Sold Out"
+   instead of the red "Bought" stamp the player's own purchase shows. */
+.material-card.locked .card-art    { opacity: 0.55; }
+.material-card.locked .card-buy    { display: none; }
+.material-card.locked .card-soldout {
+    display: flex;
+    background-color: rgb(120, 120, 120);
+    border-left-color:   rgba(40, 40, 40, 0.65);
+    border-right-color:  rgba(40, 40, 40, 0.65);
+    border-top-color:    rgba(40, 40, 40, 0.65);
+    border-bottom-color: rgba(40, 40, 40, 0.65);
+    color: rgb(245, 240, 230);
+}
 
 /* ── Footer (bottom bar) ────────────────────────────────────────────────── */
 .market-footer {

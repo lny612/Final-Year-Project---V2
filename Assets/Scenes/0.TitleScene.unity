@@ -739,6 +739,7 @@ GameObject:
   - component: {fileID: 935777865}
   - component: {fileID: 935777864}
   - component: {fileID: 935777863}
+  - component: {fileID: 935777866}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -820,6 +821,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &935777866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935777862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!1 &971138431
 GameObject:
   m_ObjectHideFlags: 0
@@ -1439,6 +1484,8 @@ MonoBehaviour:
   wandsCrafted: 0
   lettersReceived: 0
   bankruptedOnDay3: 0
+  goldAtMorningStart: 0
+  lastDayRepEarned: 0
 --- !u!4 &1848445531
 Transform:
   m_ObjectHideFlags: 0
@@ -1590,6 +1637,65 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &2121833297
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2121833299}
+  - component: {fileID: 2121833298}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2121833298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121833297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 906123e83f676544b8e0de8a6a997b42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bgmMain: {fileID: 8300000, guid: f4fad9be0a3743447833232161656bcc, type: 3}
+  bgmMorning: {fileID: 8300000, guid: 9da3ab22c68a0ba47abf5cf43de46d97, type: 3}
+  bgmMarket: {fileID: 8300000, guid: 285e35d672029b94788902d3888a2f0d, type: 3}
+  sfxButtonHover: {fileID: 8300000, guid: f2d49a211d0d611449ab3a6e1c1dc8ab, type: 3}
+  sfxButtonDown: {fileID: 8300000, guid: c39c261bfd371424990956d536d9701f, type: 3}
+  sfxLetterReceive: {fileID: 8300000, guid: ff0f9e21f3c45ea468c08ac8d9e5876d, type: 3}
+  sfxHighlighter: {fileID: 8300000, guid: 5c37bffaf9681a940a13b9a0e575af68, type: 3}
+  sfxPurchase: {fileID: 8300000, guid: 0e027e0c84b7318448cb0b6cce0ca35d, type: 3}
+  sfxGateClear: {fileID: 8300000, guid: 9472d6fb325de804ba370380a8d5038a, type: 3}
+  sfxEvaluationReveal: {fileID: 8300000, guid: cea6ef6d91e927d4babb287602f12fc5, type: 3}
+  sfxMaterialSelection: {fileID: 8300000, guid: 40cd8cad8e9e1904bbc03e67a1eeb2d1, type: 3}
+  sfxTracingLoop: {fileID: 8300000, guid: d48b54e73f5bbdd47af9a5e6eaf6d061, type: 3}
+  bgmVolume: 0.45
+  sfxVolume: 0.75
+  bgmCrossfadeDuration: 0.6
+--- !u!4 &2121833299
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121833297}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1599,3 +1705,4 @@ SceneRoots:
   - {fileID: 1848445531}
   - {fileID: 1045599817}
   - {fileID: 695895385}
+  - {fileID: 2121833299}

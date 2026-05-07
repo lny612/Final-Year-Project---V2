@@ -11,8 +11,18 @@ using UnityEngine.UI;
 //   (EndingTitle, DialogueText, StatsText, RestartButton/QuitButton labels)
 //   and set their Font Asset to `Assets/Fonts/The Garden of Lights SDF.asset`.
 //
-// TODO-EDITOR: Create a new scene "EndingScene" and add it to Build Settings
-//   AFTER MorningScene. Scene hierarchy:
+// TODO-EDITOR: Wire the 5 ending illustrations on the EndingManager component
+//   in EndingScene.unity. Drag each PNG from
+//   `Assets/Texture/Ending Illustrations/` into the matching Inspector slot
+//   under "Ending Illustrations":
+//     royalArt          ← Royal Ending.png
+//     rivalArt          ← Rival Ending.png
+//     slumArt           ← Slum Ending.png
+//     bankruptEarlyArt  ← Bankrupt Early Ending.png
+//     bankruptLateArt   ← Bankrupt Late Ending.png
+//   The legacy Resources/EndingArt/ fallback still runs if any slot is empty.
+//
+// TODO-EDITOR: Scene hierarchy reference for EndingScene.unity:
 //     - GameManager (same DontDestroyOnLoad pattern)
 //     - EventSystem
 //     - Canvas (Screen Space - Overlay)
@@ -25,9 +35,6 @@ using UnityEngine.UI;
 //         - StatsText (TMP_Text, small, below dialogue)
 //         - RestartButton (Button, bottom-left, "Start a new week")
 //         - QuitButton (Button, bottom-right, "Leave the shop" — optional)
-//   Ending illustrations go in Assets/Resources/EndingArt/ as Royal.png, Rival.png,
-//   Slum.png, Bankrupt.png. Texture2Ds — Resources.Load resolves by filename.
-//   Generate once via ComfyUITest with your chosen prompts and drop them in.
 
 /// <summary>
 /// Terminal scene controller. Picks the correct ending variant from
@@ -50,6 +57,18 @@ public class EndingManager : MonoBehaviour
     [Header("Flow")]
     public Button        restartButton;
     public Button        quitButton;
+
+    [Header("Ending Illustrations")]
+    [Tooltip("Royal Ending.png from Assets/Texture/Ending Illustrations/")]
+    public Texture2D     royalArt;
+    [Tooltip("Rival Ending.png from Assets/Texture/Ending Illustrations/")]
+    public Texture2D     rivalArt;
+    [Tooltip("Slum Ending.png from Assets/Texture/Ending Illustrations/")]
+    public Texture2D     slumArt;
+    [Tooltip("Bankrupt Early Ending.png from Assets/Texture/Ending Illustrations/")]
+    public Texture2D     bankruptEarlyArt;
+    [Tooltip("Bankrupt Late Ending.png from Assets/Texture/Ending Illustrations/")]
+    public Texture2D     bankruptLateArt;
 
     private void Start()
     {
@@ -91,17 +110,32 @@ public class EndingManager : MonoBehaviour
     {
         if (illustration == null) return;
 
-        string artName = ending switch
+        Texture2D tex = ending switch
         {
-            EndingType.Royal          => "Royal",
-            EndingType.Rival          => "Rival",
-            EndingType.Slum           => "Slum",
-            EndingType.BankruptEarly  => "Bankrupt",
-            EndingType.BankruptLate   => "Bankrupt",
-            _                         => "Slum"
+            EndingType.Royal          => royalArt,
+            EndingType.Rival          => rivalArt,
+            EndingType.Slum           => slumArt,
+            EndingType.BankruptEarly  => bankruptEarlyArt,
+            EndingType.BankruptLate   => bankruptLateArt,
+            _                         => null
         };
 
-        Texture2D tex = Resources.Load<Texture2D>($"EndingArt/{artName}");
+        // Fallback: legacy Resources/EndingArt/ lookup when an Inspector slot
+        // is unwired — keeps prior setups working until the scene is re-saved.
+        if (tex == null)
+        {
+            string artName = ending switch
+            {
+                EndingType.Royal          => "Royal",
+                EndingType.Rival          => "Rival",
+                EndingType.Slum           => "Slum",
+                EndingType.BankruptEarly  => "Bankrupt",
+                EndingType.BankruptLate   => "Bankrupt",
+                _                         => "Slum"
+            };
+            tex = Resources.Load<Texture2D>($"EndingArt/{artName}");
+        }
+
         if (tex != null)
         {
             illustration.texture = tex;
@@ -120,7 +154,7 @@ public class EndingManager : MonoBehaviour
                 EndingType.BankruptLate   => new Color(0.55f, 0.15f, 0.15f),
                 _                         => Color.grey
             };
-            Debug.LogWarning($"[EndingManager] Missing EndingArt/{artName}.png in Resources — using placeholder tint.");
+            Debug.LogWarning($"[EndingManager] No illustration wired for {ending} — drag the matching PNG from Assets/Texture/Ending Illustrations/ into the Inspector slot, or place a fallback in Resources/EndingArt/. Using placeholder tint.");
         }
     }
 

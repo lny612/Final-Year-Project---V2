@@ -12,7 +12,6 @@
         <ui:VisualElement name="header" class="header" picking-mode="Ignore">
             <ui:Label name="headerTitle" class="header-title" text="The Wandcrafter's Bench" />
             <ui:VisualElement class="header-rule" picking-mode="Ignore" />
-            <ui:Label name="headerSub" class="header-sub" text="Two cores meet a single wood. Reason carefully." />
         </ui:VisualElement>
 
         <!-- Three-column workspace: memo · circle · inventory -->
