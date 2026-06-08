@@ -1,0 +1,69 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="EndingScreen.uss" />
+
+    <!-- Storybook-final-page composition: framed painting on top, title band, then
+         a parchment scroll for the typewritten dialogue and the run stats.
+         A `tone-*` class is added to `.root` at runtime to tint the vignette per
+         ending variant (royal/rival/slum/bankrupt-early/bankrupt-late). -->
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+
+        <!-- Deep wood backdrop + warm vignette so the painting feels lit on a stage. -->
+        <ui:VisualElement name="backdrop" class="backdrop" picking-mode="Ignore" />
+        <ui:VisualElement name="vignette" class="vignette" picking-mode="Ignore" />
+
+        <!-- Center column holding plaque → title → dialogue. Footer is absolute. -->
+        <ui:VisualElement name="stage" class="stage" picking-mode="Ignore">
+
+            <!-- ── Illustration plaque ──────────────────────────────────── -->
+            <ui:VisualElement name="illustrationPlaque" class="illustration-plaque reveal-fade">
+                <!-- Inner gold rule frame. -->
+                <ui:VisualElement class="parchment-inner-border" picking-mode="Ignore" />
+
+                <!-- Four rotated-square gold ornaments at the plaque corners. -->
+                <ui:VisualElement class="gold-corner gold-corner--tl" picking-mode="Ignore" />
+                <ui:VisualElement class="gold-corner gold-corner--tr" picking-mode="Ignore" />
+                <ui:VisualElement class="gold-corner gold-corner--bl" picking-mode="Ignore" />
+                <ui:VisualElement class="gold-corner gold-corner--br" picking-mode="Ignore" />
+
+                <!-- The painting itself. Texture set at runtime via style.backgroundImage.
+                     A `placeholder` modifier is added if the variant has no wired Texture2D. -->
+                <ui:VisualElement name="illustration" class="illustration" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <!-- ── Title band ──────────────────────────────────────────── -->
+            <ui:VisualElement name="titleBand" class="title-band reveal-fade" picking-mode="Ignore">
+                <ui:VisualElement class="title-rule title-rule--left"  picking-mode="Ignore" />
+                <ui:Label  name="titleGlyph" class="title-glyph" text="✦" />
+                <ui:VisualElement class="title-rule title-rule--right" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:Label name="endingTitle" class="ending-title reveal-fade"
+                      text="The Royal Wandmaker" />
+
+            <!-- ── Dialogue scroll ─────────────────────────────────────── -->
+            <ui:VisualElement name="dialoguePanel" class="dialogue-panel reveal-fade">
+                <ui:VisualElement class="dialogue-inner-border" picking-mode="Ignore" />
+                <ui:ScrollView name="dialogueScroll" class="dialogue-scroll">
+                    <ui:Label name="dialogueText" class="dialogue-text" text="" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+
+            <!-- ── Stats line ──────────────────────────────────────────── -->
+            <ui:VisualElement class="stats-rule reveal-fade" picking-mode="Ignore" />
+            <ui:Label name="statsLabel" class="stats-label reveal-fade"
+                      text="Days survived: 7  ·  Letters: 8  ·  Peak reputation: 95  ·  Wands crafted: 12" />
+        </ui:VisualElement>
+
+        <!-- ── Footer ──────────────────────────────────────────────────── -->
+        <ui:VisualElement name="footer" class="footer" picking-mode="Ignore">
+            <ui:Label  name="hintLabel"     class="hint-label"     text="Click to skip the typewriter." />
+            <ui:VisualElement name="buttonRow" class="button-row" picking-mode="Ignore">
+                <ui:Button name="restartButton" class="primary-button reveal-pop is-hidden"
+                           text="Start a new week" />
+                <ui:Button name="quitButton"    class="ghost-button reveal-pop is-hidden"
+                           text="Leave the shop" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

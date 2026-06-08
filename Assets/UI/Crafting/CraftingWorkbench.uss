@@ -225,6 +225,10 @@
     height: 936px;
     align-items: center;
     justify-content: center;
+    /* Visual-only 30% downscale around the stage center. The layout box stays
+       1044x936 so the confirm button + status text below don't reflow; only
+       the rings/spokes/slots/labels inside shrink uniformly. */
+    scale: 0.7 0.7;
 }
 
 /* Outer warm aura behind the circle — soft halo. */

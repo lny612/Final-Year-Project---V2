@@ -1,0 +1,272 @@
+[
+  {
+    "customerName": "Castor Vey",
+    "schoolOfMagic": "Pyromancy",
+    "profession": "Forge-mage who tempers high-tolerance steel using sustained low-temperature flame",
+    "personality": "Patient, secretly impatient, perfectionist",
+    "request": "I want a wand that feeds heat in a steady envelope. My castings spike at the worst time and the steel skips its temper, so the blade comes out brittle.",
+    "trueGoal": "To hold flame at sub-100°C tolerance for thirty minutes straight while finishing a single ceremonial blade without ever letting the temperature spike",
+    "constraint": "His pyromancy peaks the moment he second-guesses his own work — which is exactly when a blade's last temper is most fragile"
+  },
+  {
+    "customerName": "Imran Sourbier",
+    "schoolOfMagic": "Necromancy",
+    "profession": "Funeral consultant who uses necromancy to ease final conversations between the dying and their families",
+    "personality": "Gentle, professionally exhausted, chronically late",
+    "request": "I need a wand that lets me invite the deceased without binding them. Every time I link, they linger long after the family has finished speaking, and I don't know how to send them off.",
+    "trueGoal": "To open a brief, permission-based connection that closes itself the moment both parties have said what they came to say, with no residual tether",
+    "constraint": "His necromancy resists release whenever he projects his own unprocessed grief into the link — and he is the kind of man who always does"
+  },
+  {
+    "customerName": "Nila Crane",
+    "schoolOfMagic": "Aeromancy",
+    "profession": "Stage technician who shapes wind cues to launch acrobats and float props on theatre rigging",
+    "personality": "Punctual, creatively cowardly, secretly fierce",
+    "request": "I need a wand that gives me localised gusts, not gales. My cues blow the entire backdrop down instead of just nudging the trapeze across the stage.",
+    "trueGoal": "To deliver wind precisely shaped to one performer's mark, repeatable across two shows a night for a thirty-night run",
+    "constraint": "Her aeromancy doubles in radius the instant a director raises their voice at her — which, in theatre, is most of the show"
+  },
+  {
+    "customerName": "Branwell Hodge",
+    "schoolOfMagic": "Geomancy",
+    "profession": "Tunnel surveyor who reads bedrock stress to plan safe excavations beneath old cities",
+    "personality": "Methodical, claustrophobic, doggedly proud",
+    "request": "I want a wand that listens to the rock instead of pushing on it. Every time I cast, the limestone answers back — cracks open, dust falls — and I lose three days clearing it.",
+    "trueGoal": "To take a complete stress reading from a hundred-foot column of bedrock without disturbing a single crystal",
+    "constraint": "His geomancy turns from question to command the moment he starts to feel the ceiling above him — and the deeper he goes, the louder it commands"
+  },
+  {
+    "customerName": "Telma Vore",
+    "schoolOfMagic": "Chronomancy",
+    "profession": "Archaeologist who reads brief flashes of the past through chronomancy on excavated artefacts",
+    "personality": "Ravenously curious, scholarly, impatient with peers",
+    "request": "I need a wand that holds the window open longer. I get four seconds of vision per cast and the most important objects need a full minute to read.",
+    "trueGoal": "To stretch a chronomantic vision to a continuous sixty seconds without the past collapsing back into unreadable static",
+    "constraint": "Her chronomancy snaps shut the instant her excitement spikes — and a minute-long vision into the past is the most exciting thing she has ever felt"
+  },
+  {
+    "customerName": "Avon Reckford",
+    "schoolOfMagic": "Illusion magic",
+    "profession": "Courtroom interpreter who illusion-renders witness testimony for juries",
+    "personality": "Soft-spoken, uncomfortably honest, ferociously precise",
+    "request": "I need a wand that doesn't add anything I haven't been given. When the witness hesitates I show the jury what I imagine they saw, not what they actually saw, and I don't know how to stop.",
+    "trueGoal": "To render testimony as exactly the witness describes it and no further, even when the witness's account is incomplete or self-contradictory",
+    "constraint": "His illusion magic fills in narrative gaps automatically — a useful trait in a stagecraft master, a dangerous one in a sworn officer of the court"
+  },
+  {
+    "customerName": "Pell Marrowby",
+    "schoolOfMagic": "Alchemy",
+    "profession": "Glassblower who alchemically tints art glass to commission for cathedral windows",
+    "personality": "Boisterous, financially anxious, devout",
+    "request": "I need a wand that lets me hold the colour for the whole pour. My pigments shift hue while the glass is still molten, and what comes out at the end never matches the patron's sample.",
+    "trueGoal": "To lock a precise shade of cathedral cobalt across the entire forty-second pour from gather to anneal, every single time",
+    "constraint": "His alchemy reads ambient prayer — and a window destined for an altar absorbs every devotional thought in the workshop, drifting toward whichever shade the worshippers most expect"
+  },
+  {
+    "customerName": "Madisin Quill",
+    "schoolOfMagic": "Divination",
+    "profession": "Maritime navigator who uses divination to anticipate squall lines on long-haul cargo runs",
+    "personality": "Steady, dryly funny, hides her superstitions",
+    "request": "I want a wand that gives me one clean answer at a time. Right now I get five possible squalls overlapping each other and I have to bet which is the real one.",
+    "trueGoal": "To resolve five overlapping probability streams into the single most likely weather event, twelve hours out, with margin enough to alter course",
+    "constraint": "Her divination amplifies every parallel possibility she contemplates — and a navigator who has been at sea long enough has learned to contemplate every one of them"
+  },
+  {
+    "customerName": "Yorrick Penn",
+    "schoolOfMagic": "Druidic magic",
+    "profession": "Orchard surgeon who heals diseased fruit trees on country estates",
+    "personality": "Earthy, perpetually muddy, hides a sharp business mind",
+    "request": "I need a wand that lets me touch the rot without taking it home. Every estate I clear, I bring a little of the blight back to my own garden, and last spring I lost the apricot.",
+    "trueGoal": "To excise tree-blight from a host without the residue clinging to his own magical signature, a single clean cut every time",
+    "constraint": "His druidic magic recognises any tree he has loved as his — and the apricot he raised from a sapling is one such tree"
+  },
+  {
+    "customerName": "Solene Vace",
+    "schoolOfMagic": "Lunar magic",
+    "profession": "Midwife who uses lunar magic to time delivery interventions to the safest minute",
+    "personality": "Calm, sleep-deprived, bone-honest with mothers",
+    "request": "I need a wand that holds my reading steady when the moon is between phases. The child decides when to come, not the calendar, and on a half-moon my count is off by ten minutes.",
+    "trueGoal": "To read the lunar window for a safe-intervention minute regardless of the moon's actual phase, even at the dark and the half",
+    "constraint": "Her lunar magic was born in a full-moon ritual she undertook at fifteen — every other phase reads to her as if through cloudy glass"
+  },
+  {
+    "customerName": "Dorek Achill",
+    "schoolOfMagic": "Solar magic",
+    "profession": "Solar-still operator who purifies brackish caravan water in desert way-stations",
+    "personality": "Stoic, dryly philosophical, fiercely careful with rations",
+    "request": "I want a wand that keeps the focus narrow. My solar feed widens into a halo at noon and the stills overshoot — the salt re-precipitates in the catch-basin and the day is wasted.",
+    "trueGoal": "To hold a ten-centimetre focused-light column on the still's apex from dawn to dusk without a single widening event",
+    "constraint": "His solar magic broadens whenever he is hungry — and a man who rations his own water through the desert is hungry from breakfast onward"
+  },
+  {
+    "customerName": "Indra Lothbrook",
+    "schoolOfMagic": "Glyph magic",
+    "profession": "Tax clerk in the City Treasury who uses glyph magic to seal records against forgery",
+    "personality": "Pedantic, secretly literary, allergic to imprecision",
+    "request": "I want a wand that doesn't bleed the seal. My anti-forgery glyphs creep three lines beyond the line I cast on, which makes audit corrections impossible without destroying half the page.",
+    "trueGoal": "To set a permanent anti-forgery glyph on exactly the line cast, with bounded edges that hold up under official re-audit",
+    "constraint": "Her glyph magic spreads further the more it cares about what it is sealing — and she cares, in private, about every receipt she has ever stamped"
+  },
+  {
+    "customerName": "Tobias Renshaw",
+    "schoolOfMagic": "Beast magic",
+    "profession": "Border-control inspector who beast-charms hostile guard dogs to allow vehicle searches",
+    "personality": "Loud, secretly tender, persistently underslept",
+    "request": "I need a wand that calms a single dog without putting the rest of the pack to sleep. Right now half the kennel goes still and the handler files a complaint every time.",
+    "trueGoal": "To produce a localised calm-effect aimed at one animal, with a sharp rolloff at three feet so the rest of the pack feels nothing",
+    "constraint": "His beast magic is empathic — and any dog he calms causes him to feel kin with all the others in earshot, broadening the cast against his will"
+  },
+  {
+    "customerName": "Halia Vesperin",
+    "schoolOfMagic": "Mind magic",
+    "profession": "Trauma therapist who uses mind magic to help patients revisit memories without re-experiencing them",
+    "personality": "Composed, deeply self-aware, professionally lonely",
+    "request": "I need a wand that gives me a barrier I can't cross by accident. When a patient describes the worst night, I find myself there with them, and I bring the dread home.",
+    "trueGoal": "To accompany a patient through the recall of a traumatic memory at sufficient psychological distance that the patient feels witnessed but the therapist remains uncontaminated",
+    "constraint": "Her mind magic is by nature empathic-immersive — and the very skill that makes her good at her work is what makes the boundary fail"
+  },
+  {
+    "customerName": "Glyn Vasimer",
+    "schoolOfMagic": "Cryomancy",
+    "profession": "Vintner who uses cryomancy to ice-press concentrated wine for high-end cuvées",
+    "personality": "Indulgent, superstitious, financially careless",
+    "request": "I want a wand that holds the ice at a steady minus-eight. My casting drifts colder when I taste-test, and a frozen-out cuvée cracks the cask.",
+    "trueGoal": "To hold a press-bath at exactly -8°C across a six-hour pressing without a single drop below -10°C even during taste sampling",
+    "constraint": "His cryomancy follows his palate — a sip too sweet pushes the bath colder, a sip too dry pulls it warmer, and a man who taste-tests his own product cannot help drifting"
+  },
+  {
+    "customerName": "Sora Phelps",
+    "schoolOfMagic": "Blood magic",
+    "profession": "Battlefield surgeon who uses blood magic to slow hemorrhage during emergency operations",
+    "personality": "Quick-witted, combative with fear, exhaustively fair",
+    "request": "I need a wand that doesn't pull too hard. When I slow a wound the patient's pulse drops further than I want, and I have lost two soldiers to bottomed-out blood pressure.",
+    "trueGoal": "To dampen a bleeding rate by exactly the percentage needed to keep a wound survivable, no more, across procedures lasting up to forty minutes",
+    "constraint": "Her blood magic answers to urgency — and a woman who became a battlefield surgeon by witnessing a friend bleed out feels urgency about every patient she treats"
+  },
+  {
+    "customerName": "Renn Carravon",
+    "schoolOfMagic": "Resonance magic",
+    "profession": "Cathedral organ tuner who uses resonance magic to align dissonant pipes in old instruments",
+    "personality": "Hard of hearing, fastidious, comfortably solitary",
+    "request": "I want a wand that lets me hold one frequency at a time. When I focus on a single pipe my casting picks up the pipe next to it and the whole rank drifts sharp by Friday's service.",
+    "trueGoal": "To selectively retune one organ pipe in isolation without the resonance leaking to its neighbours along the windchest",
+    "constraint": "His resonance magic was trained in close-quarters chamber music — it expects the surrounding instruments to share its key, and an organ pipe rank is laid out exactly like a chamber ensemble"
+  },
+  {
+    "customerName": "Vala Mayhew",
+    "schoolOfMagic": "Light magic",
+    "profession": "Optometrist who uses light magic to perform precise corneal corrections without surgery",
+    "personality": "Bright, uncomfortably blunt, perfectionist",
+    "request": "I need a wand that focuses to a sub-millimetre point. My corrections widen during the cast — the spot becomes a smear and the patient sees haloes for a week.",
+    "trueGoal": "To direct a healing-light beam at a 0.3 mm column on the cornea, held steady for the full eight-second correction without any beam wander",
+    "constraint": "Her light magic broadens with patient anxiety — and patients who let a stranger aim a beam at their eye are universally anxious"
+  },
+  {
+    "customerName": "Mardo Felgrave",
+    "schoolOfMagic": "Gravity magic",
+    "profession": "Trapeze rigger who uses gravity magic to soften missed catches before performers hit the net",
+    "personality": "Big-hearted, secretly insecure, doggedly loyal",
+    "request": "I want a wand that catches one performer at a time. Last week I caught the trapeze artist and accidentally floated the safety net out of position, and my best aerialist landed wrong.",
+    "trueGoal": "To soften the impact of a single specific falling body without affecting the surrounding rigging, ropes, or the performer's mid-air partner",
+    "constraint": "His gravity magic is broadcast by intent — and his intent during a missed catch is to save the entire troupe, every time, without distinguishing"
+  },
+  {
+    "customerName": "Beatrix Quoll",
+    "schoolOfMagic": "Memory magic",
+    "profession": "Genealogist who uses memory magic to reconstruct family lineages from fragmentary household records",
+    "personality": "Inquisitive, stubbornly polite, secretly nostalgic",
+    "request": "I need a wand that doesn't blend my readings together. By the third client of the morning, the great-grandfather of one family is wearing the medals of another, and I have to apologise.",
+    "trueGoal": "To keep up to ten reconstructed family memory threads cleanly separate across a working day, with no cross-contamination between clients",
+    "constraint": "Her memory magic is associative by design — the same trait that lets her find a missing ancestor is the trait that pulls one family's story into another's"
+  },
+  {
+    "customerName": "Otho Lyerin",
+    "schoolOfMagic": "Dream magic",
+    "profession": "Night-watch counsellor who enters the dreams of insomniac patients to settle recurring nightmares",
+    "personality": "Soft-spoken, gallows-humoured, fights his own fatigue",
+    "request": "I want a wand that lets me leave when the dream ends. Right now I get carried into the patient's next dream automatically, and after a long night I wake up with images I do not own.",
+    "trueGoal": "To enter and exit a single specified dream cleanly, with a hard boundary against being pulled into the patient's adjacent dream sequences",
+    "constraint": "His dream magic was self-taught during his own insomnia — it learned to follow whatever dream came next, because that is what an insomniac mind does"
+  },
+  {
+    "customerName": "Amrith Solven",
+    "schoolOfMagic": "Soul magic",
+    "profession": "Stage director hired by old theatres to console and re-route the ghosts of former players",
+    "personality": "Theatrical, kind, professionally weary of theatre people",
+    "request": "I need a wand that politely declines. When I open the channel to send a ghost on, three more queue up behind it, and they all want monologues.",
+    "trueGoal": "To address one specific theatre ghost, perform the consolation, and close the channel before adjacent spirits become aware that a channel is open",
+    "constraint": "His soul magic carries the courtesy of the theatre — it cannot ignore an unannounced presence wishing to be seen, because nor can he"
+  },
+  {
+    "customerName": "Hess Carrowyn",
+    "schoolOfMagic": "Bone magic",
+    "profession": "Orthopaedic technician who uses bone magic to set complex fractures in working farm animals",
+    "personality": "Practical, gruff, unsentimentally fond of his patients",
+    "request": "I want a wand that knits the bone exactly along the original line. My casts re-knit the fracture stronger than the original — which sounds nice until the next bone over breaks instead.",
+    "trueGoal": "To re-fuse a fractured bone to exactly its pre-fracture strength, no stronger, so the surrounding skeleton bears stress as it did before",
+    "constraint": "His bone magic over-corrects in proportion to how much he likes the animal — and a man who works with farm animals likes them all"
+  },
+  {
+    "customerName": "Iola Vant",
+    "schoolOfMagic": "Astral magic",
+    "profession": "Astronomer who uses astral magic to image distant stellar bodies through atmospheric distortion",
+    "personality": "Patient, faintly arrogant, indifferent to weather",
+    "request": "I need a wand that holds the image steady through a full exposure. Even on a clear night the field jitters because I, the caster, am breathing.",
+    "trueGoal": "To capture a thirty-minute long-exposure of a single stellar object through atmosphere, with sub-arcsecond steadiness across the entire exposure",
+    "constraint": "Her astral magic uses her own pulse as its base frequency — a frequency that obeys her diaphragm, and a thirty-minute exposure is longer than she can hold her breath"
+  },
+  {
+    "customerName": "Wendel Yarrow",
+    "schoolOfMagic": "Plant magic",
+    "profession": "Urban farmer who plant-magics rooftop gardens to feed apartment buildings during winter",
+    "personality": "Earnestly optimistic, organisational, secretly competitive",
+    "request": "I need a wand that grows for the harvest, not for show. My beans yield enormous pods that look magnificent and contain almost nothing, while my carrots stay knee-high but go to leaf.",
+    "trueGoal": "To prioritise edible-mass yield over visual proportion across a sixteen-week growing window with no manual intervention beyond watering",
+    "constraint": "His plant magic responds to admiration — and his rooftop is the most admired garden on the block, by tenants who have never seen a vegetable grow"
+  },
+  {
+    "customerName": "Malik Stenway",
+    "schoolOfMagic": "Forge magic",
+    "profession": "Smith who forge-magics ceremonial regalia for civic processions and royal ceremonies",
+    "personality": "Showy, secretly meticulous, prickly with apprentices",
+    "request": "I want a wand that doesn't let the metal remember. My processional pieces hold the heat of the casting and warp on the parade route in summer, embarrassing the herald and embarrassing me.",
+    "trueGoal": "To complete a forge-cast that fully releases its thermal memory by the moment the workpiece leaves the anvil, so the finished piece is dimensionally stable across all weather",
+    "constraint": "His forge magic is keyed to his pride in the work — and pride is exactly what holds heat in a piece long after the hammer has stopped"
+  },
+  {
+    "customerName": "Sahel Iddrin",
+    "schoolOfMagic": "Sand magic",
+    "profession": "Caravan guide who uses sand magic to firm up shifting dunes across trade routes",
+    "personality": "Weathered, dryly devout, slow to trust",
+    "request": "I want a wand that sets the path firm only where the camels walk. My castings stiffen the dunes to either side as well, and the desert reads it as an insult and corrects within the day.",
+    "trueGoal": "To set a stable footing across a six-foot-wide caravan path through soft dunes for the four hours of crossing, without affecting the dunes outside the path",
+    "constraint": "His sand magic was learned in oasis villages where every grain of sand belongs to the community — it cannot be told to fix only some of the sand and not the rest"
+  },
+  {
+    "customerName": "Eilan Brusque",
+    "schoolOfMagic": "Mirror magic",
+    "profession": "Portrait restorer who uses mirror magic to lift varnish-yellowing from old oil paintings",
+    "personality": "Fastidious, opinionated, secretly afraid of damage",
+    "request": "I need a wand that takes the yellow and not the gold. My castings strip the warmth out of the underpainting too, and the patron sees a face that looks twenty years younger and somehow wrong.",
+    "trueGoal": "To selectively dissolve oxidised varnish without affecting the natural yellow tones of the original pigment layer, across a panel up to two metres on a side",
+    "constraint": "Her mirror magic optimises for what it considers true colour — and the original pigments have, after centuries, drifted into a yellow it considers a flaw"
+  },
+  {
+    "customerName": "Karis Doll",
+    "schoolOfMagic": "Heart magic",
+    "profession": "Matchmaker who uses heart magic to read which prospective partners would form lasting bonds",
+    "personality": "Outgoing, secretly cynical, intuitively kind",
+    "request": "I want a wand that reads the present, not the future. My readings show me how the couple will be in five years, and the lovely-now ones who are doomed-then have stopped trusting my recommendations.",
+    "trueGoal": "To assess current emotional fit between two people without the reading auto-extrapolating five years forward into outcomes that are not yet inevitable",
+    "constraint": "Her heart magic was developed as a child reading her own parents' marriage — a marriage whose worst years were five years out, and her magic has never stopped looking for that horizon"
+  },
+  {
+    "customerName": "Brann Holster",
+    "schoolOfMagic": "Echo magic",
+    "profession": "Cave cartographer who uses echo magic to map underground passages too narrow for a surveyor to enter",
+    "personality": "Patient, claustrophobic, wryly self-aware",
+    "request": "I need a wand that returns one echo at a time. When I cast into a network of side-passages every wall returns at once and the map I get back is a sphere of noise.",
+    "trueGoal": "To send an echo down one branch of a junction, receive that branch's reflection alone, and only then probe the next branch — cleanly serial, never simultaneous",
+    "constraint": "His echo magic was first practised in his childhood bedroom, where every surface was equidistant — it learned to listen to all walls at once and has never been taught otherwise"
+  }
+]

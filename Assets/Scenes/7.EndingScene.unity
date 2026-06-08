@@ -1082,34 +1082,13 @@ GameObject:
   - component: {fileID: 649356380}
   - component: {fileID: 649356379}
   - component: {fileID: 649356378}
-  - component: {fileID: 649356377}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &649356377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 649356376}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1e2488b2f44bc24baeb795b43c583cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  illustration: {fileID: 176423171}
-  fader: {fileID: 649356378}
-  fadeInSeconds: 1.5
-  endingTitle: {fileID: 1251571982}
-  dialogueTypewriter: {fileID: 378036866}
-  statsText: {fileID: 153303937}
-  restartButton: {fileID: 346623130}
-  quitButton: {fileID: 73632852}
+  m_IsActive: 0
 --- !u!225 &649356378
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1452,6 +1431,22 @@ MonoBehaviour:
     request: 
     trueGoal: 
     constraint: 
+  currentMemo:
+    element: 
+    personality: 
+    purpose: 
+    reinforcement: 
+  pendingCustomer:
+    customerName: 
+    schoolOfMagic: 
+    profession: 
+    personality: 
+    request: 
+    trueGoal: 
+    constraint: 
+  pendingCustomerInProgress: 0
+  pendingMaterials: []
+  pendingMaterialsInProgress: 0
   availableMaterials: []
   inventory: []
   playerGold: 500
@@ -1463,11 +1458,42 @@ MonoBehaviour:
     imagePrompt: 
     wandImage: {fileID: 0}
   craftingQualityGrade: 65
+  chosenCore1:
+    materialType: 
+    name: 
+    price: 0
+    imagePrompt: 
+    attributes: 
+    personalityMatch: 
+    elementalAffinity: 
+    special: 
+  chosenCore2:
+    materialType: 
+    name: 
+    price: 0
+    imagePrompt: 
+    attributes: 
+    personalityMatch: 
+    elementalAffinity: 
+    special: 
+  chosenWood:
+    materialType: 
+    name: 
+    price: 0
+    imagePrompt: 
+    attributes: 
+    personalityMatch: 
+    elementalAffinity: 
+    special: 
+  lastMinigameRoundsWon: 0
+  lastMatchScore: 0
   currentDay: 1
   peakReputation: 0
   wandsCrafted: 0
   lettersReceived: 0
   bankruptedOnDay3: 0
+  goldAtMorningStart: 0
+  lastDayRepEarned: 0
 --- !u!4 &1336025441
 Transform:
   m_ObjectHideFlags: 0
@@ -1475,6 +1501,93 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1336025439}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1573252941
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1573252945}
+  - component: {fileID: 1573252944}
+  - component: {fileID: 1573252943}
+  - component: {fileID: 1573252942}
+  m_Layer: 0
+  m_Name: EndingUIDocument
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1573252942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573252941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1e2488b2f44bc24baeb795b43c583cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  screen: {fileID: 1573252943}
+--- !u!114 &1573252943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573252941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6ada7de92335ad46bab54634981f5a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  document: {fileID: 1573252944}
+  fadeInSeconds: 1.5
+  charsPerSecond: 35
+  skipOnClick: 1
+  royalArt: {fileID: 2800000, guid: 8b447da368300764d80dc37d8086819e, type: 3}
+  rivalArt: {fileID: 2800000, guid: dcff994ee554d6c4a824118e97b7678b, type: 3}
+  slumArt: {fileID: 2800000, guid: 991ecdd2bf2641e47ad56d8d7aa5af24, type: 3}
+  bankruptEarlyArt: {fileID: 2800000, guid: d860146b6d43a1b4780ebac08e3e31c5, type: 3}
+  bankruptLateArt: {fileID: 2800000, guid: fb15399adf54d5c4595534878273fd5a, type: 3}
+--- !u!114 &1573252944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573252941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: 35e1de97463dfa84aa235cc08148fe8b, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: c2ed4491479e26b4eada2f83b9d0dce6, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!4 &1573252945
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573252941}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1583,3 +1696,4 @@ SceneRoots:
   - {fileID: 1316124858}
   - {fileID: 1336025441}
   - {fileID: 649356382}
+  - {fileID: 1573252945}

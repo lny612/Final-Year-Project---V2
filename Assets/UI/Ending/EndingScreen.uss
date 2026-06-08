@@ -1,0 +1,373 @@
+/* ==========================================================================
+   EndingScreen.uss
+   Storybook last-page treatment for the 5 ending variants.
+   Palette + font tokens mirrored from MorningScene.uss / EvaluationResult.uss
+   so this scene reads as the closing chapter of the same bound book.
+   ========================================================================== */
+
+/* ── Palette ────────────────────────────────────────────────────────────── */
+:root {
+    --parchment-base:    rgb(244, 229, 194);
+    --parchment-warm:    rgb(232, 213, 178);
+    --parchment-shadow:  rgb(217, 192, 150);
+    --parchment-edge:    rgb(190, 160, 112);
+    --ink-dark:          rgb(46, 32, 22);
+    --ink-soft:          rgb(86, 64, 44);
+    --ink-faded:         rgba(46, 32, 22, 0.55);
+    --gold-light:        rgb(201, 169, 110);
+    --gold-deep:         rgb(150, 116, 60);
+    --wood-deep:         rgb(62, 45, 31);
+    --wax-red:           rgb(122, 46, 31);
+    --wax-red-glow:      rgb(168, 70, 50);
+}
+
+/* ── Root ───────────────────────────────────────────────────────────────── */
+.root {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(28, 20, 14);
+    -unity-font-definition: url("project://database/Assets/Fonts/The%20Garden%20of%20Lights%20SDF%201.asset");
+    -unity-font-style: normal;
+    color: rgb(46, 32, 22);
+    font-size: 16px;
+}
+
+/* Deep-wood gradient stand-in: a flat warm-dark background tinted by the
+   tone modifier classes. Sits behind everything. */
+.backdrop {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgb(28, 20, 14);
+}
+
+/* Per-tone background washes — applied via `.tone-*` on the root. */
+.tone-royal       .backdrop { background-color: rgb(40, 28, 14); }
+.tone-rival       .backdrop { background-color: rgb(30, 26, 22); }
+.tone-slum        .backdrop { background-color: rgb(24, 22, 22); }
+.tone-bankrupt-early .backdrop { background-color: rgb(34, 16, 12); }
+.tone-bankrupt-late  .backdrop { background-color: rgb(34, 16, 12); }
+
+/* Soft inset vignette — borders darken the painted edges so the centre stage
+   reads brighter without an actual gradient texture. Tone-modulated below. */
+.vignette {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-left-width:   96px;
+    border-right-width:  96px;
+    border-top-width:    72px;
+    border-bottom-width: 80px;
+    border-left-color:   rgba(8, 4, 2, 0.55);
+    border-right-color:  rgba(8, 4, 2, 0.55);
+    border-top-color:    rgba(8, 4, 2, 0.45);
+    border-bottom-color: rgba(8, 4, 2, 0.62);
+}
+
+.tone-royal       .vignette { border-left-color: rgba(60, 40, 8, 0.50); border-right-color: rgba(60, 40, 8, 0.50); border-top-color: rgba(60, 40, 8, 0.40); border-bottom-color: rgba(40, 24, 4, 0.62); }
+.tone-rival       .vignette { border-left-color: rgba(20, 14, 8, 0.48); border-right-color: rgba(20, 14, 8, 0.48); border-top-color: rgba(20, 14, 8, 0.38); border-bottom-color: rgba(14, 10, 6, 0.58); }
+.tone-slum        .vignette { border-left-color: rgba(8, 4, 2, 0.65);  border-right-color: rgba(8, 4, 2, 0.65);  border-top-color: rgba(8, 4, 2, 0.55);  border-bottom-color: rgba(0, 0, 0, 0.72); }
+.tone-bankrupt-early .vignette,
+.tone-bankrupt-late  .vignette { border-left-color: rgba(50, 8, 4, 0.55); border-right-color: rgba(50, 8, 4, 0.55); border-top-color: rgba(50, 8, 4, 0.42); border-bottom-color: rgba(30, 4, 2, 0.68); }
+
+/* ── Stage (vertical column holding plaque, title, dialogue, stats) ────── */
+.stage {
+    position: absolute;
+    left: 0; right: 0; top: 36px; bottom: 132px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+/* ── Illustration plaque ───────────────────────────────────────────────── */
+.illustration-plaque {
+    width: 1040px;
+    max-width: 70%;
+    height: 480px;
+    max-height: 50%;
+    background-color: rgb(244, 229, 194);
+    border-color: rgb(107, 74, 46);
+    border-width: 3px;
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 16px 36px rgba(6, 3, 1, 0.65);
+}
+
+/* Per-tone faint plaque tint (so the painting frame absorbs the mood). */
+.tone-royal       .illustration-plaque { border-color: rgb(122, 88, 36); }
+.tone-rival       .illustration-plaque { border-color: rgb(96, 70, 46); }
+.tone-slum        .illustration-plaque { border-color: rgb(76, 58, 42); }
+.tone-bankrupt-early .illustration-plaque,
+.tone-bankrupt-late  .illustration-plaque { border-color: rgb(96, 36, 28); }
+
+.parchment-inner-border {
+    position: absolute;
+    top: 12px; right: 12px; bottom: 12px; left: 12px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+/* Gold corner ornaments — rotated squares straddling the plaque corners. */
+.gold-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: rgb(201, 169, 110);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 4px;
+    rotate: 45deg;
+}
+.gold-corner--tl { left: -6px;  top: -6px; }
+.gold-corner--tr { right: -6px; top: -6px; }
+.gold-corner--bl { left: -6px;  bottom: -6px; }
+.gold-corner--br { right: -6px; bottom: -6px; }
+
+/* The painting fills the inside of the plaque. Texture set in C# via
+   style.backgroundImage. scale-and-crop preserves aspect on weird viewports. */
+.illustration {
+    flex-grow: 1;
+    background-color: rgb(20, 14, 8);
+    -unity-background-scale-mode: scale-and-crop;
+    border-radius: 2px;
+}
+
+/* When no Texture2D is wired we land in the placeholder branch — controller
+   sets a tone-driven solid colour via inline style.backgroundColor. */
+.illustration.placeholder {
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* ── Title band ────────────────────────────────────────────────────────── */
+.title-band {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+    margin-bottom: -4px;
+}
+
+.title-rule {
+    height: 2px;
+    width: 220px;
+    background-color: rgb(150, 116, 60);
+    border-radius: 1px;
+}
+.title-rule--left  { margin-right: 14px; }
+.title-rule--right { margin-left:  14px; }
+
+.title-glyph {
+    color: rgb(201, 169, 110);
+    font-size: 22px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.ending-title {
+    -unity-text-align: middle-center;
+    color: rgb(244, 229, 194);
+    font-size: 56px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    text-shadow: 1px 2px 0 rgba(8, 4, 2, 0.85);
+    white-space: normal;
+}
+
+/* Per-tone title accents. */
+.tone-royal       .ending-title { color: rgb(255, 232, 178); }
+.tone-rival       .ending-title { color: rgb(238, 222, 192); }
+.tone-slum        .ending-title { color: rgb(214, 200, 172); }
+.tone-bankrupt-early .ending-title,
+.tone-bankrupt-late  .ending-title { color: rgb(238, 198, 176); }
+
+/* ── Dialogue scroll panel ─────────────────────────────────────────────── */
+.dialogue-panel {
+    width: 1040px;
+    max-width: 72%;
+    height: 220px;
+    max-height: 26%;
+    background-color: rgba(244, 229, 194, 0.96);
+    border-color: rgb(107, 74, 46);
+    border-width: 2px;
+    border-radius: 5px;
+    padding: 22px 32px 22px 32px;
+    box-shadow: 0 10px 24px rgba(6, 3, 1, 0.55);
+}
+
+.dialogue-inner-border {
+    position: absolute;
+    top: 10px; right: 10px; bottom: 10px; left: 10px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgb(184, 148, 92);
+    border-width: 1px;
+    border-radius: 3px;
+}
+
+.dialogue-scroll {
+    flex-grow: 1;
+}
+
+/* Trim ScrollView chrome — keep only the slim parchment-tone scrollbar. */
+.dialogue-scroll #unity-content-and-vertical-scroll-container { background-color: rgba(0, 0, 0, 0); }
+.dialogue-scroll .unity-scroller--vertical                    { background-color: rgba(0, 0, 0, 0); width: 6px; }
+.dialogue-scroll .unity-base-slider__tracker                  { background-color: rgba(46, 32, 22, 0.10); border-radius: 3px; }
+.dialogue-scroll .unity-base-slider__dragger                  { background-color: rgba(150, 116, 60, 0.55); border-radius: 3px; border-width: 0; }
+
+.dialogue-text {
+    color: rgb(46, 32, 22);
+    font-size: 22px;
+    -unity-font-style: normal;
+    white-space: normal;
+    -unity-paragraph-spacing: 12px;
+    letter-spacing: 0.5px;
+    -unity-text-align: middle-left;
+}
+
+/* ── Stats footer ─────────────────────────────────────────────────────── */
+.stats-rule {
+    width: 720px;
+    max-width: 60%;
+    height: 1px;
+    background-color: rgb(150, 116, 60);
+    margin-top: 18px;
+    margin-bottom: 10px;
+    opacity: 0.55;
+}
+
+.stats-label {
+    -unity-text-align: middle-center;
+    color: rgba(244, 229, 194, 0.72);
+    font-size: 16px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    white-space: normal;
+}
+
+/* ── Footer (hint + buttons) ───────────────────────────────────────────── */
+.footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 36px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hint-label {
+    color: rgba(244, 229, 194, 0.55);
+    font-size: 13px;
+    -unity-font-style: italic;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.button-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Primary "Start a new week" — wax-red plaque button. Mirrors Morning's
+   continue-button so cross-scene SFX hover/active timing matches. */
+.primary-button {
+    -unity-text-align: middle-center;
+    color: rgb(244, 229, 194);
+    background-color: rgb(122, 46, 31);
+    background-image: none;
+    border-color: rgb(46, 18, 12);
+    border-width: 2px;
+    border-radius: 4px;
+    padding: 10px 36px 10px 36px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin: 0 12px 0 12px;
+    transition-property: color, background-color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+
+.primary-button:hover {
+    background-color: rgb(168, 70, 50);
+    color: rgb(255, 240, 210);
+    scale: 1.03 1.03;
+}
+
+.primary-button:focus {
+    background-color: rgb(168, 70, 50);
+    color: rgb(255, 240, 210);
+}
+
+.primary-button:active {
+    background-color: rgb(96, 30, 20);
+    translate: 0 2px;
+    scale: 0.98 0.98;
+}
+
+/* Secondary "Leave the shop" — quiet ghost variant. */
+.ghost-button {
+    -unity-text-align: middle-center;
+    color: rgba(244, 229, 194, 0.78);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    border-color: rgba(244, 229, 194, 0.35);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 10px 28px 10px 28px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin: 0 12px 0 12px;
+    transition-property: color, background-color, scale, translate;
+    transition-duration: 120ms;
+    transition-timing-function: ease-out;
+}
+
+.ghost-button:hover {
+    color: rgb(255, 240, 210);
+    background-color: rgba(244, 229, 194, 0.08);
+    border-color: rgba(244, 229, 194, 0.55);
+    scale: 1.03 1.03;
+}
+
+.ghost-button:focus {
+    color: rgb(255, 240, 210);
+    border-color: rgba(244, 229, 194, 0.55);
+}
+
+.ghost-button:active {
+    background-color: rgba(244, 229, 194, 0.04);
+    translate: 0 2px;
+    scale: 0.98 0.98;
+}
+
+/* ── Reveal helpers ────────────────────────────────────────────────────── */
+.is-hidden { display: none; }
+
+.reveal-fade {
+    opacity: 0;
+    transition-property: opacity, scale, translate;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.reveal-fade.visible {
+    opacity: 1;
+}
+
+.reveal-pop {
+    opacity: 0;
+    scale: 0.8 0.8;
+    transition-property: opacity, scale;
+    transition-duration: 320ms;
+    transition-timing-function: ease-out;
+}
+
+.reveal-pop.visible {
+    opacity: 1;
+    scale: 1 1;
+}

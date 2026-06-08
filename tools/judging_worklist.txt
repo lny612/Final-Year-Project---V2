@@ -1,0 +1,3427 @@
+==============================================================================
+CANDIDATE DOSSIER WORKLIST FOR INTERACTIVE LLM-AS-JUDGE SCORING
+==============================================================================
+
+Rubric (each output scored on five axes):
+  coherence    [0|1|2]   constraint logically EXPLAINS request
+  misdirection [0|1|2]   trueGoal differs from request meaningfully
+  tone         [0|1|2]   reads as cosy fantasy authored prose
+  playability  [0|1|2]   could a player extract a 4-slot memo in 30-60s
+  wellformed   [0|1]     parsed cleanly with all 7 required fields
+
+API-error rows (error != null in the source JSON) are listed at the
+end with a single 'API_ERROR' marker; they get wellformed=0 and 
+0 on every other axis.
+
+==============================================================================
+
+## Content rows (162)
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 01 / silver-fern
+FILE  : claude-opus-4-7-chat/00.json
+PARSE_OK : True
+
+  customerName :
+    Castor Vey
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Forge-mage who tempers high-tolerance steel using sustained low-temperature flame
+  personality :
+    Patient, secretly impatient, perfectionist
+  request :
+    I want a wand that feeds heat in a steady envelope. My castings spike at the worst time and the steel skips its temper, so the blade comes out brittle.
+  trueGoal :
+    To hold flame at sub-100°C tolerance for thirty minutes straight while finishing a single ceremonial blade without ever letting the temperature spike
+  constraint :
+    His pyromancy peaks the moment he second-guesses his own work — which is exactly when a blade's last temper is most fragile
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 02 / amber-finch
+FILE  : claude-opus-4-7-chat/01.json
+PARSE_OK : True
+
+  customerName :
+    Imran Sourbier
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Funeral consultant who uses necromancy to ease final conversations between the dying and their families
+  personality :
+    Gentle, professionally exhausted, chronically late
+  request :
+    I need a wand that lets me invite the deceased without binding them. Every time I link, they linger long after the family has finished speaking, and I don't know how to send them off.
+  trueGoal :
+    To open a brief, permission-based connection that closes itself the moment both parties have said what they came to say, with no residual tether
+  constraint :
+    His necromancy resists release whenever he projects his own unprocessed grief into the link — and he is the kind of man who always does
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 03 / glass-heron
+FILE  : claude-opus-4-7-chat/02.json
+PARSE_OK : True
+
+  customerName :
+    Nila Crane
+  schoolOfMagic :
+    Aeromancy
+  profession :
+    Stage technician who shapes wind cues to launch acrobats and float props on theatre rigging
+  personality :
+    Punctual, creatively cowardly, secretly fierce
+  request :
+    I need a wand that gives me localised gusts, not gales. My cues blow the entire backdrop down instead of just nudging the trapeze across the stage.
+  trueGoal :
+    To deliver wind precisely shaped to one performer's mark, repeatable across two shows a night for a thirty-night run
+  constraint :
+    Her aeromancy doubles in radius the instant a director raises their voice at her — which, in theatre, is most of the show
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 04 / iron-vine
+FILE  : claude-opus-4-7-chat/03.json
+PARSE_OK : True
+
+  customerName :
+    Branwell Hodge
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Tunnel surveyor who reads bedrock stress to plan safe excavations beneath old cities
+  personality :
+    Methodical, claustrophobic, doggedly proud
+  request :
+    I want a wand that listens to the rock instead of pushing on it. Every time I cast, the limestone answers back — cracks open, dust falls — and I lose three days clearing it.
+  trueGoal :
+    To take a complete stress reading from a hundred-foot column of bedrock without disturbing a single crystal
+  constraint :
+    His geomancy turns from question to command the moment he starts to feel the ceiling above him — and the deeper he goes, the louder it commands
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 05 / coral-moth
+FILE  : claude-opus-4-7-chat/04.json
+PARSE_OK : True
+
+  customerName :
+    Telma Vore
+  schoolOfMagic :
+    Chronomancy
+  profession :
+    Archaeologist who reads brief flashes of the past through chronomancy on excavated artefacts
+  personality :
+    Ravenously curious, scholarly, impatient with peers
+  request :
+    I need a wand that holds the window open longer. I get four seconds of vision per cast and the most important objects need a full minute to read.
+  trueGoal :
+    To stretch a chronomantic vision to a continuous sixty seconds without the past collapsing back into unreadable static
+  constraint :
+    Her chronomancy snaps shut the instant her excitement spikes — and a minute-long vision into the past is the most exciting thing she has ever felt
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 06 / hollow-spruce
+FILE  : claude-opus-4-7-chat/05.json
+PARSE_OK : True
+
+  customerName :
+    Avon Reckford
+  schoolOfMagic :
+    Illusion magic
+  profession :
+    Courtroom interpreter who illusion-renders witness testimony for juries
+  personality :
+    Soft-spoken, uncomfortably honest, ferociously precise
+  request :
+    I need a wand that doesn't add anything I haven't been given. When the witness hesitates I show the jury what I imagine they saw, not what they actually saw, and I don't know how to stop.
+  trueGoal :
+    To render testimony as exactly the witness describes it and no further, even when the witness's account is incomplete or self-contradictory
+  constraint :
+    His illusion magic fills in narrative gaps automatically — a useful trait in a stagecraft master, a dangerous one in a sworn officer of the court
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 07 / quartz-stoat
+FILE  : claude-opus-4-7-chat/06.json
+PARSE_OK : True
+
+  customerName :
+    Pell Marrowby
+  schoolOfMagic :
+    Alchemy
+  profession :
+    Glassblower who alchemically tints art glass to commission for cathedral windows
+  personality :
+    Boisterous, financially anxious, devout
+  request :
+    I need a wand that lets me hold the colour for the whole pour. My pigments shift hue while the glass is still molten, and what comes out at the end never matches the patron's sample.
+  trueGoal :
+    To lock a precise shade of cathedral cobalt across the entire forty-second pour from gather to anneal, every single time
+  constraint :
+    His alchemy reads ambient prayer — and a window destined for an altar absorbs every devotional thought in the workshop, drifting toward whichever shade the worshippers most expect
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 08 / saffron-koi
+FILE  : claude-opus-4-7-chat/07.json
+PARSE_OK : True
+
+  customerName :
+    Madisin Quill
+  schoolOfMagic :
+    Divination
+  profession :
+    Maritime navigator who uses divination to anticipate squall lines on long-haul cargo runs
+  personality :
+    Steady, dryly funny, hides her superstitions
+  request :
+    I want a wand that gives me one clean answer at a time. Right now I get five possible squalls overlapping each other and I have to bet which is the real one.
+  trueGoal :
+    To resolve five overlapping probability streams into the single most likely weather event, twelve hours out, with margin enough to alter course
+  constraint :
+    Her divination amplifies every parallel possibility she contemplates — and a navigator who has been at sea long enough has learned to contemplate every one of them
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 09 / dusk-wren
+FILE  : claude-opus-4-7-chat/08.json
+PARSE_OK : True
+
+  customerName :
+    Yorrick Penn
+  schoolOfMagic :
+    Druidic magic
+  profession :
+    Orchard surgeon who heals diseased fruit trees on country estates
+  personality :
+    Earthy, perpetually muddy, hides a sharp business mind
+  request :
+    I need a wand that lets me touch the rot without taking it home. Every estate I clear, I bring a little of the blight back to my own garden, and last spring I lost the apricot.
+  trueGoal :
+    To excise tree-blight from a host without the residue clinging to his own magical signature, a single clean cut every time
+  constraint :
+    His druidic magic recognises any tree he has loved as his — and the apricot he raised from a sapling is one such tree
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 10 / opal-mantis
+FILE  : claude-opus-4-7-chat/09.json
+PARSE_OK : True
+
+  customerName :
+    Solene Vace
+  schoolOfMagic :
+    Lunar magic
+  profession :
+    Midwife who uses lunar magic to time delivery interventions to the safest minute
+  personality :
+    Calm, sleep-deprived, bone-honest with mothers
+  request :
+    I need a wand that holds my reading steady when the moon is between phases. The child decides when to come, not the calendar, and on a half-moon my count is off by ten minutes.
+  trueGoal :
+    To read the lunar window for a safe-intervention minute regardless of the moon's actual phase, even at the dark and the half
+  constraint :
+    Her lunar magic was born in a full-moon ritual she undertook at fifteen — every other phase reads to her as if through cloudy glass
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 11 / cinder-thistle
+FILE  : claude-opus-4-7-chat/10.json
+PARSE_OK : True
+
+  customerName :
+    Dorek Achill
+  schoolOfMagic :
+    Solar magic
+  profession :
+    Solar-still operator who purifies brackish caravan water in desert way-stations
+  personality :
+    Stoic, dryly philosophical, fiercely careful with rations
+  request :
+    I want a wand that keeps the focus narrow. My solar feed widens into a halo at noon and the stills overshoot — the salt re-precipitates in the catch-basin and the day is wasted.
+  trueGoal :
+    To hold a ten-centimetre focused-light column on the still's apex from dawn to dusk without a single widening event
+  constraint :
+    His solar magic broadens whenever he is hungry — and a man who rations his own water through the desert is hungry from breakfast onward
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 12 / brass-vesper
+FILE  : claude-opus-4-7-chat/11.json
+PARSE_OK : True
+
+  customerName :
+    Indra Lothbrook
+  schoolOfMagic :
+    Glyph magic
+  profession :
+    Tax clerk in the City Treasury who uses glyph magic to seal records against forgery
+  personality :
+    Pedantic, secretly literary, allergic to imprecision
+  request :
+    I want a wand that doesn't bleed the seal. My anti-forgery glyphs creep three lines beyond the line I cast on, which makes audit corrections impossible without destroying half the page.
+  trueGoal :
+    To set a permanent anti-forgery glyph on exactly the line cast, with bounded edges that hold up under official re-audit
+  constraint :
+    Her glyph magic spreads further the more it cares about what it is sealing — and she cares, in private, about every receipt she has ever stamped
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 13 / agate-lynx
+FILE  : claude-opus-4-7-chat/12.json
+PARSE_OK : True
+
+  customerName :
+    Tobias Renshaw
+  schoolOfMagic :
+    Beast magic
+  profession :
+    Border-control inspector who beast-charms hostile guard dogs to allow vehicle searches
+  personality :
+    Loud, secretly tender, persistently underslept
+  request :
+    I need a wand that calms a single dog without putting the rest of the pack to sleep. Right now half the kennel goes still and the handler files a complaint every time.
+  trueGoal :
+    To produce a localised calm-effect aimed at one animal, with a sharp rolloff at three feet so the rest of the pack feels nothing
+  constraint :
+    His beast magic is empathic — and any dog he calms causes him to feel kin with all the others in earshot, broadening the cast against his will
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 14 / linen-finch
+FILE  : claude-opus-4-7-chat/13.json
+PARSE_OK : True
+
+  customerName :
+    Halia Vesperin
+  schoolOfMagic :
+    Mind magic
+  profession :
+    Trauma therapist who uses mind magic to help patients revisit memories without re-experiencing them
+  personality :
+    Composed, deeply self-aware, professionally lonely
+  request :
+    I need a wand that gives me a barrier I can't cross by accident. When a patient describes the worst night, I find myself there with them, and I bring the dread home.
+  trueGoal :
+    To accompany a patient through the recall of a traumatic memory at sufficient psychological distance that the patient feels witnessed but the therapist remains uncontaminated
+  constraint :
+    Her mind magic is by nature empathic-immersive — and the very skill that makes her good at her work is what makes the boundary fail
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 15 / lichen-dove
+FILE  : claude-opus-4-7-chat/14.json
+PARSE_OK : True
+
+  customerName :
+    Glyn Vasimer
+  schoolOfMagic :
+    Cryomancy
+  profession :
+    Vintner who uses cryomancy to ice-press concentrated wine for high-end cuvées
+  personality :
+    Indulgent, superstitious, financially careless
+  request :
+    I want a wand that holds the ice at a steady minus-eight. My casting drifts colder when I taste-test, and a frozen-out cuvée cracks the cask.
+  trueGoal :
+    To hold a press-bath at exactly -8°C across a six-hour pressing without a single drop below -10°C even during taste sampling
+  constraint :
+    His cryomancy follows his palate — a sip too sweet pushes the bath colder, a sip too dry pulls it warmer, and a man who taste-tests his own product cannot help drifting
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 16 / pewter-grove
+FILE  : claude-opus-4-7-chat/15.json
+PARSE_OK : True
+
+  customerName :
+    Sora Phelps
+  schoolOfMagic :
+    Blood magic
+  profession :
+    Battlefield surgeon who uses blood magic to slow hemorrhage during emergency operations
+  personality :
+    Quick-witted, combative with fear, exhaustively fair
+  request :
+    I need a wand that doesn't pull too hard. When I slow a wound the patient's pulse drops further than I want, and I have lost two soldiers to bottomed-out blood pressure.
+  trueGoal :
+    To dampen a bleeding rate by exactly the percentage needed to keep a wound survivable, no more, across procedures lasting up to forty minutes
+  constraint :
+    Her blood magic answers to urgency — and a woman who became a battlefield surgeon by witnessing a friend bleed out feels urgency about every patient she treats
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 17 / juniper-fox
+FILE  : claude-opus-4-7-chat/16.json
+PARSE_OK : True
+
+  customerName :
+    Renn Carravon
+  schoolOfMagic :
+    Resonance magic
+  profession :
+    Cathedral organ tuner who uses resonance magic to align dissonant pipes in old instruments
+  personality :
+    Hard of hearing, fastidious, comfortably solitary
+  request :
+    I want a wand that lets me hold one frequency at a time. When I focus on a single pipe my casting picks up the pipe next to it and the whole rank drifts sharp by Friday's service.
+  trueGoal :
+    To selectively retune one organ pipe in isolation without the resonance leaking to its neighbours along the windchest
+  constraint :
+    His resonance magic was trained in close-quarters chamber music — it expects the surrounding instruments to share its key, and an organ pipe rank is laid out exactly like a chamber ensemble
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 18 / cobalt-stag
+FILE  : claude-opus-4-7-chat/17.json
+PARSE_OK : True
+
+  customerName :
+    Vala Mayhew
+  schoolOfMagic :
+    Light magic
+  profession :
+    Optometrist who uses light magic to perform precise corneal corrections without surgery
+  personality :
+    Bright, uncomfortably blunt, perfectionist
+  request :
+    I need a wand that focuses to a sub-millimetre point. My corrections widen during the cast — the spot becomes a smear and the patient sees haloes for a week.
+  trueGoal :
+    To direct a healing-light beam at a 0.3 mm column on the cornea, held steady for the full eight-second correction without any beam wander
+  constraint :
+    Her light magic broadens with patient anxiety — and patients who let a stranger aim a beam at their eye are universally anxious
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 19 / ember-shrike
+FILE  : claude-opus-4-7-chat/18.json
+PARSE_OK : True
+
+  customerName :
+    Mardo Felgrave
+  schoolOfMagic :
+    Gravity magic
+  profession :
+    Trapeze rigger who uses gravity magic to soften missed catches before performers hit the net
+  personality :
+    Big-hearted, secretly insecure, doggedly loyal
+  request :
+    I want a wand that catches one performer at a time. Last week I caught the trapeze artist and accidentally floated the safety net out of position, and my best aerialist landed wrong.
+  trueGoal :
+    To soften the impact of a single specific falling body without affecting the surrounding rigging, ropes, or the performer's mid-air partner
+  constraint :
+    His gravity magic is broadcast by intent — and his intent during a missed catch is to save the entire troupe, every time, without distinguishing
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 20 / chalk-otter
+FILE  : claude-opus-4-7-chat/19.json
+PARSE_OK : True
+
+  customerName :
+    Beatrix Quoll
+  schoolOfMagic :
+    Memory magic
+  profession :
+    Genealogist who uses memory magic to reconstruct family lineages from fragmentary household records
+  personality :
+    Inquisitive, stubbornly polite, secretly nostalgic
+  request :
+    I need a wand that doesn't blend my readings together. By the third client of the morning, the great-grandfather of one family is wearing the medals of another, and I have to apologise.
+  trueGoal :
+    To keep up to ten reconstructed family memory threads cleanly separate across a working day, with no cross-contamination between clients
+  constraint :
+    Her memory magic is associative by design — the same trait that lets her find a missing ancestor is the trait that pulls one family's story into another's
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 21 / verdigris-tern
+FILE  : claude-opus-4-7-chat/20.json
+PARSE_OK : True
+
+  customerName :
+    Otho Lyerin
+  schoolOfMagic :
+    Dream magic
+  profession :
+    Night-watch counsellor who enters the dreams of insomniac patients to settle recurring nightmares
+  personality :
+    Soft-spoken, gallows-humoured, fights his own fatigue
+  request :
+    I want a wand that lets me leave when the dream ends. Right now I get carried into the patient's next dream automatically, and after a long night I wake up with images I do not own.
+  trueGoal :
+    To enter and exit a single specified dream cleanly, with a hard boundary against being pulled into the patient's adjacent dream sequences
+  constraint :
+    His dream magic was self-taught during his own insomnia — it learned to follow whatever dream came next, because that is what an insomniac mind does
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 22 / hazel-marten
+FILE  : claude-opus-4-7-chat/21.json
+PARSE_OK : True
+
+  customerName :
+    Amrith Solven
+  schoolOfMagic :
+    Soul magic
+  profession :
+    Stage director hired by old theatres to console and re-route the ghosts of former players
+  personality :
+    Theatrical, kind, professionally weary of theatre people
+  request :
+    I need a wand that politely declines. When I open the channel to send a ghost on, three more queue up behind it, and they all want monologues.
+  trueGoal :
+    To address one specific theatre ghost, perform the consolation, and close the channel before adjacent spirits become aware that a channel is open
+  constraint :
+    His soul magic carries the courtesy of the theatre — it cannot ignore an unannounced presence wishing to be seen, because nor can he
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 23 / smoke-pollen
+FILE  : claude-opus-4-7-chat/22.json
+PARSE_OK : True
+
+  customerName :
+    Hess Carrowyn
+  schoolOfMagic :
+    Bone magic
+  profession :
+    Orthopaedic technician who uses bone magic to set complex fractures in working farm animals
+  personality :
+    Practical, gruff, unsentimentally fond of his patients
+  request :
+    I want a wand that knits the bone exactly along the original line. My casts re-knit the fracture stronger than the original — which sounds nice until the next bone over breaks instead.
+  trueGoal :
+    To re-fuse a fractured bone to exactly its pre-fracture strength, no stronger, so the surrounding skeleton bears stress as it did before
+  constraint :
+    His bone magic over-corrects in proportion to how much he likes the animal — and a man who works with farm animals likes them all
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 24 / amber-quail
+FILE  : claude-opus-4-7-chat/23.json
+PARSE_OK : True
+
+  customerName :
+    Iola Vant
+  schoolOfMagic :
+    Astral magic
+  profession :
+    Astronomer who uses astral magic to image distant stellar bodies through atmospheric distortion
+  personality :
+    Patient, faintly arrogant, indifferent to weather
+  request :
+    I need a wand that holds the image steady through a full exposure. Even on a clear night the field jitters because I, the caster, am breathing.
+  trueGoal :
+    To capture a thirty-minute long-exposure of a single stellar object through atmosphere, with sub-arcsecond steadiness across the entire exposure
+  constraint :
+    Her astral magic uses her own pulse as its base frequency — a frequency that obeys her diaphragm, and a thirty-minute exposure is longer than she can hold her breath
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 25 / spindle-moth
+FILE  : claude-opus-4-7-chat/24.json
+PARSE_OK : True
+
+  customerName :
+    Wendel Yarrow
+  schoolOfMagic :
+    Plant magic
+  profession :
+    Urban farmer who plant-magics rooftop gardens to feed apartment buildings during winter
+  personality :
+    Earnestly optimistic, organisational, secretly competitive
+  request :
+    I need a wand that grows for the harvest, not for show. My beans yield enormous pods that look magnificent and contain almost nothing, while my carrots stay knee-high but go to leaf.
+  trueGoal :
+    To prioritise edible-mass yield over visual proportion across a sixteen-week growing window with no manual intervention beyond watering
+  constraint :
+    His plant magic responds to admiration — and his rooftop is the most admired garden on the block, by tenants who have never seen a vegetable grow
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 26 / shale-rook
+FILE  : claude-opus-4-7-chat/25.json
+PARSE_OK : True
+
+  customerName :
+    Malik Stenway
+  schoolOfMagic :
+    Forge magic
+  profession :
+    Smith who forge-magics ceremonial regalia for civic processions and royal ceremonies
+  personality :
+    Showy, secretly meticulous, prickly with apprentices
+  request :
+    I want a wand that doesn't let the metal remember. My processional pieces hold the heat of the casting and warp on the parade route in summer, embarrassing the herald and embarrassing me.
+  trueGoal :
+    To complete a forge-cast that fully releases its thermal memory by the moment the workpiece leaves the anvil, so the finished piece is dimensionally stable across all weather
+  constraint :
+    His forge magic is keyed to his pride in the work — and pride is exactly what holds heat in a piece long after the hammer has stopped
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 27 / tallow-yew
+FILE  : claude-opus-4-7-chat/26.json
+PARSE_OK : True
+
+  customerName :
+    Sahel Iddrin
+  schoolOfMagic :
+    Sand magic
+  profession :
+    Caravan guide who uses sand magic to firm up shifting dunes across trade routes
+  personality :
+    Weathered, dryly devout, slow to trust
+  request :
+    I want a wand that sets the path firm only where the camels walk. My castings stiffen the dunes to either side as well, and the desert reads it as an insult and corrects within the day.
+  trueGoal :
+    To set a stable footing across a six-foot-wide caravan path through soft dunes for the four hours of crossing, without affecting the dunes outside the path
+  constraint :
+    His sand magic was learned in oasis villages where every grain of sand belongs to the community — it cannot be told to fix only some of the sand and not the rest
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 28 / loam-vesper
+FILE  : claude-opus-4-7-chat/27.json
+PARSE_OK : True
+
+  customerName :
+    Eilan Brusque
+  schoolOfMagic :
+    Mirror magic
+  profession :
+    Portrait restorer who uses mirror magic to lift varnish-yellowing from old oil paintings
+  personality :
+    Fastidious, opinionated, secretly afraid of damage
+  request :
+    I need a wand that takes the yellow and not the gold. My castings strip the warmth out of the underpainting too, and the patron sees a face that looks twenty years younger and somehow wrong.
+  trueGoal :
+    To selectively dissolve oxidised varnish without affecting the natural yellow tones of the original pigment layer, across a panel up to two metres on a side
+  constraint :
+    Her mirror magic optimises for what it considers true colour — and the original pigments have, after centuries, drifted into a yellow it considers a flaw
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 29 / bone-magpie
+FILE  : claude-opus-4-7-chat/28.json
+PARSE_OK : True
+
+  customerName :
+    Karis Doll
+  schoolOfMagic :
+    Heart magic
+  profession :
+    Matchmaker who uses heart magic to read which prospective partners would form lasting bonds
+  personality :
+    Outgoing, secretly cynical, intuitively kind
+  request :
+    I want a wand that reads the present, not the future. My readings show me how the couple will be in five years, and the lovely-now ones who are doomed-then have stopped trusting my recommendations.
+  trueGoal :
+    To assess current emotional fit between two people without the reading auto-extrapolating five years forward into outcomes that are not yet inevitable
+  constraint :
+    Her heart magic was developed as a child reading her own parents' marriage — a marriage whose worst years were five years out, and her magic has never stopped looking for that horizon
+
+------------------------------------------------------------------------------
+MODEL : claude-opus-4-7-chat
+SEED  : Run 30 / rune-cricket
+FILE  : claude-opus-4-7-chat/29.json
+PARSE_OK : True
+
+  customerName :
+    Brann Holster
+  schoolOfMagic :
+    Echo magic
+  profession :
+    Cave cartographer who uses echo magic to map underground passages too narrow for a surveyor to enter
+  personality :
+    Patient, claustrophobic, wryly self-aware
+  request :
+    I need a wand that returns one echo at a time. When I cast into a network of side-passages every wall returns at once and the map I get back is a sphere of noise.
+  trueGoal :
+    To send an echo down one branch of a junction, receive that branch's reflection alone, and only then probe the next branch — cleanly serial, never simultaneous
+  constraint :
+    His echo magic was first practised in his childhood bedroom, where every surface was equidistant — it learned to listen to all walls at once and has never been taught otherwise
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 03 / glass-heron
+FILE  : gemini-flash/02.json
+PARSE_OK : True
+
+  customerName :
+    Cinder Hearthwick
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Culinary mage who uses precise flame control to infuse rare ingredients
+  personality :
+    Passionate, perfectionistic, easily frustrated under pressure
+  request :
+    I need a wand that can consistently maintain a very low, precise flame. My current wand keeps flaring up at the critical moment, ruining my delicate emulsions and infusing spices unevenly.
+  trueGoal :
+    To achieve absolute, consistent temperature control for complex alchemical infusions across many ingredients, allowing for both rapid preparation and perfect flavor profiles without burning anything.
+  constraint :
+    Her pyromancy intensifies with her emotional investment in the dish, making delicate temperature control almost impossible when she's most determined to perfect a recipe
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 04 / iron-vine
+FILE  : gemini-flash/03.json
+PARSE_OK : True
+
+  customerName :
+    Korvin Stonehand
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Gem-smith and structural engineer who manipulates stone and ore for construction
+  personality :
+    Meticulous, practical, easily frustrated
+  request :
+    My rock-shaping spells are too... broad. I try to make a fine cut for an intricate gem setting, and the whole chunk of ore cracks. I need something that allows for delicate chiseling, not just brute force.
+  trueGoal :
+    To sculpt intricate, structurally sound gem settings and support beams at high speed, ensuring both aesthetic delicacy and robust durability without sacrificing either.
+  constraint :
+    His geomancy tends to magnify the force of his emotions into physical tremors, causing his precision spells to become jarring and unstable whenever he feels rushed or frustrated.
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 05 / coral-moth
+FILE  : gemini-flash/04.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Frostwind
+  schoolOfMagic :
+    Cryomancy
+  profession :
+    Arctic scout who uses ice magic to create temporary bridges and shelters in frozen wastes
+  personality :
+    Resilient, solitary, secretly yearning for companionship
+  request :
+    I need a wand that can make my ice creations last longer, especially when I'm building shelters or bridges in really unstable areas. They keep collapsing faster than I can reinforce them.
+  trueGoal :
+    To construct durable, structurally sound ice formations rapidly and reliably, enabling safe passage and shelter for extended periods in extreme conditions.
+  constraint :
+    Their cryomancy weakens and becomes less stable when they themselves are experiencing severe cold or extreme loneliness, making their creations fragile when they need them most reliable.
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 06 / hollow-spruce
+FILE  : gemini-flash/05.json
+PARSE_OK : True
+
+  customerName :
+    Gaius Stonehart
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Geomancer who uses precision earth manipulation to disarm traps and secure archaeological digs
+  personality :
+    Meticulous, risk-averse, surprisingly impulsive
+  request :
+    I need a wand that prevents vibrations when I'm moving loose earth. Sometimes my magic is too... clunky. It shakes the ground and I almost triggered a collapse on my last excavation.
+  trueGoal :
+    To safely and rapidly excavate ancient sites and disarm intricate traps, needing both extreme precision to avoid triggering mechanisms and swift manipulation to prevent cave-ins.
+  constraint :
+    His earth magic naturally creates a subtle hum that translates into ground vibrations, a hum that intensifies uncontrollably when he is in a hurry or under severe mental stress, making silent, precise manipulation nearly impossible.
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 07 / quartz-stoat
+FILE  : gemini-flash/06.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Vex
+  schoolOfMagic :
+    Chronomancy
+  profession :
+    Investigator who reconstructs past events by briefly observing echoes in time
+  personality :
+    Meticulous, observant, prone to temporal disorientation
+  request :
+    I need a wand that can stabilize my chronomantic echoes. They keep shimmering and fading before I can properly observe the details, especially when I'm trying to pinpoint a specific moment.
+  trueGoal :
+    To precisely and quickly reconstruct complex past events in full detail, without losing temporal stability or accurate perception of time
+  constraint :
+    His chronomancy is inherently unstable; the act of pulling information from the past causes minor temporal distortions in his own perception of the present, making echoes harder to focus on and maintain
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 10 / opal-mantis
+FILE  : gemini-flash/09.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Stonehearth
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Relic hunter who uses geomancy to stabilize unstable ruins and extract ancient artifacts
+  personality :
+    Patient, meticulous, prone to sudden bursts of reckless urgency
+  request :
+    My earth magic often affects too broad an area. I need a wand that can focus my geomancy to precisely remove only the dirt and rubble *around* a delicate artifact, without touching the artifact itself.
+  trueGoal :
+    To rapidly and precisely extract extremely fragile ancient relics from highly unstable geological formations, preserving both the artifact and the structural integrity of the site.
+  constraint :
+    His geomancy naturally seeks to reinforce and connect to the largest available earth structure in the vicinity, making fine-tuned isolation nearly impossible, especially when under pressure to act quickly
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 16 / pewter-grove
+FILE  : gemini-flash/15.json
+PARSE_OK : True
+
+  customerName :
+    Lysandra Thorne
+  schoolOfMagic :
+    Chronosync magic
+  profession :
+    Archivist who uses time magic to pause and rewind moments to study ancient texts and lost knowledge
+  personality :
+    Meticulous, easily overwhelmed by details, driven by historical preservation
+  request :
+    I need a wand that helps me maintain my temporal stasis spells more consistently. My freezes keep flickering, and sometimes it causes pages to blur, making ancient scripts unreadable.
+  trueGoal :
+    To sustain precise, localized time manipulation on fragile artifacts for extended periods without risking degradation or loss of detail
+  constraint :
+    Her time magic becomes unstable and brief when she's under pressure to decipher a time-sensitive or highly complex historical fragment
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 17 / juniper-fox
+FILE  : gemini-flash/16.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Emberforge
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Artificer who uses intense heat to purify rare metals for enchanted alloys
+  personality :
+    Obsessive, impatient, highly methodical
+  request :
+    I need a wand that can focus my fire spells into a much finer beam. My current one just blasts everything, and I keep ruining delicate purification processes by accidentally vaporizing the material.
+  trueGoal :
+    To consistently achieve ultra-high purity in rare metals through intense, sustained heat, without ever exceeding the critical temperature even by a fraction.
+  constraint :
+    His pyromancy tends to flare uncontrollably when he enters a state of deep concentration, making fine adjustments incredibly difficult
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 18 / cobalt-stag
+FILE  : gemini-flash/17.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Tempus
+  schoolOfMagic :
+    Chronomancy
+  profession :
+    Temporal investigator who rewinds specific, short bursts of time to observe past events for clues
+  personality :
+    Quietly intense, deeply curious, prone to temporal disorientation
+  request :
+    My current wand makes it difficult to isolate the exact moment I want to observe. I keep overshooting or getting a blurry, extended timeframe when I just need a second, perfectly clear.
+  trueGoal :
+    To precisely isolate and perfectly focus on single, critical micro-moments within a recent past event, without the surrounding temporal noise or accidental rewinds
+  constraint :
+    His chronomancy tends to 'stretch' or 'compress' the perceived time, especially when he's under pressure to find a hidden detail quickly, making precise rewinding difficult
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 19 / ember-shrike
+FILE  : gemini-flash/18.json
+PARSE_OK : True
+
+  customerName :
+    Aldric Temporal
+  schoolOfMagic :
+    Chronurgy
+  profession :
+    Curator of ancient artifacts who uses temporal magic to repair and stabilize fragile relics
+  personality :
+    Patient, meticulous, deeply anxious about irreversible mistakes
+  request :
+    I need a wand that lets me precisely control the duration of my temporal mending. Sometimes my spells accelerate the decay instead of reversing it, especially on very old pieces.
+  trueGoal :
+    To perfectly restore incredibly fragile artifacts to their original state with exact temporal precision, often needing to hold complex spells for extended periods
+  constraint :
+    His temporal magic becomes unstable and can 'skip' or 'jump' when he is physically fatigued or mentally distracted by a deadline
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 20 / chalk-otter
+FILE  : gemini-flash/19.json
+PARSE_OK : True
+
+  customerName :
+    Roric Stonehand
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Architect who uses earth magic to sculpt and reinforce structures instantly
+  personality :
+    Meticulous, impatient, easily frustrated by imperfections
+  request :
+    I need a wand that can make my earth structures *perfectly* smooth and precise on the surface. My walls are strong, but they always end up looking a bit... rustic. I need clean lines, sharp angles, instantly.
+  trueGoal :
+    To construct large, complex buildings with both the speed and structural integrity of earth magic, while achieving the aesthetic precision and polished finish of traditional masonry, all in real-time on site
+  constraint :
+    His geomancy, while immensely powerful for raw construction, inherently struggles with fine detail work, often creating minor fissures and rough surfaces when hurried or stressed
+
+------------------------------------------------------------------------------
+MODEL : gemini-flash
+SEED  : Run 23 / smoke-pollen
+FILE  : gemini-flash/22.json
+PARSE_OK : True
+
+  customerName :
+    Ignis Solara
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Artisan who crafts enchanted glass using precision pyromancy
+  personality :
+    Obsessively meticulous, easily flustered, deeply passionate
+  request :
+    I need a wand that can maintain a perfectly stable, ultra-low flame for extended periods. My delicate glass work requires absolute consistency, but my fire keeps flickering, or worse, flaring up when I'm trying to hold a tiny, intricate shape.
+  trueGoal :
+    To consistently maintain ultra-fine, delicate heat for hours on end, allowing for rapid succession of intricate, enchanted glass pieces without any fluctuations in temperature or accidental overheating.
+  constraint :
+    Her pyromancy's heat output fluctuates wildly when she's under pressure or trying to hold a precise, static temperature for too long, making delicate work impossible for extended periods.
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 01 / silver-fern
+FILE  : gpt-4o/00.json
+PARSE_OK : True
+
+  customerName :
+    Thalrin Thornmane
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Defense architect who uses earth magic to construct fortifications
+  personality :
+    Innovative, overly cautious, adventurous
+  request :
+    I need a wand that helps prevent the structures I build from collapsing prematurely when the ground shifts.
+  trueGoal :
+    To construct stable, resilient barriers quickly in dynamic environments without sacrificing structural integrity
+  constraint :
+    His earth magic weakens unexpectedly when the terrain is unstable or shifting
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 02 / amber-finch
+FILE  : gpt-4o/01.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Thornroot
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Earth architect who uses geomancy to rapidly construct or deconstruct structures
+  personality :
+    Patient, stubbornly perfectionist, impulsive under pressure
+  request :
+    I need a wand that helps me control the spread of my creations. My earth constructs sometimes grow beyond my initial design.
+  trueGoal :
+    To swiftly build detailed, stable earth structures without them unexpectedly expanding beyond set boundaries
+  constraint :
+    Her magic becomes overly expansive when she's under tight deadlines
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 03 / glass-heron
+FILE  : gpt-4o/02.json
+PARSE_OK : True
+
+  customerName :
+    Thalos Virell
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Architect who uses earth magic to sculpt and stabilize complex structures
+  personality :
+    Visionary, stubbornly perfectionist, easily frustrated
+  request :
+    I need a wand that enhances my precision when forming detailed stone carvings. My structures often crack when the shapes are too intricate.
+  trueGoal :
+    To create large, elaborate architectural designs with fine detail without compromising structural integrity
+  constraint :
+    His geomantic magic becomes less precise as the structures grow taller or more elaborate, leading to accidental fractures
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 04 / iron-vine
+FILE  : gpt-4o/03.json
+PARSE_OK : True
+
+  customerName :
+    Tandor Brighthorn
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Architectural surveyor who uses geomancy to assess structural integrity
+  personality :
+    Inquisitive, stubbornly perfectionist, socially awkward
+  request :
+    I need a wand that can refine the precision of my earth sense. The readings blur when I get too close to certain compositions.
+  trueGoal :
+    To conduct highly accurate assessments of structural weaknesses in diverse geological compositions without the readings going awry
+  constraint :
+    His earth magic becomes erratic when faced with intricate mineral patterns, muddling feedback when he needs it clearest
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 05 / coral-moth
+FILE  : gpt-4o/04.json
+PARSE_OK : True
+
+  customerName :
+    Varisel Thorne
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Architect who uses earth magic to shape and stabilize buildings
+  personality :
+    Innovative, impatient, deeply empathetic
+  request :
+    I need a wand that allows me to maintain the integrity of a structure while rapidly crafting it. My magic tends to overcompensate, causing sudden shifts in the foundation.
+  trueGoal :
+    To construct stable, intricate structures quickly without compromising structural integrity
+  constraint :
+    His geomancy reacts too heavily to pressure, causing foundational shifts when he's rushing to meet multiple project deadlines
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 06 / hollow-spruce
+FILE  : gpt-4o/05.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Tideshadow
+  schoolOfMagic :
+    Lunamancy
+  profession :
+    Navigator who uses lunar magic to chart courses through seas and fog
+  personality :
+    Adventurous, introspective, overconfident
+  request :
+    I need a wand that can stabilize my lunar compasses during sudden tidal changes. It's hard to keep direction steady when the sea is unpredictable.
+  trueGoal :
+    To maintain uninterrupted navigational precision and stability while voyaging through storm-prone, foggy waters without losing course
+  constraint :
+    His lunar spells become erratic when the moon is obscured by thick clouds or sudden ocean tempests
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 07 / quartz-stoat
+FILE  : gpt-4o/06.json
+PARSE_OK : True
+
+  customerName :
+    Thalenic Verdant
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Ranger who uses earth magic to manipulate terrain and track creatures
+  personality :
+    Methodical, deeply empathetic, prone to overthinking
+  request :
+    I need a wand that enhances my connection to the earth without making vibrations too intense. My spells sometimes cause unintended landslides.
+  trueGoal :
+    To smoothly alter terrain and secure paths in an unpredictable forest environment while stealthily tracking targets
+  constraint :
+    His earth magic magnifies ground tremors if he hesitates, which often happens when adjusting his plan on the fly
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 08 / saffron-koi
+FILE  : gpt-4o/07.json
+PARSE_OK : True
+
+  customerName :
+    Thaliel Emberstone
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Fire dancer who uses pyromancy to create stunning visual displays
+  personality :
+    Charismatic, impulsive, self-critical
+  request :
+    I need a wand that limits the heat from my fire during performances. On stage, I can't risk setting anything ablaze accidentally.
+  trueGoal :
+    To create breathtaking fire visuals that capture the crowd's attention while ensuring safety at all times
+  constraint :
+    His fire magic flares unpredictably higher in moments of excitement or stress, which can happen mid-performance
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 09 / dusk-wren
+FILE  : gpt-4o/08.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Harrow
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Fortress architect who uses geomancy to construct defense structures
+  personality :
+    Innovative, hasty, perfectionistic
+  request :
+    I need a wand that helps maintain structural integrity when transforming raw earth into walls because they sometimes crumble in key areas.
+  trueGoal :
+    To quickly erect robust defensive structures with intricate detailing without compromising their stability
+  constraint :
+    His geomantic power weakens unexpectedly whenever he rushes the foundation work - right when he feels the pressure to build fast
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 10 / opal-mantis
+FILE  : gpt-4o/09.json
+PARSE_OK : True
+
+  customerName :
+    Thalor Brynn
+  schoolOfMagic :
+    Chronomancy
+  profession :
+    Archivist who manipulates time to preserve ancient documents
+  personality :
+    Inquisitive, overly meticulous, hasty under pressure
+  request :
+    I require a wand that can stabilize time fields. My magic sometimes accelerates the decay instead of preserving the artifacts.
+  trueGoal :
+    To maintain a steady and time-preserving field around multiple fragile documents simultaneously without inadvertently speeding up their disintegration
+  constraint :
+    His time field becomes chaotic when he's under pressure, causing time loops or rushes exactly when he needs precise control
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 11 / cinder-thistle
+FILE  : gpt-4o/10.json
+PARSE_OK : True
+
+  customerName :
+    Cinder Thistle
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Chef who uses fire magic to enhance culinary creations with precise heat
+  personality :
+    Passionate, short-tempered, deeply empathetic
+  request :
+    I'm looking for a wand that provides consistent heating. My flames tend to surge unexpectedly, ruining delicate dishes.
+  trueGoal :
+    To cook intricate recipes requiring precision and subtlety in heat without the threat of scorching or uneven cooking
+  constraint :
+    Her fire magic flares up unpredictably when she loses her temper, especially when striving for perfection
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 12 / brass-vesper
+FILE  : gpt-4o/11.json
+PARSE_OK : True
+
+  customerName :
+    Thalion Rimewinter
+  schoolOfMagic :
+    Cryomancy
+  profession :
+    Glacial architect who uses ice magic to construct enduring structures
+  personality :
+    Visionary, impatient, detail-oriented
+  request :
+    I need a wand that boosts my precision so my ice bridges hold under shifting temperatures. Sometimes they form too brittle to support the weight.
+  trueGoal :
+    To rapidly construct intricate and stable ice structures capable of withstanding fluctuating conditions without sacrificing artistic detail
+  constraint :
+    His ice magic becomes erratic when faced with time constraints, causing the structures to form with unexpected weaknesses
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 13 / agate-lynx
+FILE  : gpt-4o/12.json
+PARSE_OK : True
+
+  customerName :
+    Kael Thorne
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to forge enchanted weapons
+  personality :
+    Passionate, self-critical, overly cautious
+  request :
+    I need a wand that can maintain a consistent heat level. My flames keep fluctuating, which ruins the temper of the weapons I forge.
+  trueGoal :
+    To forge exquisitely enchanted weapons consistently with even heat distribution without risking damage to the materials
+  constraint :
+    His fire magic fluctuates wildly when he's focused on delicate enchantment work, causing spikes in temperature
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 14 / linen-finch
+FILE  : gpt-4o/13.json
+PARSE_OK : True
+
+  customerName :
+    Thalor Windswift
+  schoolOfMagic :
+    Aeromancy
+  profession :
+    Courier who uses wind magic to deliver messages rapidly across vast distances
+  personality :
+    Impatient, precise, nostalgic
+  request :
+    I need a wand that helps me control gust strength when propelling messages. Too strong and they drift off course, too weak and they're delayed.
+  trueGoal :
+    To send messages with perfect accuracy at high speed, covering great distances without losing the intended path
+  constraint :
+    His wind magic becomes erratic when he loses sight of the destination, causing deviations from course exactly when precision is key
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 15 / lichen-dove
+FILE  : gpt-4o/14.json
+PARSE_OK : True
+
+  customerName :
+    Jorek Flintstrike
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Blacksmith who uses earth magic to forge unbreakable weapons
+  personality :
+    Stoic, perfectionist, easily frustrated
+  request :
+    I need a wand that lets me maintain steady heat in my forge without fluctuations. The last thing I want is an uneven blade.
+  trueGoal :
+    To forge durable, precisely crafted weapons with a consistent energy flow throughout the entire process
+  constraint :
+    His control over earth-based magic wavers when his temper flares, causing inconsistent heat levels in the forge
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 16 / pewter-grove
+FILE  : gpt-4o/15.json
+PARSE_OK : True
+
+  customerName :
+    Liora Thyst
+  schoolOfMagic :
+    Chronomancy
+  profession :
+    Time weaver who manipulates timelines to avert catastrophes
+  personality :
+    Optimistic, indecisive, deeply analytical
+  request :
+    I need a wand that stabilizes my time loops because they tend to unravel when I'm in a rush, causing paradoxes.
+  trueGoal :
+    To create seamless time loops that allow for rapid interventions without timeline distortions
+  constraint :
+    Her time manipulation becomes unwieldy when mental multitasking overwhelms her, precisely when events are most critical
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 17 / juniper-fox
+FILE  : gpt-4o/16.json
+PARSE_OK : True
+
+  customerName :
+    Kaelan Rime
+  schoolOfMagic :
+    Cryomancy
+  profession :
+    Explorer who uses ice magic to traverse and map treacherous terrains
+  personality :
+    Adventurous, overly cautious, obsessively detailed
+  request :
+    I need a wand to keep my ice bridges stable. They tend to crack under light pressure during sudden temperature changes.
+  trueGoal :
+    To construct durable, long-lasting ice paths quickly over unstable ground without them fracturing unexpectedly
+  constraint :
+    His ice magic becomes brittle when transitioning from one temperature extreme to another quickly
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 18 / cobalt-stag
+FILE  : gpt-4o/17.json
+PARSE_OK : True
+
+  customerName :
+    Kael Windrider
+  schoolOfMagic :
+    Aeromancy
+  profession :
+    Courier who uses wind magic to swiftly deliver messages and parcels
+  personality :
+    Energetic, impulsive, anxious
+  request :
+    I need a wand that helps control air currents during delivery sprints. Strong gusts keep taking my parcels off course.
+  trueGoal :
+    To deliver messages with pinpoint accuracy and maximum speed, even through unpredictable weather conditions
+  constraint :
+    His air currents become erratic and turbulent when he speeds up, particularly during moments of urgency
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 19 / ember-shrike
+FILE  : gpt-4o/18.json
+PARSE_OK : True
+
+  customerName :
+    Rhogar Flintforge
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Miner who uses earth magic to unearth valuable gems and ores
+  personality :
+    Stubborn, deeply passionate, overly cautious
+  request :
+    I need a wand that can help me maintain stability when shifting large volumes of rock. Sometimes, I end up causing unintended collapses.
+  trueGoal :
+    To excavate large amounts of gems quickly without triggering dangerous cave-ins or damaging the ores
+  constraint :
+    His geomancy becomes erratic when he simultaneously tries to move earth and sense the structure of the cavern
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 20 / chalk-otter
+FILE  : gpt-4o/19.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Oakenshade
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Defensive architect who uses geomancy to create sturdy, impromptu shelters
+  personality :
+    Resourceful, overly cautious, secretly ambitious
+  request :
+    I need a wand that can solidify earth quickly without requiring extended contact. Time spent shaping is time we're vulnerable.
+  trueGoal :
+    To rapidly construct strong, durable shelters in high-stress situations with limited time and zero exposure to threats
+  constraint :
+    His earth magic requires prolonged focus to fully solidify structures, which becomes erratic if rushed
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 21 / verdigris-tern
+FILE  : gpt-4o/20.json
+PARSE_OK : True
+
+  customerName :
+    Thalorn Emberflame
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Chef who uses fire magic to cook dishes to perfection
+  personality :
+    Passionate, easily frustrated, meticulous
+  request :
+    I need a wand that can help me sustain a steady flame temperature. My current one causes sudden bursts of heat which ruins delicate sauces.
+  trueGoal :
+    To maintain a perfectly even flame to cook intricate dishes without unintended flare-ups despite rapidly changing kitchen conditions
+  constraint :
+    His fire magic varies with his level of frustration, escalating disproportionately when under high pressure
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 22 / hazel-marten
+FILE  : gpt-4o/21.json
+PARSE_OK : True
+
+  customerName :
+    Renlock Blazewick
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Wildlife conservator who uses fire magic to create controlled burns and manage forest health
+  personality :
+    Passionate, impulsive, deeply empathetic
+  request :
+    I need a wand that ensures my fire spreads only to the designated areas. Sometimes it flares up beyond control, and I can't risk harming habitats.
+  trueGoal :
+    To conduct precise and reliable controlled burns that improve forest conditions without disrupting wildlife
+  constraint :
+    His fire magic becomes unpredictable in gusty conditions, which often occur at critical moments during his work
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 23 / smoke-pollen
+FILE  : gpt-4o/22.json
+PARSE_OK : True
+
+  customerName :
+    Thalor Embermyn
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith mage who uses fire magic to forge enchanted weapons
+  personality :
+    Passionate, impatient, methodical
+  request :
+    I need a wand that helps me stabilize my flames during the forging process. The heat fluctuates too much, making the metal brittle.
+  trueGoal :
+    To maintain a consistent, controlled heat that allows for the precise crafting of resilient and powerful enchantments
+  constraint :
+    His fire magic becomes erratic when he becomes too focused, causing heat surges
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 24 / amber-quail
+FILE  : gpt-4o/23.json
+PARSE_OK : True
+
+  customerName :
+    Thalor Birchspur
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Seismic scout who uses earth magic to detect and fortify unstable terrain
+  personality :
+    Diligent, overly cautious, secretly adventurous
+  request :
+    I need a wand that can help me stabilize vibrations. When the ground shifts unexpectedly, it disrupts my sensing spells.
+  trueGoal :
+    To maintain unwavering sensitivity to ground changes while simultaneously reinforcing weak spots quickly
+  constraint :
+    His earth magic becomes erratic and less precise during unexpected tectonic shifts
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 25 / spindle-moth
+FILE  : gpt-4o/24.json
+PARSE_OK : True
+
+  customerName :
+    Thalor Eldridge
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Earth mage who constructs instant fortifications and barriers in battle
+  personality :
+    Stubborn, strategic, impulsively reckless
+  request :
+    I need a wand that can help me shape the terrain with greater precision. My walls often end up with gaps during hectic battles.
+  trueGoal :
+    To create seamless, structurally sound defenses rapidly under pressure without compromising the barrier's integrity
+  constraint :
+    His earth magic fluctuates in stability when he's forced to rush, leading to unpredictable gaps
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 26 / shale-rook
+FILE  : gpt-4o/25.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Ferris
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Bridge builder who uses earth magic to rapidly construct solid stone structures
+  personality :
+    Innovative, relentlessly driven, easily frustrated
+  request :
+    I need a wand that can stabilize my constructs on unstable terrain. My bridges sometimes crumble when the ground shifts unexpectedly.
+  trueGoal :
+    To construct strong, enduring stone bridges quickly on any terrain while maintaining structural integrity
+  constraint :
+    His earth magic becomes unstable and brittle when the ground beneath is inherently volatile
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 27 / tallow-yew
+FILE  : gpt-4o/26.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Celestin
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Construction overseer who uses earth magic to shift terrain for building sites
+  personality :
+    Confident, impulsive, overly detail-oriented
+  request :
+    I need a wand to help me seamlessly stabilize the ground after shifting it. Lately, I've had issues with uneven settling under pressure.
+  trueGoal :
+    To swiftly and accurately manipulate and stabilize large sections of terrain during construction without compromising structural integrity
+  constraint :
+    His geomancy becomes inconsistent when he's in haste, causing unforeseen shifting
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 28 / loam-vesper
+FILE  : gpt-4o/27.json
+PARSE_OK : True
+
+  customerName :
+    Thalindra Faeryn
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Environment sculptor who uses geomancy to shape landscapes for magical gardens
+  personality :
+    Visionary, easily frustrated, detail-oriented
+  request :
+    I need a wand that minimizes the noise generated when shifting rocks and soil. The clatter distracts the local wildlife and disrupts my work.
+  trueGoal :
+    To quietly and precisely sculpt intricate landscapes where delicate ecosystems thrive without disturbance
+  constraint :
+    Her geomantic magic inadvertently amplifies ambient sounds when she loses focus, especially when juggling multiple simultaneous adjustments
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 29 / bone-magpie
+FILE  : gpt-4o/28.json
+PARSE_OK : True
+
+  customerName :
+    Thalorin Wraithe
+  schoolOfMagic :
+    Chronomancy
+  profession :
+    Temporal investigator using time magic to uncover past events
+  personality :
+    Obsessively curious, emotionally distant, regretful of past choices
+  request :
+    I need a wand that stabilizes time loops I generate during investigations. They tend to collapse just when I'm about to gain insight.
+  trueGoal :
+    To maintain stable and prolonged time loops during investigations to gather detailed historical insights without collapsing unexpectedly
+  constraint :
+    His temporal magic destabilizes when faced with emotional triggers from his own past, causing time loops to fold
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o
+SEED  : Run 30 / rune-cricket
+FILE  : gpt-4o/29.json
+PARSE_OK : True
+
+  customerName :
+    Zarith Emberflame
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Enchanter who uses fire magic to forge and infuse legendary weapons with elemental fire
+  personality :
+    Passionate, easily frustrated, relentlessly creative
+  request :
+    I'm looking for a wand that can help me control the heat levels precisely. Too much heat during the enchanting process and the metal integrity is compromised.
+  trueGoal :
+    To forge powerful, perfectly balanced weapons with high elemental potency without risking structural weakness
+  constraint :
+    His fire magic becomes erratic and uncontrollable when he loses patience, exactly when precision is required in crafting
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 01 / silver-fern
+FILE  : gpt-4o-mini/00.json
+PARSE_OK : True
+
+  customerName :
+    Thalion Emberforge
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who harnesses fire magic to forge enchanted weapons
+  personality :
+    Passionate, impulsive, detail-oriented
+  request :
+    I need a wand that allows me to regulate the temperature of my flames. Too hot and I melt the metal instead of shaping it.
+  trueGoal :
+    To create highly detailed, durable weapons at a controlled temperature without risking damage to the materials
+  constraint :
+    His fire magic flares uncontrollably when he becomes overly excited or frustrated, forcing him to backtrack on his work
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 02 / amber-finch
+FILE  : gpt-4o-mini/01.json
+PARSE_OK : True
+
+  customerName :
+    Talon Emberbrim
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Fire dancer who uses flame to create mesmerizing performances
+  personality :
+    Charismatic, reckless, secretly insecure
+  request :
+    I need a wand that allows me to control the height and intensity of my flames. Sometimes, they get out of hand when I try to show off.
+  trueGoal :
+    To deliver stunning, varied fire displays that captivate audiences without uncontrollable flare-ups
+  constraint :
+    His flames grow in intensity when he feels pressured to impress or perform, leading to unpredictable bursts
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 03 / glass-heron
+FILE  : gpt-4o-mini/02.json
+PARSE_OK : True
+
+  customerName :
+    Braxian Glint
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Architect mage who uses earth magic to shape structures
+  personality :
+    Creative, indecisive, overly ambitious
+  request :
+    I need a wand that allows me to fine-tune the density of stone I’m shaping. If it's too solid, I can't make adjustments when I need to.
+  trueGoal :
+    To innovate structurally complex designs quickly while ensuring flexibility in my creations during the building process
+  constraint :
+    His earth magic hardens under pressure, particularly when he's feeling the weight of expectations from his clients
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 04 / iron-vine
+FILE  : gpt-4o-mini/03.json
+PARSE_OK : True
+
+  customerName :
+    Kael Thundershade
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Cave explorer who uses earth magic to manipulate terrain and create safe pathways
+  personality :
+    Adventurous, easily overwhelmed, analytical
+  request :
+    I need a wand that allows me to shape the earth quickly without causing instability. Sometimes I make the ground tremble too much when I try to carve out paths.
+  trueGoal :
+    To shape the terrain swiftly and reliably while ensuring the cave’s stability during exploration
+  constraint :
+    His earth magic triggers seismic reactions when he is anxious or rushed, exactly when he requires the utmost control.
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 05 / coral-moth
+FILE  : gpt-4o-mini/04.json
+PARSE_OK : True
+
+  customerName :
+    Talindra Fyre
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to meld and shape metal
+  personality :
+    Passionate, impatient, inconsistently meticulous
+  request :
+    I need a wand that helps me control the heat when forging. Sometimes the flames flare up too high, and I end up ruining the metal.
+  trueGoal :
+    To maintain precise heat control to create intricate designs rapidly without compromising the quality of the metal
+  constraint :
+    Her fire magic intensifies when she's excited or frustrated, leading to unpredictable heat levels at critical moments
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 06 / hollow-spruce
+FILE  : gpt-4o-mini/05.json
+PARSE_OK : True
+
+  customerName :
+    Branwen Coldfire
+  schoolOfMagic :
+    Ice magic
+  profession :
+    Ice sculptor who creates intricate frozen artworks for royal events
+  personality :
+    Passionate, overly critical, subtly insecure
+  request :
+    I need a wand that allows me to perfectly control the temperature of my ice magic. If it gets too cold, my sculptures become brittle and shatter.
+  trueGoal :
+    To carve detailed structures quickly while maintaining the ideal temperature for durability without sacrificing artistic flair
+  constraint :
+    Her ice magic's cooling effect accelerates when she's under pressure, leading to unintentional brittleness at critical moments
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 07 / quartz-stoat
+FILE  : gpt-4o-mini/06.json
+PARSE_OK : True
+
+  customerName :
+    Felix Pyrestone
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Cook who uses fire magic to enhance flavor and cooking precision
+  personality :
+    Passionate, easily distracted, perfectionist
+  request :
+    I need a wand that can control the heat level more precisely. Sometimes my fire gets too intense and I scorch the dish instead of roasting it.
+  trueGoal :
+    To create gourmet meals with the perfect balance of heat and flavor quickly, without risking burnt ingredients
+  constraint :
+    His fire magic flares unpredictably when he gets overly excited or distracted, exactly when precision is critical
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 08 / saffron-koi
+FILE  : gpt-4o-mini/07.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Brightflame
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Forensic investigator who uses fire magic to enhance evidence analysis
+  personality :
+    Intense, analytical, prone to impulsivity
+  request :
+    I need a wand that can control the heat output of my flames. Otherwise, things get too charred before I can analyze them.
+  trueGoal :
+    To rapidly and precisely handle evidence analysis without compromising the samples from excessive heat
+  constraint :
+    His fire magic tends to flare uncontrollably when he's excited or frustrated, leading to unintended destruction
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 09 / dusk-wren
+FILE  : gpt-4o-mini/08.json
+PARSE_OK : True
+
+  customerName :
+    Thalor Emberbane
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Artificer who uses fire magic to forge enchanted weapons
+  personality :
+    Passionate, impulsive, deeply contemplative
+  request :
+    I need a wand that helps me control the flames better. Every time I get too excited, the heat becomes uncontrollable and ruins the metal.
+  trueGoal :
+    To forge intricate weapons quickly while maintaining precise control over the flames, even amidst creative bursts of inspiration
+  constraint :
+    His fire magic intensifies when he feels strong emotions, especially excitement, causing dangerous flare-ups right when he's focused on intricate details
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 10 / opal-mantis
+FILE  : gpt-4o-mini/09.json
+PARSE_OK : True
+
+  customerName :
+    Faelan Thorne
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Geomancer who shapes terrain for defensive structures
+  personality :
+    Grounded, overly cautious, unpredictably impulsive
+  request :
+    I need a wand that helps me stabilize the earth while I'm constructing. Sometimes the ground shifts unexpectedly, and I need to maintain my focus.
+  trueGoal :
+    To rapidly create sturdy barriers without losing control of the terrain's integrity during chaos
+  constraint :
+    His magic tends to falter when he's distracted, especially in high-pressure situations when quick decisions are vital
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 11 / cinder-thistle
+FILE  : gpt-4o-mini/10.json
+PARSE_OK : True
+
+  customerName :
+    Fendril Emberforge
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to forge weapons with precision and speed
+  personality :
+    Passionate, impulsive, deeply contemplative
+  request :
+    I need a wand that can regulate the temperature of my flames. If it gets too hot, I can ruin my work, but if it's too low, I can't get the right quality.
+  trueGoal :
+    To heat the metal to the perfect temperature quickly while maintaining a fine level of control over the flame's intensity
+  constraint :
+    His magic flares out of control when he gets overly excited or angry, compromising his precision at crucial moments
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 12 / brass-vesper
+FILE  : gpt-4o-mini/11.json
+PARSE_OK : True
+
+  customerName :
+    Thalra Duskwhisper
+  schoolOfMagic :
+    Illusion magic
+  profession :
+    Spy who uses illusions to infiltrate secured locations undetected
+  personality :
+    Charming, overtly confident, occasionally paranoid
+  request :
+    I need a wand that enhances the stability of my illusions. They tend to flicker when I get too nervous while using them.
+  trueGoal :
+    To craft convincing and long-lasting illusions seamlessly while maintaining composure in high-pressure situations
+  constraint :
+    Her illusions destabilize in moments of self-doubt, especially when she feels threatened or pressured
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 13 / agate-lynx
+FILE  : gpt-4o-mini/12.json
+PARSE_OK : True
+
+  customerName :
+    Braxis Thornweaver
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Geomancer who uses earth spells to reshape terrain for defense
+  personality :
+    Determined, impulsive, highly protective
+  request :
+    I need a wand that helps me stabilize the ground while I'm shaping it. Sometimes it collapses just when I’m about to create a barrier.
+  trueGoal :
+    To swiftly create solid barriers that can withstand attacks while ensuring the ground remains stable during casting
+  constraint :
+    His earth magic loses cohesion when he’s too hurried, leading to unpredictable collapses at critical moments
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 14 / linen-finch
+FILE  : gpt-4o-mini/13.json
+PARSE_OK : True
+
+  customerName :
+    Talon Firebrand
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to shape and temper metal
+  personality :
+    Passionate, easily frustrated, meticulous
+  request :
+    I need a wand that helps me control the flames' heat more effectively. Right now, I risk burning my projects or not getting the metal hot enough.
+  trueGoal :
+    To achieve consistent heat control for perfect metal crafting without overshooting or undershooting the temperature
+  constraint :
+    His fire magic flares unpredictably when he's passionate about a project, compelling him to work quickly and recklessly
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 15 / lichen-dove
+FILE  : gpt-4o-mini/14.json
+PARSE_OK : True
+
+  customerName :
+    Faelan Glimmershade
+  schoolOfMagic :
+    Nature magic
+  profession :
+    Herbalist who uses plant magic to enhance potion efficacy
+  personality :
+    Empathetic, stubborn, intensely focused
+  request :
+    I need a wand that can stabilize the energy of the plants when I’m mixing them. I often end up with volatile reactions that ruin my potions.
+  trueGoal :
+    To craft high-quality potions quickly while maintaining consistency in plant energy extraction without triggering unwanted effects
+  constraint :
+    His magic fluctuates unpredictably around unfamiliar flora, especially when he's in a rush
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 16 / pewter-grove
+FILE  : gpt-4o-mini/15.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Wildwhisper
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Geologist who uses earth magic to locate precious minerals
+  personality :
+    Inquisitive, stubbornly defensive, awkwardly enthusiastic
+  request :
+    I need a wand that helps me pinpoint mineral locations without causing tremors. The ground shakes too much when I'm in a hurry.
+  trueGoal :
+    To accurately and swiftly locate mineral deposits while minimizing disturbing the surrounding environment
+  constraint :
+    His earth magic creates vibrations in the ground that intensify under pressure, which happens when he's excited or rushing
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 17 / juniper-fox
+FILE  : gpt-4o-mini/16.json
+PARSE_OK : True
+
+  customerName :
+    Kaelan Emberforge
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to forge enchanted weapons
+  personality :
+    Passionate, impulsive, inconstant
+  request :
+    I need a wand that helps me control the temperature of the flames while I work. Sometimes they burn too hot and ruin the metal before I can shape it.
+  trueGoal :
+    To forge weapons quickly and flawlessly with precise temperature control for the perfect blend of strength and enchantment
+  constraint :
+    His fire magic tends to erupt uncontrollably when he feels overexcited or stressed, leading to imperfections in his craft
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 18 / cobalt-stag
+FILE  : gpt-4o-mini/17.json
+PARSE_OK : True
+
+  customerName :
+    Grimwald Thornfist
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Stone sculptor who uses earth magic to shape intricate designs
+  personality :
+    Passionate, excessively critical, intensely focused
+  request :
+    I need a wand that can help me fine-tune the vibrations of my earth spells. If I exert too much power, I risk shattering my creations before they are finished.
+  trueGoal :
+    To create detailed, artistic sculptures quickly without compromising the integrity of the stone
+  constraint :
+    His earth magic reacts unpredictably to stress, causing tremors when he feels the pressure of perfection
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 19 / ember-shrike
+FILE  : gpt-4o-mini/18.json
+PARSE_OK : True
+
+  customerName :
+    Vespera Ignis
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who crafts enchanted weapons using fire magic
+  personality :
+    Fiery, passionate, deeply insecure
+  request :
+    I need a wand that helps me regulate the temperature of my flames. Sometimes I overheat the metal and ruin my work.
+  trueGoal :
+    To forge weapons with precise temperatures quickly while ensuring consistency in quality throughout the crafting process
+  constraint :
+    Her fire magic flares erratically when she's emotionally charged, causing her to lose control when the stakes are high
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 20 / chalk-otter
+FILE  : gpt-4o-mini/19.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Ashforge
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Stone sculptor who uses earth magic to mold and refine intricate designs
+  personality :
+    Creative, impatient, overly critical
+  request :
+    I need a wand that helps me fine-tune my control over the density of stone. Sometimes I end up shattering my work when I just want a light touch.
+  trueGoal :
+    To effortlessly create intricate, delicate sculptures without risking damage from unintended earth shifts
+  constraint :
+    His control over earth magic falters under pressure, often causing him to overexert strength in crucial moments
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 21 / verdigris-tern
+FILE  : gpt-4o-mini/20.json
+PARSE_OK : True
+
+  customerName :
+    Kalon Windsor
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Seismic architect who uses earth magic to create stable structures
+  personality :
+    Innovative, overly cautious, dreamily optimistic
+  request :
+    I need a wand that can help me manipulate the earth swiftly and accurately while I work on-site. Sometimes I can't get the stone to move just the way I want it to.
+  trueGoal :
+    To shape and stabilize large structures with rapid precision even in challenging conditions without causing harm to the site
+  constraint :
+    His connection to the earth can become chaotic when he feels rushed, increasing the risk of structural instability
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 22 / hazel-marten
+FILE  : gpt-4o-mini/21.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Duskmantle
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to forge weapons with precision
+  personality :
+    Passionate, impulsive, perpetually anxious
+  request :
+    I need a wand that can help me maintain a consistent flame temperature. My forges keep fluctuating, and I can't get the right heat for delicate work.
+  trueGoal :
+    To forge weaponry at high speed with the precise temperature control necessary for maintaining quality without overheating
+  constraint :
+    His fire magic tends to create uncontrolled bursts of flame whenever he feels rushed or pressured, especially in the heat of a busy forge
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 23 / smoke-pollen
+FILE  : gpt-4o-mini/22.json
+PARSE_OK : True
+
+  customerName :
+    Astrid Flameheart
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Fire dancer who uses flames in dramatic performances
+  personality :
+    Passionate, impulsive, self-critical
+  request :
+    I need a wand that allows me to control the flame's color and shape while performing. Sometimes, my flames get too wild and turn into a dangerous inferno.
+  trueGoal :
+    To create captivating, dynamic fire displays that maintain audience engagement without risking injury to myself or others
+  constraint :
+    Her ability to control the flames weakens when she feels embarrassed or under pressure to perform perfectly
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 24 / amber-quail
+FILE  : gpt-4o-mini/23.json
+PARSE_OK : True
+
+  customerName :
+    Thorn Wildbriar
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Geomancer who shapes the land to create protective barriers
+  personality :
+    Grounded, fiercely independent, painfully shy
+  request :
+    I need a wand that helps me stabilize my earthen walls quickly. They keep collapsing when I try to divert too much energy into shaping them.
+  trueGoal :
+    To rapidly create durable and stable barriers in chaotic situations without them crumbling under pressure
+  constraint :
+    His earth magic weakens in vulnerable emotional states, making constructs less stable when he feels insecure
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 25 / spindle-moth
+FILE  : gpt-4o-mini/24.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Emberwood
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to enhance metal forging
+  personality :
+    Passionate, often reckless, deeply creative
+  request :
+    I need a wand that helps me control the temperature of the flames precisely. I keep melting my designs when I try to push the limits.
+  trueGoal :
+    To forge intricate, high-quality weapons quickly while maintaining exact control over the fire's intensity and heat
+  constraint :
+    His pyromancy flares up uncontrollably when he gets overly excited or frustrated, risking his work
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 26 / shale-rook
+FILE  : gpt-4o-mini/25.json
+PARSE_OK : True
+
+  customerName :
+    Thorn Eldergrove
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Geological surveyor who uses earth magic to sense mineral deposits
+  personality :
+    Stubborn, intensely curious, yet painfully indecisive
+  request :
+    I need a wand that helps me focus my sensing spells without overwhelming vibrations. The readings go wild when I'm trying to pinpoint a location.
+  trueGoal :
+    To accurately detect and analyze mineral deposits in real-time while remaining stable and focused on the source
+  constraint :
+    His sensing magic can become erratic if he’s emotionally conflicted, which is often when he needs clarity the most
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 27 / tallow-yew
+FILE  : gpt-4o-mini/26.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Underleaf
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Gemstone appraiser who uses earth magic to reveal the true value of gems
+  personality :
+    Inquisitive, impatient, deeply observant
+  request :
+    I need a wand that can help me sense the minute properties of gems faster. Sometimes I lose track of time when I'm trying to focus on their intricacies.
+  trueGoal :
+    To quickly and accurately identify the value of multiple gemstones in an intense market environment while maintaining clarity of perception
+  constraint :
+    His magic falters when he tries to rush through the appraisal, causing misinterpretations of the gemstones' true essence
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 28 / loam-vesper
+FILE  : gpt-4o-mini/27.json
+PARSE_OK : True
+
+  customerName :
+    Kiran Emberfrost
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to craft weapons and armor
+  personality :
+    Passionate, impatient, deeply caring
+  request :
+    I need a wand that helps me focus and maintain the perfect temperature while forging. I often overheat the metal, ruining my work.
+  trueGoal :
+    To rapidly create precisely tempered weapons without losing any of the fine details during the crafting process
+  constraint :
+    His fire magic flares uncontrollably when he feels rushed, leading to inconsistent heat control when he’s under pressure
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 29 / bone-magpie
+FILE  : gpt-4o-mini/28.json
+PARSE_OK : True
+
+  customerName :
+    Kaelan Thorne
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Architectural mage who shapes stone and earth for constructing fortifications
+  personality :
+    Innovative, stubborn, occasionally reckless
+  request :
+    I need a wand that allows me to sculpt stone with finesse. Sometimes my creations crumble because I can't control the density precisely enough.
+  trueGoal :
+    To create intricate defensive structures quickly without risking collapse or instability in the material
+  constraint :
+    His magic falters when he is under pressure, leading to unstable creations just when stakes are highest
+
+------------------------------------------------------------------------------
+MODEL : gpt-4o-mini
+SEED  : Run 30 / rune-cricket
+FILE  : gpt-4o-mini/29.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Emberveil
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to forge unique weapons
+  personality :
+    Passionate, reckless, fiercely loyal
+  request :
+    I need a wand that can help me control the fire's heat precisely. Too much and I ruin the metal, too little and it doesn't fuse.
+  trueGoal :
+    To forge weapons at an optimal temperature quickly without compromising on quality or detail
+  constraint :
+    His fire magic flares unpredictably when his emotions run high, especially during intense crafting sessions
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 01 / silver-fern
+FILE  : llama3-8b/00.json
+PARSE_OK : True
+
+  customerName :
+    Elwynn Glimmer
+  schoolOfMagic :
+    Crystalomancy
+  profession :
+    Gemstone prospector who uses crystal magic to locate and excavate valuable minerals
+  personality :
+    Perfectionistic, risk-averse, compulsively organized
+  request :
+    I need a wand that can prevent the crystalline resonances from disrupting my excavation equipment. Every time I try to pinpoint a new vein, the vibrations in the rock cause my machinery to malfunction.
+  trueGoal :
+    To locate and extract valuable gems with unparalleled speed and precision without the resonant interference causing mechanical failure
+  constraint :
+    Her magic synchronises poorly with inanimate objects, particularly those made of metal or wood
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 02 / amber-finch
+FILE  : llama3-8b/01.json
+PARSE_OK : True
+
+  customerName :
+    Kaid Rahlven
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Volcanic archaeologist who uses fire magic to navigate treacherous lava flows and uncover ancient artifacts
+  personality :
+    Brash, fiercely loyal, secretly claustrophobic
+  request :
+    I need a wand that lets me adjust the temperature of my flames in real-time. My readings indicate I'm creating unstable flow dynamics - I don't want to accidentally trigger a new eruption.
+  trueGoal :
+    To navigate extreme thermal environments with precision and control, unearthing artifacts without igniting new flows
+  constraint :
+    His magic destabilises at high altitude or in areas of intense electromagnetic interference
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 03 / glass-heron
+FILE  : llama3-8b/02.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Threnody
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Master smith who uses fire magic to imbue steel with strength and resilience
+  personality :
+    Ingenious, intensely introverted, brutally honest
+  request :
+    I need a wand that keeps my flames consistent in temperature and intensity. I've been getting inconsistent results on the alloy's tensile strength.
+  trueGoal :
+    To craft superior steel alloys quickly under precise thermal control without compromising structural integrity
+  constraint :
+    His pyromancy destabilises when he works with high-temperature alloys, causing unpredictable heat fluctuations
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 04 / iron-vine
+FILE  : llama3-8b/03.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Darkspan
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Furnace craftsman who uses fire magic to fine-tune and repair complex machinery
+  personality :
+    Blunt, analytical, quietly possessive
+  request :
+    I need a wand that prevents the thermal surge when I imbue metals with my flame. One wrong spark and I risk damaging the entire assembly.
+  trueGoal :
+    To infuse precision temperature control into molten metal during high-pressure repairs without disrupting the chemical balance
+  constraint :
+    His magic loses thermal stability at precise moments of focus, causing unpredictable temperature spikes
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 05 / coral-moth
+FILE  : llama3-8b/04.json
+PARSE_OK : True
+
+  customerName :
+    Kai Luminari
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Architect who uses fire magic to craft self-sustaining habitats and cities
+  personality :
+    Charismatic, overly perfectionistic, quietly nihilistic
+  request :
+    I need a wand that lets me precision-control the combustion rate of my fires. My constructions are still too prone to either igniting wildly out of control or not catching at all.
+  trueGoal :
+    To design and build large-scale self-sustaining habitats with intricate, temperature-controlled fire systems without sacrificing structural integrity or aesthetics
+  constraint :
+    His pyromancy is severely disrupted by changing weather conditions - a constant problem when designing for cities prone to variable climate
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 06 / hollow-spruce
+FILE  : llama3-8b/05.json
+PARSE_OK : True
+
+  customerName :
+    Kaida Holloway
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Furnace operator who uses fire magic to ignite chemical reactions for steel production
+  personality :
+    Blunt, fiercely loyal, quietly superstitious
+  request :
+    I need a wand that prevents overheating. The last batch I produced had too much excess iron - we lost the whole shipment.
+  trueGoal :
+    To control the precision and speed of her fire ignitions across multiple furnaces without losing temperature control during rapid production shifts
+  constraint :
+    Her magic surges in intensity when exposed to electromagnetic fields - a constant presence near our machinery
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 07 / quartz-stoat
+FILE  : llama3-8b/06.json
+PARSE_OK : False
+
+  PARSED EMPTY — RAW RESPONSE FOLLOWS
+  {
+  "customerName": "Kaelin Blackstone",
+  "schoolOfMagic": "Necromancy",
+  "profession": "Grave robber who uses necromancy to animate skeletal allies in combat",
+  "personality": "Darkly charming, emotionally numb, intensely driven by curiosity",
+  "request": "I need a wand that can delay the putrefaction of my undead minions for longer. They're falling apart too fast when I need them most.",
+  "trueGoal": "To sustain long battles with a large and reliable skeletal army without worrying about their structural integrity collapsing mid-fight",
+  "constraint": "Her necromancy accelerates decomposition on her allies whenever she is anxious about the success of an operation"
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 08 / saffron-koi
+FILE  : llama3-8b/07.json
+PARSE_OK : False
+
+  PARSED EMPTY — RAW RESPONSE FOLLOWS
+  {
+  "customerName": "Asterion Thrane",
+  "schoolOfMagic": "Pyromancy",
+  "profession": "Pyromancer blacksmith who forges blades infused with fire magic for battle",
+  "personality": "Blunt, hot-headed, secretly a perfectionist",
+  "request": "I need a wand that can control the temperature of my flames when working at high heat. I burn too many fine irons because my magic gets out of hand.",
+  "trueGoal": "To craft intricately patterned fire-infused blades rapidly without burning through precious materials or scorching himself",
+  "constraint": "His pyromancy ignites uncontrollably when he is intensely focused on precision - exactly during the most delicate parts of his craft"
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 09 / dusk-wren
+FILE  : llama3-8b/08.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Duskmist
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Grave robber who uses necromancy to animate and control skeletal soldiers for retrieval of valuable artifacts
+  personality :
+    Ambitious, morbidly fascinated, increasingly isolated
+  request :
+    I need a wand that allows me to focus on a single skeleton at a time without them getting restless or turning on each other - it's hard enough navigating these tombs as is.
+  trueGoal :
+    To animate and control a large squad of skeletons with precision, speed, and coordination in the cramped, poorly mapped tunnels of an ancient necropolis
+  constraint :
+    His necromantic magic falters when surrounded by too many spirits, which often happens when he's trying to bring order to the larger squads
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 10 / opal-mantis
+FILE  : llama3-8b/09.json
+PARSE_OK : True
+
+  customerName :
+    Kaida Ryujin
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Ceramicist who uses fire magic to temper and shape glazes
+  personality :
+    Practical, intensely curious, quietly perfectionistic
+  request :
+    I need a wand that lets me regulate my flame's temperature. Right now, I'm having trouble getting the right glaze without it bubbling or cracking.
+  trueGoal :
+    To produce intricate, high-precision ceramics with consistent, controlled thermal shock resistance
+  constraint :
+    Her fire magic accelerates unpredictably in response to sudden changes in air currents - exactly when she needs precise control over temperature
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 11 / cinder-thistle
+FILE  : llama3-8b/10.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Thorne
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Firefighter mage who uses fire magic to rescue people from burning buildings
+  personality :
+    Impulsive, habitually detached, intensely passionate about saving others
+  request :
+    I need a wand that stabilizes my flame manipulation. It keeps jumping wildly when I'm rescuing multiple people at once.
+  trueGoal :
+    To rapidly extinguish fires in tight spaces without accidentally pushing fleeing victims back into the flames
+  constraint :
+    His magic intensifies uncontrollably whenever he hears someone screaming for help
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 12 / brass-vesper
+FILE  : llama3-8b/11.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Darkhaven
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Art forger who uses pyromagic techniques to craft convincing fakes of precious artifacts
+  personality :
+    Charming, emotionally guarded, quietly perfectionistic
+  request :
+    I need a wand that lets me fine-tune the temperature and texture of my fires. I'm sick of accidentally scorching the 'wood' in these fake relics.
+  trueGoal :
+    To craft authentic-looking replicas with precise control over thermal patterns without triggering any detectable heat signatures
+  constraint :
+    His pyromagic skills destabilise when he's exposed to intense visual stimuli - exactly when he needs the most control
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 13 / agate-lynx
+FILE  : llama3-8b/12.json
+PARSE_OK : True
+
+  customerName :
+    Kaida Rahl
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Crypt explorer who uses necromantic magic to detect and stabilize undead energies
+  personality :
+    Fiercely driven, obsessively meticulous, terrified of being overwhelmed by the dead
+  request :
+    I need a wand that stops my necro-lights from draining themselves too quickly. I have to explore deep tombs and can't afford to run out of light mid-expedition.
+  trueGoal :
+    To reliably map and stabilize undead energies across vast distances without overextending her necromantic resources
+  constraint :
+    Her magic accelerates in consumption when she's surrounded by a high density of spirits - often exactly where it matters most
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 14 / linen-finch
+FILE  : llama3-8b/13.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Lysander
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Ceremonial pyromancer who uses fire magic for grand, public incantations
+  personality :
+    Charismatic, easily flustered under pressure, intensely proud of his artistry
+  request :
+    I need a wand that helps me control the flame height without overheating. I had an incident where I accidentally set off the ceremonial hall's curtains ablaze during a ritual.
+  trueGoal :
+    To perform visually stunning, precision-crafted fire magic in high-pressure public performances without inadvertently setting anything ablaze
+  constraint :
+    His pyromancy overreacts when he becomes intensely focused on his craft
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 15 / lichen-dove
+FILE  : llama3-8b/14.json
+PARSE_OK : False
+
+  PARSED EMPTY — RAW RESPONSE FOLLOWS
+  {
+  "customerName": "Cormac Vyrn",
+  "schoolOfMagic": "Pyromancy",
+  "profession": "High-temperature smelter who uses fire magic to melt rare ores into precise alloys",
+  "personality": "Ruthless, fastidious, quietly fascinated by impermanence",
+  "request": "I need a wand that stabilizes the temperature of my flames. When I'm trying to melt certain metals, my fire tends to overshoot or get stuck at a low point, which ruins the alloy.",
+  "trueGoal": "To create high-precision alloys for advanced machinery by accurately controlling the flame's heat and duration",
+  "constraint": "His magic is erratic when his hands are numb from working with extremely high temperatures"
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 16 / pewter-grove
+FILE  : llama3-8b/15.json
+PARSE_OK : True
+
+  customerName :
+    Aurélien Kyrios
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Firebrand commander who uses fire magic to lead siege assaults
+  personality :
+    Charismatic, fiercely optimistic, tactically anxious
+  request :
+    I need a wand that helps me adjust the temperature of my flames on the fly. Too hot and we scorch our own allies.
+  trueGoal :
+    To execute precision pyromancy at high speeds while directing an entire team without accidentally burning anyone
+  constraint :
+    His magic accelerates uncontrollably when he's under pressure to meet a deadline
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 17 / juniper-fox
+FILE  : llama3-8b/16.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Darksong
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Volcano explorer and cartographer who uses fire magic to chart new cave systems
+  personality :
+    Bluntly honest, fiercely independent, secretly terrified of being trapped underground
+  request :
+    I need a wand that prevents me from accidentally setting off small explosions when I'm mapping tight spaces. My fire magic keeps getting out of control in enclosed areas.
+  trueGoal :
+    To chart the most thorough and detailed maps of new cave systems without causing self-inflicted structural damage with my pyromancy
+  constraint :
+    His flames grow wildly unpredictable whenever he feels claustrophobic, which is almost always when working deep underground
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 18 / cobalt-stag
+FILE  : llama3-8b/17.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Vexys
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Grave warden who uses necromantic magic to stabilize restless spirits
+  personality :
+    Dryly sarcastic, quietly compassionate, intensely introspective
+  request :
+    I need a wand that prevents my summoned spirits from getting 'excited' and causing trouble during the ritual. It's hard enough dealing with the grieving families without some rambunctious undead ruining everything.
+  trueGoal :
+    To perform complex spirit binding rituals rapidly while minimizing disruptions to both the family and the restless entities
+  constraint :
+    Her necromantic magic accelerates when she encounters strong emotions from either herself or others - making it harder to control when dealing with highly distressed spirits
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 19 / ember-shrike
+FILE  : llama3-8b/18.json
+PARSE_OK : True
+
+  customerName :
+    Kaelara Embergard
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Volcano explorer who uses fire magic to navigate and map lava flows
+  personality :
+    Charismatic, impulsive, deeply claustrophobic
+  request :
+    I need a wand that helps me regulate my flames when I'm in tight spaces. Sometimes they get too big for the tunnels and risk collapsing them.
+  trueGoal :
+    To navigate and map pyroclastic flows with precision at high speeds without creating catastrophic hazards
+  constraint :
+    Her magic over-compensates when she's anxious about being trapped underground
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 20 / chalk-otter
+FILE  : llama3-8b/19.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Brightshore
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Treasure hunter who uses fire magic to detect and extract valuable minerals from the depths of volcanic caverns
+  personality :
+    Confident, slightly reckless, intensely driven
+  request :
+    I need a wand that lets me pinpoint the location of hotspots in the rock without setting off the unstable geological structure - one spark could seal our escape route forever.
+  trueGoal :
+    To locate and extract valuable deposits rapidly while navigating treacherous cave networks without triggering a catastrophic collapse
+  constraint :
+    Her magic becomes disoriented by intense heat sources, exactly when she needs precise thermal imaging
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 21 / verdigris-tern
+FILE  : llama3-8b/20.json
+PARSE_OK : True
+
+  customerName :
+    Kaida Argent
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Fire forge mage who uses magic to imbue metal with strength and resilience
+  personality :
+    Impatient, intensely passionate, quietly critical of herself
+  request :
+    I need a wand that stabilizes the temperature in my forges. Sometimes I accidentally overheat or undercool the metal, which ruins entire batches.
+  trueGoal :
+    To precision-craft high-strength alloys rapidly without compromising their integrity through thermal shock
+  constraint :
+    Her fire magic spikes wildly when she's excited about a new project - exactly when she needs utmost control over the heat
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 22 / hazel-marten
+FILE  : llama3-8b/21.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Thorne
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Treasure hunter who uses fire magic to extract artifacts from ancient ruins
+  personality :
+    Charismatic, tactically focused, secretly claustrophobic
+  request :
+    I need a wand that stops my spells from overcooking the surfaces. I'm finding it difficult to preserve artifacts when they melt or burn instantly
+  trueGoal :
+    To carefully excavate valuable relics using precise pyromancy without risking further damage
+  constraint :
+    His magic accelerates uncontrollably in enclosed spaces, eroding any subtlety
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 23 / smoke-pollen
+FILE  : llama3-8b/22.json
+PARSE_OK : True
+
+  customerName :
+    Lysander Threnody
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Cryptologist who uses necromancy to decode ancient, cursed texts
+  personality :
+    Cerebral, morally ambiguous, intensely reclusive
+  request :
+    I need a wand that slows my magic's spread when deciphering an unknown curse. Too fast and the spell unravels before I can interpret it.
+  trueGoal :
+    To crack ancient cryptic texts by precisely controlling necromantic energies without them overwhelming or corrupting me
+  constraint :
+    His magic draws upon his life force, draining him with each failed decipherment
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 24 / amber-quail
+FILE  : llama3-8b/23.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Valtor
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Undertaker who uses necromancy to accelerate and stabilize the decay process
+  personality :
+    Resigned, morbidly fascinated, subconsciously resentful of authority
+  request :
+    I need a wand that lets me slow down or speed up decomposition without losing control. Sometimes the dead just won't stay still long enough for me to finish the ritual.
+  trueGoal :
+    To manage and accelerate necrotic decay across multiple corpses simultaneously while maintaining precision and control over the process
+  constraint :
+    His magic falters when he's exposed to strong emotions or conflicting magical auras
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 25 / spindle-moth
+FILE  : llama3-8b/24.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Darkhaven
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Grim reaper mage who uses magic to bring swift and silent end to suffering
+  personality :
+    Somber, analytical, fiercely independent
+  request :
+    I need a wand that can anchor my souls back in place when they try to escape. They often slip free during prolonged transitions.
+  trueGoal :
+    To execute gentle, precise soul retrievals with maximum efficiency without allowing the restless spirits to disrupt the process
+  constraint :
+    His necromancy falters when he's in close proximity to those who refuse his service
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 26 / shale-rook
+FILE  : llama3-8b/25.json
+PARSE_OK : True
+
+  customerName :
+    Kaelith Sunshadow
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Cryptkeeper who specializes in reanimating skeletal warriors for defense
+  personality :
+    Somber, detached, quietly obsessed with understanding the dead
+  request :
+    I need a wand that helps me control my undead minions' aggression levels. Currently they get too overexcited and break out of formation at critical moments.
+  trueGoal :
+    To deploy his skeletal army in precise formations and hold them under reliable command during long battles without them becoming overwhelmed and breaking ranks
+  constraint :
+    His necromancy feeds on the emotional resonance of nearby combatants, making it difficult to control the undead's behavior when he himself is emotionally charged
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 27 / tallow-yew
+FILE  : llama3-8b/26.json
+PARSE_OK : True
+
+  customerName :
+    Rowan Glimble
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Graveyard archaeologist who uses necromantic magic to uncover ancient knowledge from skeletal remains
+  personality :
+    Auric and detached, with a deep sense of curiosity and occasional dark obsession
+  request :
+    I need a wand that can help me stabilise the memories I extract from skulls. They tend to blur or become distorted when I'm in a rush.
+  trueGoal :
+    To extract accurate and detailed historical records from ancient skeletons without losing clarity
+  constraint :
+    His necromancy unravels when he's working under pressure, causing the extracted knowledge to degrade rapidly
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 28 / loam-vesper
+FILE  : llama3-8b/27.json
+PARSE_OK : True
+
+  customerName :
+    Kaelin Thistledown
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Inferno sculptor who shapes magma flows into molten glass objects
+  personality :
+    Ruthless, fascinated by the intricacies of thermal transfer, quietly bored with repetition
+  request :
+    I need a wand that stabilizes my plasma currents to achieve finer details in my artwork without blowing apart entire furnaces
+  trueGoal :
+    To create intricate, high-definition molten glass pieces at incredible speeds without compromising precision or risking explosions
+  constraint :
+    Her magic becomes uncontrollably turbulent when exposed to sudden temperature fluctuations
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 29 / bone-magpie
+FILE  : llama3-8b/28.json
+PARSE_OK : True
+
+  customerName :
+    Renn Searg
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Graveyard archaeologist who uses necromancy to reanimate corpses for historical analysis
+  personality :
+    Resigned, darkly humorous, quietly fascinated by the dead
+  request :
+    I need a wand that prevents me from accidentally reanimating the surrounding environment when unearthing new relics. My research notes are getting harder and harder to read due to all the walking skeletons.
+  trueGoal :
+    To reanimate precise control over the corpses I raise for examination, allowing for detailed analysis of ancient bone structure without the interference of unintended undead
+  constraint :
+    His necromancy is disrupted by exposure to bone structures that don't match his expectations
+
+------------------------------------------------------------------------------
+MODEL : llama3-8b
+SEED  : Run 30 / rune-cricket
+FILE  : llama3-8b/29.json
+PARSE_OK : True
+
+  customerName :
+    Zhilin Aethon
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Undertaker who uses necromancy to prevent unnecessary suffering and expedite the passage of souls
+  personality :
+    Morally complex, quietly stoic, intensely fascinated by mortality
+  request :
+    I need a wand that can stabilise the spectral energies when conducting exorcisms. They tend to fluctuate wildly when the subject is highly resistant or scared.
+  trueGoal :
+    To safely and reliably guide resistant spirits into the afterlife at rapid pace without exacerbating their suffering
+  constraint :
+    Her necromancy collapses under emotional resonance, which is precisely what happens with most exorcisms
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 01 / silver-fern
+FILE  : mistral-7b/00.json
+PARSE_OK : True
+
+  customerName :
+    Elara Moonshade
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Gravekeeper who resurrects fallen soldiers for temporary use
+  personality :
+    Dutiful, pragmatic, sentimental
+  request :
+    I need a wand that can focus on a single target when I cast ressurection spells. Sometimes my magic gets drawn to unintended bones.
+  trueGoal :
+    To resurrect multiple soldiers in rapid succession, each with full concentration and memory intact
+  constraint :
+    Her magic is affected by nearby emotions, causing it to pull towards the strongest one present
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 02 / amber-finch
+FILE  : mistral-7b/01.json
+PARSE_OK : True
+
+  customerName :
+    Aiden Cormorant
+  schoolOfMagic :
+    Ice magic
+  profession :
+    Harvester who uses ice magic to preserve food
+  personality :
+    Analytical, obsessive, easily distressed
+  request :
+    I need a wand that allows me to carve more intricate patterns in my frost sculptures without causing cracks. My work is my reputation.
+  trueGoal :
+    To create complex and durable ice preservation structures with detailed designs that last for extended periods
+  constraint :
+    His magic becomes unstable under rapid changes in temperature, which could cause his creations to melt prematurely
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 03 / glass-heron
+FILE  : mistral-7b/02.json
+PARSE_OK : True
+
+  customerName :
+    Elara Seraphel
+  schoolOfMagic :
+    Glass magic
+  profession :
+    Memory mage who uses shards of her own past to manipulate thoughts
+  personality :
+    Unpredictable, secretive, emotionally volatile
+  request :
+    I need a wand that keeps my glass shards from fading too quickly. My memories slip away when I'm under pressure.
+  trueGoal :
+    To maintain control over her subject's thoughts during intense interrogations
+  constraint :
+    Her magic fades in strength when she feels threatened
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 04 / iron-vine
+FILE  : mistral-7b/03.json
+PARSE_OK : True
+
+  customerName :
+    Iron Thorn
+  schoolOfMagic :
+    Vegetation magic
+  profession :
+    Wildlife wrangler who uses plant magic to control and manipulate flora for relocating creatures
+  personality :
+    Patient, pragmatic, stubbornly independent
+  request :
+    I'm looking for a wand that can accurately manipulate the growth patterns of my plants. They always seem to grow in unpredictable ways which can be dangerous when I need precise control.
+  trueGoal :
+    To cultivate and control an array of plant creatures rapidly in complex formations without causing widespread chaos
+  constraint :
+    His magic responds to his emotional state, growing plants excessively if he is anxious or too calmly if he is excited
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 05 / coral-moth
+FILE  : mistral-7b/04.json
+PARSE_OK : True
+
+  customerName :
+    Eira Corallis
+  schoolOfMagic :
+    Floramancy
+  profession :
+    Enchanter who uses plant magic to manipulate and strengthen other's emotions
+  personality :
+    Calculating, reserved, easily angered by inefficiency
+  request :
+    I require a wand capable of modulating the intensity of my spells. A slight miscalibration can render my enchantments too potent or weak.
+  trueGoal :
+    To weave complex emotional enchantments with pinpoint precision and subtlety, ensuring their effects remain controllable
+  constraint :
+    Her magic blooms unpredictably when under the influence of strong emotions, particularly anger
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 06 / hollow-spruce
+FILE  : mistral-7b/05.json
+PARSE_OK : True
+
+  customerName :
+    Thorn Ebonroot
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith mage who uses fire magic to forge enchanted weapons
+  personality :
+    Impulsive, pragmatic, easily bored
+  request :
+    I need a wand that keeps my heat control steady during complex fusions. If the temperature wavers, I risk fusion imperfections.
+  trueGoal :
+    To create high-quality, enchanted weapons quickly and without flaw while maintaining precise temperature control throughout the process
+  constraint :
+    His magic spikes wildly when he gets excited or impatient - exactly the moments when precision is crucial
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 07 / quartz-stoat
+FILE  : mistral-7b/06.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Quartz
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who forges magical weapons
+  personality :
+    Methodical, fiery-tempered, impatient
+  request :
+    I need a wand that lets me precisely control the temperature of my fire. I burn too hot and melt my work instead of shaping it.
+  trueGoal :
+    To create intricate enchanted weapons with specific heat properties without overheating the forge
+  constraint :
+    His magic flares up uncontrollably when he is under pressure - exactly when precision matters most
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 08 / saffron-koi
+FILE  : mistral-7b/07.json
+PARSE_OK : True
+
+  customerName :
+    Orion Lyris
+  schoolOfMagic :
+    Fire magic
+  profession :
+    Investigation mage who uses heat and light to uncover secrets
+  personality :
+    Curious, impulsive, thorough
+  request :
+    I need a wand that allows me to precisely adjust the temperature of my flames. Too cold and they're useless, too hot and I risk burning evidence.
+  trueGoal :
+    To illuminate dark rooms with precise and adjustable light while maintaining enough heat to reveal hidden documents
+  constraint :
+    His magic flares up uncontrollably when he is under pressure - the very situation that requires careful investigation
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 09 / dusk-wren
+FILE  : mistral-7b/08.json
+PARSE_OK : True
+
+  customerName :
+    Kai Drakeshard
+  schoolOfMagic :
+    Earth magic
+  profession :
+    Road mage who uses ground magic to fortify and stabilize structures
+  personality :
+    Pragmatic, impulsive, secretly cautious
+  request :
+    I need a wand that helps me channel the vibrations of my earth magic more precisely. Sometimes I create cracks instead of supports.
+  trueGoal :
+    To construct robust walls and foundations instantly and safely
+  constraint :
+    His magic quivers when he's rushing, creating instability where speed is required
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 10 / opal-mantis
+FILE  : mistral-7b/09.json
+PARSE_OK : True
+
+  customerName :
+    Orion Arborweave
+  schoolOfMagic :
+    Geomancy
+  profession :
+    Terrain shaper who uses earth magic to create intricate structures and passageways for city planning
+  personality :
+    Methodical, impulsive, detail-oriented
+  request :
+    I need a wand that ensures the ground stays stable as I sculpt. The soil often shifts mid-project due to my powerful earth manipulation.
+  trueGoal :
+    To shape and mold cityscapes with complex architectural structures without the land sinking or collapsing
+  constraint :
+    His magic destabilizes when working on unstable ground, creating hazardous conditions
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 11 / cinder-thistle
+FILE  : mistral-7b/10.json
+PARSE_OK : True
+
+  customerName :
+    Orion Cinder-Thistle
+  schoolOfMagic :
+    Fire magic
+  profession :
+    Pyromancer who creates temporary fortresses for battles
+  personality :
+    Spontaneous, impulsive, reckless
+  request :
+    I need a wand that can precisely control the size and heat of my firewall without burning down the structure I'm trying to protect.
+  trueGoal :
+    To create intricate, self-sustaining fire fortresses in mere moments with perfect temperature regulation
+  constraint :
+    His magic intensifies uncontrollably when he is feeling vulnerable - a situation common in high-stakes battles
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 12 / brass-vesper
+FILE  : mistral-7b/11.json
+PARSE_OK : True
+
+  customerName :
+    Kael Thunderspire
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic to forge enchanted weapons
+  personality :
+    Determined, fiercely independent, unyielding to compromise
+  request :
+    I need a wand that keeps my flames stable and controlled. My spells tend to wane in consistency, affecting the quality of my work.
+  trueGoal :
+    To create powerful, consistently durable enchanted weapons through precise and steady fire magic
+  constraint :
+    His magic falters during periods of intense focus, resulting in fluctuations in heat output
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 13 / agate-lynx
+FILE  : mistral-7b/12.json
+PARSE_OK : True
+
+  customerName :
+    Fynn Obsidian
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Firebrand who uses pyrokinetic flames to start and spread conflagrations
+  personality :
+    Impulsive, fiercely creative, prone to recklessness
+  request :
+    I need a wand that maintains consistent temperature of my fire blasts. Uncontrolled fluctuations in heat can cause unexpected damage.
+  trueGoal :
+    To control the temperature and intensity of his pyrokinetic flames while sustaining their size for extended periods
+  constraint :
+    His magic malfunctions when he experiences sudden fear or hesitation, causing the flames to flare up uncontrollably
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 14 / linen-finch
+FILE  : mistral-7b/13.json
+PARSE_OK : True
+
+  customerName :
+    Thorn Whisperwood
+  schoolOfMagic :
+    Necromancy
+  profession :
+    Cursebreaker who neutralises deadly enchantments
+  personality :
+    Reserved, cautious, morally ambiguous
+  request :
+    I need a wand that prevents accidental resurrection when I'm trying to break powerful curses.
+  trueGoal :
+    To safely remove malevolent enchantments while avoiding the risk of unwittingly reviving dangerous beings
+  constraint :
+    His necromancy often draws forth the restless spirits of the dead - a dangerous distraction in high-stakes disenchantment
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 15 / lichen-dove
+FILE  : mistral-7b/14.json
+PARSE_OK : True
+
+  customerName :
+    Thalion Silverbreeze
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Pyrokinetic Blacksmith who shapes flames into weapons and tools
+  personality :
+    Cautious, fiercely independent, methodical
+  request :
+    I need a wand to regulate the heat of my fire. My work requires constant adjustments for the right temperature - too hot and I ruin my materials, too cold and it takes forever.
+  trueGoal :
+    To precisely temper flames across multiple projects simultaneously without risking damage or delays
+  constraint :
+    His magic flares out of control when he gets overly focused on a single task - exactly when precision is critical
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 16 / pewter-grove
+FILE  : mistral-7b/15.json
+PARSE_OK : True
+
+  customerName :
+    Kael Ironshade
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Blacksmith who uses fire magic for forging and annealing
+  personality :
+    Methodical, impatient, fiercely independent
+  request :
+    I need a wand that maintains the perfect temperature for my work - too hot and I ruin the metal's structure.
+  trueGoal :
+    To consistently produce durable and high-quality weapons without wasting time on trial and error in heating
+  constraint :
+    His magic spikes in heat when he feels under pressure or overwhelmed
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 17 / juniper-fox
+FILE  : mistral-7b/16.json
+PARSE_OK : True
+
+  customerName :
+    Iris Swiftbreeze
+  schoolOfMagic :
+    Flora magic
+  profession :
+    Forest guardian who uses plant magic to protect and heal the forest
+  personality :
+    Trusting, impulsive, determined
+  request :
+    I need a wand that can help me maintain control over my vine whips during fierce battles. They often grow unruly when I need them most.
+  trueGoal :
+    To direct her plant magic to defend the forest and its inhabitants with swift precision in times of crisis
+  constraint :
+    Her magic's reach expands unexpectedly when she feels threatened, making focused attacks challenging
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 18 / cobalt-stag
+FILE  : mistral-7b/17.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Iceborn
+  schoolOfMagic :
+    Ice magic
+  profession :
+    Glacier mage who uses ice for immobilization and shielding
+  personality :
+    Calculating, ruthless, methodical
+  request :
+    I need a wand that can alter the consistency of my ice forms - too brittle and they shatter easily.
+  trueGoal :
+    To create durable ice constructs for defensive barriers and restraints without compromising their mobility
+  constraint :
+    His magic weakens when he is overly confident, leaving his defenses vulnerable to external attacks
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 19 / ember-shrike
+FILE  : mistral-7b/18.json
+PARSE_OK : True
+
+  customerName :
+    Eira Flamecaller
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Arsonist who uses fire magic for strategic destruction
+  personality :
+    Impulsive, stubborn, fiercely independent
+  request :
+    I need a wand that can ignite pyrotechnic spells without the risk of backfiring. My incendiary bombs often fail to launch due to instability in my magic
+  trueGoal :
+    To create and ignite complex, precise fireworks for targeted damage across vast battlefields at high speed
+  constraint :
+    Her magic flares out of control under pressure - a dangerous disadvantage when her fuse is running low
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 20 / chalk-otter
+FILE  : mistral-7b/19.json
+PARSE_OK : True
+
+  customerName :
+    Gabriel Obsidian
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Furnace smith who uses fire magic to forge unbreakable weapons
+  personality :
+    Impulsive, obsessive, surprisingly humble
+  request :
+    I need a wand that can control the temperature of my flames. My furnace keeps overheating due to inconsistent heat.
+  trueGoal :
+    To create flawless weapons in record time without melting them or damaging his forge
+  constraint :
+    His magic flares uncontrollably under the pressure of deadlines - when precision is most crucial
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 21 / verdigris-tern
+FILE  : mistral-7b/20.json
+PARSE_OK : True
+
+  customerName :
+    Seraphina Sapphirevale
+  schoolOfMagic :
+    Floramancy
+  profession :
+    Enchanter who uses plant magic to create illusionary barriers
+  personality :
+    Optimistic, impulsive, distrustful of technology
+  request :
+    I need a wand that can focus my magic precisely. I keep summoning random growths instead of the intended defensive barrier.
+  trueGoal :
+    To create intricate illusionary fortifications to protect entire villages from invading armies
+  constraint :
+    Her magic overgrows when she is overwhelmed by negative emotions - exactly when her clients need her most disciplined
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 22 / hazel-marten
+FILE  : mistral-7b/21.json
+PARSE_OK : True
+
+  customerName :
+    Thorne Everwind
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Fire elemental summoner who conjures pyroblasts for close combat
+  personality :
+    Cocky, fearless, impulsive
+  request :
+    I need a wand that allows me to precisely control the size and duration of my pyroblasts so I can deal enough damage without incinerating myself
+  trueGoal :
+    To summon large, sustainable fire elements for intense battles while maintaining control over their destructive power
+  constraint :
+    His magic flares wildly whenever he encounters cold temperatures - a dangerous vulnerability in frigid climates
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 23 / smoke-pollen
+FILE  : mistral-7b/22.json
+PARSE_OK : True
+
+  customerName :
+    Kira Ashwood
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Glassblower who uses fire magic to heat and shape molten glass
+  personality :
+    Meticulous, fiery-tempered, always seeks perfection
+  request :
+    I need a wand that lets me control the temperature of my fire exactly. The slightest fluctuation ruins my work.
+  trueGoal :
+    To shape and manipulate molten glass with unmatched precision at high temperatures without melting or cracking it
+  constraint :
+    Her magic tends to burn out of control when she is frustrated, creating disastrous accidents
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 24 / amber-quail
+FILE  : mistral-7b/23.json
+PARSE_OK : True
+
+  customerName :
+    Aria Azurewind
+  schoolOfMagic :
+    Ice magic
+  profession :
+    Glacial engineer who uses frost magic to construct durable structures and shields
+  personality :
+    Cautious, detail-oriented, stoic
+  request :
+    A wand that allows me to fine-tune the temperature of my ice spells so I don't accidentally freeze everything in sight.
+  trueGoal :
+    To construct intricate structures and defenses using frost magic while avoiding collateral damage
+  constraint :
+    Her frost magic expands beyond intended areas when she feels pressured, making it hard to work in tight spaces
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 25 / spindle-moth
+FILE  : mistral-7b/24.json
+PARSE_OK : True
+
+  customerName :
+    Zephyr Solanum
+  schoolOfMagic :
+    Fire magic
+  profession :
+    Investigator who uses fire magic to uncover hidden truths
+  personality :
+    Curious, impatient, stubborn
+  request :
+    I need a wand that can focus my flames more tightly. They tend to spread too quickly, scorching the evidence I'm trying to examine.
+  trueGoal :
+    To burn away layers of lies and illusions with pinpoint accuracy in order to uncover buried secrets
+  constraint :
+    His magic flares out of control when he is under pressure - a dangerous moment given his line of work
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 26 / shale-rook
+FILE  : mistral-7b/25.json
+PARSE_OK : True
+
+  customerName :
+    Zephyr Thunderton
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Arsonist mage who sets fires to cause strategic distractions
+  personality :
+    Charismatic, impulsive, secretly reckless
+  request :
+    I need a wand that can finely tune the temperature of my flames. I keep igniting things I didn't intend.
+  trueGoal :
+    To master temperature control for precise and targeted distractions without causing unnecessary damage
+  constraint :
+    His magic overheats when he is under pressure - a dangerous situation given his profession
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 27 / tallow-yew
+FILE  : mistral-7b/26.json
+PARSE_OK : True
+
+  customerName :
+    Orion Arborwing
+  schoolOfMagic :
+    Floramancy
+  profession :
+    Nature guardian who uses plant magic to protect and restore the forest
+  personality :
+    Serene, cautious, stoic
+  request :
+    I need a wand that can precisely target and nurture sick or damaged plants without affecting healthy ones
+  trueGoal :
+    To heal an entire woodland ravaged by blight while maintaining the balance of its ecosystem
+  constraint :
+    His magic wanes when exposed to non-organic materials - a challenge when fighting against the unnatural blight
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 28 / loam-vesper
+FILE  : mistral-7b/27.json
+PARSE_OK : True
+
+  customerName :
+    Thorin Sablefire
+  schoolOfMagic :
+    Pyromancy
+  profession :
+    Fire mage artisan who forges enchanted weapons
+  personality :
+    Perfectionist, risk-averse, stoically stubborn
+  request :
+    I need a wand that can fine-tune the heat and consistency of my flames for smithing delicate objects.
+  trueGoal :
+    To forge enchanted weapons with precision in the least amount of time while maintaining their magical properties
+  constraint :
+    His pyromancy causes unintended flares when he gets overly focused on his work
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 29 / bone-magpie
+FILE  : mistral-7b/28.json
+PARSE_OK : True
+
+  customerName :
+    Kaelen Frostwind
+  schoolOfMagic :
+    Ice magic
+  profession :
+    Glacial sculptor who shapes powerful defensive structures
+  personality :
+    Methodical, fiercely protective, easily angered
+  request :
+    I need a wand that allows me to fine-tune the density of my ice constructs. When they're too thick, I can't carve intricate details.
+  trueGoal :
+    To sculpt grand ice structures for architectural marvels and fortifications at unmatched speed and precision
+  constraint :
+    His magic hardens unexpectedly when he feels threatened - hindering his ability to manipulate the ice during critical moments
+
+------------------------------------------------------------------------------
+MODEL : mistral-7b
+SEED  : Run 30 / rune-cricket
+FILE  : mistral-7b/29.json
+PARSE_OK : True
+
+  customerName :
+    Thoren Frostwhisper
+  schoolOfMagic :
+    Ice magic
+  profession :
+    Glacier mage who shapes ice fortresses for defensive battles
+  personality :
+    Steadfast, unyielding, overly cautious
+  request :
+    I need a wand that helps me sculpt more intricate and swift structures. My fortifications crumble when attacked from unexpected angles.
+  trueGoal :
+    To construct an elaborate, impenetrable defensive ice labyrinth in the heat of battle while withstanding rapid assaults
+  constraint :
+    His magic becomes brittle under extreme pressure - making it more susceptible to enemy attacks
+
+==============================================================================
+## API-error rows (18) — auto-score: wellformed=0, all axes=0
+==============================================================================
+gemini-flash/00  API_ERROR
+gemini-flash/01  API_ERROR
+gemini-flash/07  API_ERROR
+gemini-flash/08  API_ERROR
+gemini-flash/10  API_ERROR
+gemini-flash/11  API_ERROR
+gemini-flash/12  API_ERROR
+gemini-flash/13  API_ERROR
+gemini-flash/14  API_ERROR
+gemini-flash/20  API_ERROR
+gemini-flash/21  API_ERROR
+gemini-flash/23  API_ERROR
+gemini-flash/24  API_ERROR
+gemini-flash/25  API_ERROR
+gemini-flash/26  API_ERROR
+gemini-flash/27  API_ERROR
+gemini-flash/28  API_ERROR
+gemini-flash/29  API_ERROR

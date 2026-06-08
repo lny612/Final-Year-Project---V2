@@ -1,0 +1,7 @@
+model,n_attempted,n_successful,success_pct,coherence_mean,misdirection_mean,tone_mean,playability_mean,wellformed_mean,wellformed_rate_pct,latency_ms_mean,latency_ms_p95,cost_per_call_mean,cost_per_session_estimate
+claude-opus-4-7-chat,30,30,100.0,2,2,2,2,1,100,,,0.0,0.0
+gemini-flash,30,12,40.0,1.667,1,0.833,2,0.4,40.0,7182.583,10072,0.0,0.0039
+gpt-4o,30,30,100.0,1.933,0.933,1,2,1,100,2999.3,5150,0.004,0.1128
+gpt-4o-mini,30,30,100.0,1.9,0.9,1,1,1,100,3829.733,5842,0.0,0.0069
+llama3-8b,30,30,100.0,1.033,1,1,1,0.9,90.0,5649.133,6150,0.0,0.0
+mistral-7b,30,30,100.0,1.267,1,1,1,1,100,5467.767,5863,0.0,0.0

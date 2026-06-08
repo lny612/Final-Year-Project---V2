@@ -147,7 +147,10 @@ public class TracingMinigameUI : MonoBehaviour
 
     // Per-gate tuning constants
     private const float HOLD_GATE_DURATION  = 0.9f; // seconds the player must hold the key
-    private const float HOLD_FILL_MAX_SIZE  = 32f;  // px at HoldProgress = 1
+    // The cursor wisp sits on top of the gate at ~36 px. A 32 px fill was hidden
+    // entirely under it; 52 px (just under gateSize=56) makes the gauge read as a
+    // green halo growing past the cursor's edge to fill the diamond.
+    private const float HOLD_FILL_MAX_SIZE  = 52f;  // px at HoldProgress = 1
 
     // Key pool for gate randomization
     private static readonly KeyCode[] GATE_KEY_POOL =
